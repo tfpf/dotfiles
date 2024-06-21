@@ -136,18 +136,24 @@ void delay_to_interval(long long unsigned delay, struct Interval *interval)
  * Show a completed command using a desktop notification.
  *
  * @param last_command Most-recently run command.
+ * @param interval Running time of the command.
  *****************************************************************************/
-void notify_desktop(char const *last_command)
+void notify_desktop(char const *last_command, struct Interval const *interval)
 {
+    static char intervalbuf[64];
+    char *intervalbuf_ptr = intervalbuf;
+    if(interval->hours > 0){intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u h ", interval->hours);}
+    if(interval-> hours > 0 || interval->minutes > 0){intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u m ", interval->minutes);}
+    intervalbuf_ptr += sprintf(intervalbuf, "%u s %u ms", interval->seconds, interval->milliseconds);
 #if defined __APPLE__ || defined _WIN32
-    // Use OSC 777, which is supported on the terminals I use on these systems:
-    // Kitty, iTerm2 and WezTerm.
-    fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;CLI Ready;%s" ESCAPE BACKSLASH, last_command);
+    // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
+    // use on these systems respectively.
+    fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;%s;%s" ESCAPE BACKSLASH, last_command, intervalbuf);
 #else
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
     notify_init(__FILE__);
-    NotifyNotification *notification = notify_notification_new("CLI Ready", last_command, NULL);
+    NotifyNotification *notification = notify_notification_new(last_command, intervalbuf, NULL);
     notify_notification_show(notification, NULL);
     // notify_uninit();
 #endif
@@ -189,7 +195,6 @@ void write_report(
     {
         report_ptr += sprintf(report_ptr, B_RED_RAW "" RESET_RAW " ");
     }
-
     if (interval->hours > 0)
     {
         report_ptr += sprintf(report_ptr, "%02u:", interval->hours);
@@ -202,7 +207,6 @@ void write_report(
     LOG_DEBUG("Report length is %ld.", report_ptr - report);
     LOG_DEBUG("Padding report to %d characters.", width);
     fprintf(stderr, "\r%*s\n", width, report);
-
     // free(report);
 }
 
@@ -245,7 +249,7 @@ void report_command_status(
     write_report(last_command, last_command_len, exit_code, &interval, columns);
     if (delay > 10000000000ULL && active_window_id != get_active_window_id())
     {
-        notify_desktop(last_command);
+        notify_desktop(last_command, &interval);
     }
 }
 
