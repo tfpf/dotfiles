@@ -142,8 +142,14 @@ void notify_desktop(char const *last_command, struct Interval const *interval)
 {
     static char intervalbuf[64];
     char *intervalbuf_ptr = intervalbuf;
-    if(interval->hours > 0){intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u h ", interval->hours);}
-    if(interval-> hours > 0 || interval->minutes > 0){intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u m ", interval->minutes);}
+    if (interval->hours > 0)
+    {
+        intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u h ", interval->hours);
+    }
+    if (interval->hours > 0 || interval->minutes > 0)
+    {
+        intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u m ", interval->minutes);
+    }
     intervalbuf_ptr += sprintf(intervalbuf, "%u s %u ms", interval->seconds, interval->milliseconds);
 #if defined __APPLE__ || defined _WIN32
     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
