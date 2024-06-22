@@ -21,11 +21,11 @@ jobs:
       - if: runner.os == 'Linux'
         run: sudo apt install libnotify-dev
       - run: make -j release CC=gcc
-      - if: runner.os == 'Linux':
+      - if: runner.os == 'Linux'
         run: tar czf custom-prompt-amd64-linux.tgz *-prompt
-      - if: matrix.os == 'macos-13':
+      - if: matrix.os == 'macos-13'
         run: tar czf custom-prompt-amd64-darwin.tgz *-prompt
-      - if: matrix.os == 'macos-14':
+      - if: matrix.os == 'macos-14'
         run: tar czf custom-prompt-aarch64-darwin.tgz *-prompt
       - if: runner.os == 'Windows'
         run: |
