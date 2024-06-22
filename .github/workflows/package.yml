@@ -1,0 +1,44 @@
+name: package
+on:
+  push:
+    paths:
+      - '.github/workflows/package.yml'
+      - 'custom-prompt/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13, macos-14, ubuntu-22.04, windows-2022]
+    defaults:
+      run:
+        working-directory: custom-prompt
+    steps:
+      - uses: actions/checkout@v4
+      - if: runner.os == 'Linux'
+        run: sudo apt install libnotify-dev
+      - run: make -j release CC=gcc
+      - if: runner.os == 'Linux'
+        run: tar czf custom-prompt-amd64-linux.tgz *-prompt
+      - if: matrix.os == 'macos-13'
+        run: tar czf custom-prompt-amd64-darwin.tgz *-prompt
+      - if: matrix.os == 'macos-14'
+        run: tar czf custom-prompt-aarch64-darwin.tgz *-prompt
+      - if: runner.os == 'Windows'
+        run: |
+          7z a -ttar custom-prompt-amd64-windows.tar *-prompt.exe
+          7z a -tgzip custom-prompt-amd64-windows.tgz *.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: 'custom-prompt/*.tgz'
+
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+      - run: ls -l *
