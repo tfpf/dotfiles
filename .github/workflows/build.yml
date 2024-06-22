@@ -7,12 +7,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_linux:
+    name: build on ubuntu-22.04
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt install libnotify
+          cd custom-prompt
+          make release
+  build_other:
     name: build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13, macos-14, ubuntu-22.04, windows-2022]
+        os: [macos-13, macos-14, windows-2022]
     steps:
       - uses: actions/checkout@v4
-      - run: cd custom-prompt && make release
+      - run: |
+          cd custom-prompt
+          make release
