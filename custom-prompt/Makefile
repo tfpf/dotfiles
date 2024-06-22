@@ -1,6 +1,13 @@
 CFLAGS = -flto -O2 -std=c11 -Wall -Wextra
 LDFLAGS = -flto -O2
 
+MainSource = custom-prompt.c
+MainBashObject = custom-bash-prompt.o
+MainBashExecutable = $(MainBashObject:.o=)
+MainZshObject = custom-zsh-prompt.o
+MainZshExecutable = $(MainZshObject:.o=)
+GetActiveWindowIdObjects = get_active_window_id_linux.o get_active_window_id_windows.o
+
 ifneq "$(OS)" "Windows_NT"
     UNAME = $(shell uname)
     ifeq "$(UNAME)" "Linux"
@@ -8,15 +15,9 @@ ifneq "$(OS)" "Windows_NT"
         LDLIBS += $(shell pkg-config --libs glib-2.0 libnotify x11)
     else
         LDLIBS += -framework Cocoa -framework CoreGraphics
+        GetActiveWindowIdObjects += get_active_window_id_macos.o
     endif
 endif
-
-MainSource = custom-prompt.c
-MainBashObject = custom-bash-prompt.o
-MainBashExecutable = $(MainBashObject:.o=)
-MainZshObject = custom-zsh-prompt.o
-MainZshExecutable = $(MainZshObject:.o=)
-GetActiveWindowIdObjects = get_active_window_id_linux.o get_active_window_id_macos.o get_active_window_id_windows.o
 
 .PHONY: debug release
 

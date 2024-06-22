@@ -15,7 +15,7 @@ jobs:
       - run: |
           sudo apt install libnotify-dev
           cd custom-prompt
-          make release
+          make -j release
   build_other:
     name: build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -26,4 +26,4 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           cd custom-prompt
-          make release
+          make -j release
