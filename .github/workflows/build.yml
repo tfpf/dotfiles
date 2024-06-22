@@ -33,5 +33,7 @@ jobs:
           7z a -tgzip custom-prompt-amd64-windows.tgz *.tar
       - uses: actions/upload-artifact@v4
         with:
-          name: archive-${{ matrix.os }}
+          name: ${{ matrix.os }}
           path: 'custom-prompt/*.tgz'
+      - uses: actions/download-artifact@v4
+      - run: ls -l
