@@ -42,6 +42,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
+          pwd
+          find ..
           tag=$(git tag --points-at HEAD)
           if [ -z "$tag" ]
           then
