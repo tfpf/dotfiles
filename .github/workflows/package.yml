@@ -37,6 +37,7 @@ jobs:
           path: 'custom-prompt/*.tgz'
 
   release:
+    if: github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-22.04
     env:
@@ -45,7 +46,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-      - if: github.ref_type == 'tag'
-        run: |
+      - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
