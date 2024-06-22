@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          sudo apt install libnotify
+          sudo apt install libnotify4
           cd custom-prompt
           make release
   build_other:
