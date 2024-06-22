@@ -1,0 +1,23 @@
+name: build
+on:
+  push:
+    paths:
+      - '.github/workflows/build.yml'
+      - 'custom-prompt/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-13, macos-14, ubuntu-22.04, windows-2022]
+    defaults:
+      run:
+        working-directory: custom-prompt
+    steps:
+      - uses: actions/checkout@v4
+      - if: runner.os == 'Linux'
+        run: sudo apt install libnotify-dev
+      - run: make -j release CC=gcc
