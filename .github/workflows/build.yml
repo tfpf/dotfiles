@@ -36,6 +36,7 @@ jobs:
           name: ${{ matrix.os }}
           path: 'custom-prompt/*.tgz'
   release:
+    needs: build
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/download-artifact@v4
