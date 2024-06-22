@@ -40,4 +40,4 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/download-artifact@v4
-      - run: ls -l
+      - run: ls -l *
