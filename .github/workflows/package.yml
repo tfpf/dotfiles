@@ -41,4 +41,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/download-artifact@v4
-      - run: ls -l *
+      - run: |
+          tag=$(git tag --points-at HEAD)
+          if [ -z "$tag" ]
+          then
+              ls -l *
+          fi
