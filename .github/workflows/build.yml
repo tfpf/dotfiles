@@ -10,13 +10,14 @@ jobs:
   build_linux:
     name: build on ubuntu-22.04
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: custom-prompt
     steps:
       - uses: actions/checkout@v4
       - if: runner.os == 'Linux'
         run: sudo apt install libnotify-dev
-      - run: |
-          cd custom-prompt
-          make -j release
+      - run: make -j release
   build_windows:
     name: build on windows-2022
     runs-on: windows-2022
