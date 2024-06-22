@@ -282,7 +282,8 @@ void display_primary_prompt(char const *git_info)
 {
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
-    LOG_DEBUG("Showing primary prompt.");
+    int shlvl = atoi(getenv("SHLVL"));
+    LOG_DEBUG("Current shell level is %d.", shlvl);
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
     if (git_info[0] != '\0')
     {
@@ -292,7 +293,11 @@ void display_primary_prompt(char const *git_info)
     {
         printf("  " B_BLUE "%s" RESET, venv);
     }
-    printf("\n└─" PROMPT_SYMBOL " ");
+    printf("\n└─");
+    while(--shlvl > 0){
+        printf("▶");
+    }
+    printf(PROMPT_SYMBOL " ");
 }
 
 int main(int const argc, char const *argv[])
