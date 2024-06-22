@@ -295,7 +295,7 @@ void display_primary_prompt(char const *git_info)
     }
     printf("\n└─");
     while(--shlvl > 0){
-        printf("▶");
+        printf("▸");
     }
     printf(PROMPT_SYMBOL " ");
 }
