@@ -29,8 +29,9 @@ jobs:
         run: tar czf custom-prompt-aarch64-darwin.tgz *-prompt
       - if: runner.os == 'Windows'
         run: |
-          7z a -ttar custom-prompt-amd64-windows.tar *.exe
+          7z a -ttar custom-prompt-amd64-windows.tar *-prompt.exe
           7z a -tgzip custom-prompt-amd64-windows.tgz *.tar
       - uses: actions/upload-artifact@v4
         with:
+          name: archive-${{ matrix.os }}
           path: 'custom-prompt/*.tgz'
