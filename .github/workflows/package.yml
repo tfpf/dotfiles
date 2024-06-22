@@ -1,8 +1,8 @@
-name: build
+name: package
 on:
   push:
     paths:
-      - '.github/workflows/build.yml'
+      - '.github/workflows/package.yml'
       - 'custom-prompt/**'
   workflow_dispatch:
 
@@ -35,6 +35,7 @@ jobs:
         with:
           name: ${{ matrix.os }}
           path: 'custom-prompt/*.tgz'
+
   release:
     needs: build
     runs-on: ubuntu-22.04
