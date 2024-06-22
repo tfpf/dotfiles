@@ -24,9 +24,9 @@ jobs:
       - if: runner.os == 'Linux'
         run: tar czf custom-prompt-amd64-linux.tgz *-prompt
       - if: matrix.os == 'macos-13'
-        run: tar czf custom-prompt-amd64-darwin.tgz *-prompt
+        run: tar czf custom-prompt-amd64-macos.tgz *-prompt
       - if: matrix.os == 'macos-14'
-        run: tar czf custom-prompt-aarch64-darwin.tgz *-prompt
+        run: tar czf custom-prompt-aarch64-macos.tgz *-prompt
       - if: runner.os == 'Windows'
         run: |
           7z a -ttar custom-prompt-amd64-windows.tar *-prompt.exe
