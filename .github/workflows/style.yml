@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/style.yml'
-      - 'custom-prompt/*.c'
+      - 'custom-prompt/*'
   workflow_dispatch:
 
 jobs:
