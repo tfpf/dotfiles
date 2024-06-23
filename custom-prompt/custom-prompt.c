@@ -120,7 +120,7 @@ long long unsigned get_timestamp(void)
  * Represent an amount of time in human-readable form.
  *
  * @param delay Time measured in nanoseconds.
- * @param interval Time measured in a easier-to-understand units.
+ * @param interval Time measured in easier-to-understand units.
  *****************************************************************************/
 void delay_to_interval(long long unsigned delay, struct Interval *interval)
 {
