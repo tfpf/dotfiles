@@ -309,8 +309,8 @@ int main(int const argc, char const *argv[])
         return EXIT_SUCCESS;
     }
 
-    // Allow the first argument to be modified (this is allowed in C) in order
-    // to avoid copying it in the function which receives it.
+    // Mark the first argument as mutable (this is allowed in C) to avoid
+    // copying it in the function which receives it.
     char *last_command = (char *)argv[1];
     int exit_code = strtol(argv[2], NULL, 10);
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
