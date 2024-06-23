@@ -293,7 +293,8 @@ void display_primary_prompt(char const *git_info, int shlvl)
         printf("  " B_BLUE "%s" RESET, venv);
     }
     printf("\n└─");
-    while(--shlvl > 0){
+    while (--shlvl > 0)
+    {
         printf("▸");
     }
     printf(PROMPT_SYMBOL " ");
