@@ -276,11 +276,13 @@ void update_terminal_title(char const *pwd)
 /******************************************************************************
  * Show the primary prompt.
  *
- * @param git_info Description of the status of the current Git repository.
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(char const *git_info, int shlvl)
+void display_primary_prompt(int shlvl)
 {
+    static char git_info[256];
+    fgets(git_info, sizeof git_info / sizeof *git_info, stdin);
+    LOG_DEBUG("Current Git repository description is '%s'.", git_info);
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
@@ -316,12 +318,11 @@ int main(int const argc, char const *argv[])
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
     long long unsigned active_window_id = strtoull(argv[4], NULL, 10);
     int columns = strtol(argv[5], NULL, 10);
-    char const *git_info = argv[6];
-    int shlvl = strtol(argv[7], NULL, 10);
-    char const *pwd = argv[8];
+    int shlvl = strtol(argv[6], NULL, 10);
+    char const *pwd = argv[7];
 
     report_command_status(last_command, exit_code, delay, active_window_id, columns);
-    display_primary_prompt(git_info, shlvl);
+    display_primary_prompt(shlvl);
     update_terminal_title(pwd);
 
     return EXIT_SUCCESS;
