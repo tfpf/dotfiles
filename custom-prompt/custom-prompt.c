@@ -120,7 +120,7 @@ long long unsigned get_timestamp(void)
  * Represent an amount of time in human-readable form.
  *
  * @param delay Time measured in nanoseconds.
- * @param interval Time measured in a easier-to-understand units.
+ * @param interval Time measured in easier-to-understand units.
  *****************************************************************************/
 void delay_to_interval(long long unsigned delay, struct Interval *interval)
 {
@@ -277,12 +277,12 @@ void update_terminal_title(char const *pwd)
  * Show the primary prompt.
  *
  * @param git_info Description of the status of the current Git repository.
+ * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(char const *git_info)
+void display_primary_prompt(char const *git_info, int shlvl)
 {
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
-    LOG_DEBUG("Showing primary prompt.");
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
     if (git_info[0] != '\0')
     {
@@ -292,7 +292,12 @@ void display_primary_prompt(char const *git_info)
     {
         printf("  " B_BLUE "%s" RESET, venv);
     }
-    printf("\n└─" PROMPT_SYMBOL " ");
+    printf("\n└─");
+    while (--shlvl > 0)
+    {
+        printf("▶");
+    }
+    printf(PROMPT_SYMBOL " ");
 }
 
 int main(int const argc, char const *argv[])
@@ -304,18 +309,19 @@ int main(int const argc, char const *argv[])
         return EXIT_SUCCESS;
     }
 
-    // Allow the first argument to be modified (this is allowed in C) in order
-    // to avoid copying it in the function which receives it.
+    // Mark the first argument as mutable (this is allowed in C) to avoid
+    // copying it in the function which receives it.
     char *last_command = (char *)argv[1];
     int exit_code = strtol(argv[2], NULL, 10);
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
     long long unsigned active_window_id = strtoull(argv[4], NULL, 10);
     int columns = strtol(argv[5], NULL, 10);
     char const *git_info = argv[6];
-    char const *pwd = argv[7];
+    int shlvl = strtol(argv[7], NULL, 10);
+    char const *pwd = argv[8];
 
     report_command_status(last_command, exit_code, delay, active_window_id, columns);
-    display_primary_prompt(git_info);
+    display_primary_prompt(git_info, shlvl);
     update_terminal_title(pwd);
 
     return EXIT_SUCCESS;
