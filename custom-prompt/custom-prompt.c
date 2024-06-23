@@ -281,7 +281,7 @@ void update_terminal_title(char const *pwd)
 void display_primary_prompt(int shlvl)
 {
     static char git_info[256];
-    fgets(git_info, sizeof git_info / sizeof *git_info, stdin);
+    scanf("%255[^\n]", git_info);
     LOG_DEBUG("Current Git repository description is '%s'.", git_info);
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);

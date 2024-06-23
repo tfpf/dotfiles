@@ -6,7 +6,7 @@ _after_command()
     local exit_code=$?
     [ -z "${__begin_window+.}" ] && return
     local last_command=$(history -n -1 2>/dev/null)
-    PS1=$(__git_ps1 %s | custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS $SHLVL $PWD)
+    PS1=$(custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS $SHLVL $PWD <<< "$(__git_ps1 %s)")
     unset __begin_window
 }
 
