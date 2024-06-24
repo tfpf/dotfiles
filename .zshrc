@@ -6,8 +6,14 @@ _after_command()
     local exit_code=$?
     [ -z "${__begin_window+.}" ] && return
     local last_command=$(history -n -1 2>/dev/null)
-    PS1=$(custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS "$(__git_ps1 %s)" $SHLVL $PWD)
+    _after_command_background &!
     unset __begin_window
+}
+
+_after_command_background()
+{
+    custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS "$(__git_ps1 %s)" $SHLVL $PWD >/tmp/custom-zsh-prompt-637573746F6D2D70726F6D7074
+    kill -s USR1 $$
 }
 
 _before_command()
@@ -87,6 +93,12 @@ rr()
         tr -cd $pattern </dev/urandom | head -c $length
         printf "\n"
     done
+}
+
+TRAPUSR1()
+{
+    PS1=$(</tmp/custom-zsh-prompt-637573746F6D2D70726F6D7074)
+    zle reset-prompt
 }
 
 if ! command -v __git_ps1 &>/dev/null
