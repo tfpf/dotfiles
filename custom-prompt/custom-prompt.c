@@ -151,6 +151,7 @@ void notify_desktop(char const *last_command, struct Interval const *interval)
         intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u m ", interval->minutes);
     }
     intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u s %u ms", interval->seconds, interval->milliseconds);
+    LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command, intervalbuf);
 #if defined __APPLE__ || defined _WIN32
     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
     // use on these systems respectively.
