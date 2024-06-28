@@ -18,7 +18,7 @@ struct Interval
     unsigned milliseconds;
 };
 
-long long unsigned get_active_window_id(void);
+long long unsigned get_active_wid(void);
 
 #if defined __APPLE__
 #define HOST_ICON ""
@@ -223,11 +223,11 @@ void write_report(
  * @param last_command Most-recently run command.
  * @param exit_code Code with which the command exited.
  * @param delay Running time of the command in nanoseconds.
- * @param active_window_id ID of the focused window when the command started.
+ * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  *****************************************************************************/
 void report_command_status(
-    char *last_command, int exit_code, long long unsigned delay, long long unsigned active_window_id, int columns)
+    char *last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid, int columns)
 {
     LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command, exit_code, delay);
     if (delay <= 5000000000ULL)
@@ -254,9 +254,15 @@ void report_command_status(
     LOG_DEBUG("Command length is %zu.", last_command_len);
 
     write_report(last_command, last_command_len, exit_code, &interval, columns);
-    if (delay > 10000000000ULL && active_window_id != get_active_window_id())
+    if (delay > 10000000000ULL)
     {
-        notify_desktop(last_command, &interval);
+        long long unsigned curr_active_wid = get_active_wid();
+        LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
+        LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
+        if (prev_active_wid != curr_active_wid)
+        {
+            notify_desktop(last_command, &interval);
+        }
     }
 }
 
@@ -306,7 +312,7 @@ int main(int const argc, char const *argv[])
     long long unsigned ts = get_timestamp();
     if (argc <= 1)
     {
-        printf("%llu %llu\n", ts, get_active_window_id());
+        printf("%llu %llu\n", ts, get_active_wid());
         return EXIT_SUCCESS;
     }
 
@@ -315,13 +321,13 @@ int main(int const argc, char const *argv[])
     char *last_command = (char *)argv[1];
     int exit_code = strtol(argv[2], NULL, 10);
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
-    long long unsigned active_window_id = strtoull(argv[4], NULL, 10);
+    long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
     int columns = strtol(argv[5], NULL, 10);
     char const *git_info = argv[6];
     int shlvl = strtol(argv[7], NULL, 10);
     char const *pwd = argv[8];
 
-    report_command_status(last_command, exit_code, delay, active_window_id, columns);
+    report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
     display_primary_prompt(git_info, shlvl);
     update_terminal_title(pwd);
 
