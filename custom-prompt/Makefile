@@ -3,9 +3,9 @@ LDFLAGS = -flto -O2
 
 MainSource = custom-prompt.c
 MainBashObject = custom-bash-prompt.o
-MainBashExecutable = $(MainBashObject:.o=)
+MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
-MainZshExecutable = $(MainZshObject:.o=)
+MainZshExecutable = bin/$(MainZshObject:.o=)
 GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
 ifneq "$(OS)" "Windows_NT"
@@ -32,9 +32,11 @@ $(MainBashObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects)
+	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects)
+	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
