@@ -13,14 +13,12 @@ jobs:
     strategy:
       matrix:
         os: [macos-13, macos-14, ubuntu-22.04, windows-2022]
-    defaults:
-      run:
-        working-directory: custom-prompt
     steps:
       - uses: actions/checkout@v4
       - if: runner.os == 'Linux'
         run: sudo apt install libnotify-dev
       - run: make -j release CC=gcc
+        working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
@@ -36,11 +34,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
+      - run: chmod +x . -R
+      - run: tar czf custom-prompt-amd64-macos.tgz *
+        working-directory: macos-13
+      - run: tar czf custom-prompt-aarch64-macos.tgz *
+        working-directory: macos-14
+      - run: tar czf custom-prompt-amd64-linux.tgz *
+        working-directory: ubuntu-22.04
+      - run: tar czf custom-prompt-amd64-windows.tgz *
+        working-directory: windows-2022
       - run: |
-          chmod +x . -R
-          tar czf custom-prompt-amd64-macos.tgz macos-13/*
-          tar czf custom-prompt-aarch64-macos.tgz macos-14/*
-          tar czf custom-prompt-amd64-linux.tgz ubuntu-22.04/*
-          tar czf custom-prompt-amd64-windows.tgz windows-2022/*
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} *.tgz
