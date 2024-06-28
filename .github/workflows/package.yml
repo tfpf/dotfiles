@@ -13,28 +13,16 @@ jobs:
     strategy:
       matrix:
         os: [macos-13, macos-14, ubuntu-22.04, windows-2022]
-    defaults:
-      run:
-        working-directory: custom-prompt
     steps:
       - uses: actions/checkout@v4
       - if: runner.os == 'Linux'
         run: sudo apt install libnotify-dev
       - run: make -j release CC=gcc
-      - if: runner.os == 'Linux'
-        run: tar czf custom-prompt-amd64-linux.tgz *-prompt
-      - if: matrix.os == 'macos-13'
-        run: tar czf custom-prompt-amd64-macos.tgz *-prompt
-      - if: matrix.os == 'macos-14'
-        run: tar czf custom-prompt-aarch64-macos.tgz *-prompt
-      - if: runner.os == 'Windows'
-        run: |
-          7z a -ttar custom-prompt-amd64-windows.tar *-prompt.exe
-          7z a -tgzip custom-prompt-amd64-windows.tgz *.tar
+        working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: 'custom-prompt/*.tgz'
+          path: 'custom-prompt/bin/*'
 
   release:
     if: github.ref_type == 'tag'
@@ -46,6 +34,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
+      - run: chmod +x . -R
+      - run: tar czf custom-prompt-amd64-macos.tgz *
+        working-directory: macos-13
+      - run: tar czf custom-prompt-aarch64-macos.tgz *
+        working-directory: macos-14
+      - run: tar czf custom-prompt-amd64-linux.tgz *
+        working-directory: ubuntu-22.04
+      - run: tar czf custom-prompt-amd64-windows.tgz *
+        working-directory: windows-2022
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
