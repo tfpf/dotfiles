@@ -254,9 +254,15 @@ void report_command_status(
     LOG_DEBUG("Command length is %zu.", last_command_len);
 
     write_report(last_command, last_command_len, exit_code, &interval, columns);
-    if (delay > 10000000000ULL && active_window_id != get_active_window_id())
+    if (delay > 10000000000ULL)
     {
-        notify_desktop(last_command, &interval);
+        long long unsigned curr_active_window_id = get_active_window_id();
+        LOG_DEBUG("Active window ID when the command started was %llu.", active_window_id);
+        LOG_DEBUG("Active window ID when the command finished is %llu.", curr_active_window_id);
+        if (active_window_id != curr_active_window_id)
+        {
+            notify_desktop(last_command, &interval);
+        }
     }
 }
 
