@@ -34,3 +34,11 @@ jobs:
       - run: |
           chmod +x */*
           ls -Al */*
+          file */*
+          tar vczf custom-prompt-amd64-macos.tgz macos-13/*
+          tar vczf custom-prompt-aarch64-macos.tgz macos-14/*
+          tar vczf custom-prompt-amd64-linux.tgz ubuntu-22.04/*
+          tar vczf custom-prompt-amd64-linux.tgz windows-2022/*
+      - uses: actions/checkout@v4
+      - run: |
+          ls -Al */*
