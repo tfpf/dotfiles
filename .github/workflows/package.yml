@@ -41,6 +41,6 @@ jobs:
           tar czf custom-prompt-amd64-macos.tgz macos-13/*
           tar czf custom-prompt-aarch64-macos.tgz macos-14/*
           tar czf custom-prompt-amd64-linux.tgz ubuntu-22.04/*
-          tar czf custom-prompt-amd64-linux.tgz windows-2022/*
+          tar czf custom-prompt-amd64-windows.tgz windows-2022/*
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} *.tgz
