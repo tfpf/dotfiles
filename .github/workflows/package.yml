@@ -30,7 +30,7 @@ jobs:
     container: ${{ matrix.arch }}/alpine:3.19
     strategy:
       matrix:
-        arch: [arm64v8, i386]
+        arch: [amd64]
     steps:
       - uses: actions/checkout@v4
       - run: sudo apk add libnotify
