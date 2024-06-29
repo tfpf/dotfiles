@@ -33,7 +33,7 @@ jobs:
         arch: [amd64]
     steps:
       - uses: actions/checkout@v4
-      - run: apk add libnotify
+      - run: apk add libnotify make
       - run: make -j release CC=gcc
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
