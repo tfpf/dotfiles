@@ -30,7 +30,7 @@ jobs:
     container: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [i386/alpine:3.19]
+        os: [arm64v8/alpine:3.19, i386/alpine:3.19]
     steps:
       - uses: actions/checkout@v4
       - run: sudo apk add libnotify
