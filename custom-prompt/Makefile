@@ -1,7 +1,8 @@
 CFLAGS = -flto -O2 -std=c11 -Wall -Wextra
+CXXFLAGS = -flto -O2 -std=c++11 -Wall -Wextra
 LDFLAGS = -flto -O2
 
-MainSource = custom-prompt.c
+MainSource = custom-prompt.cc
 MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
@@ -29,14 +30,14 @@ release: debug
 
 $(MainBashObject): CPPFLAGS += -DBASH
 $(MainBashObject): $(MainSource)
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)

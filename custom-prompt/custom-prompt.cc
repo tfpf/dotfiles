@@ -18,7 +18,10 @@ struct Interval
     unsigned milliseconds;
 };
 
-long long unsigned get_active_wid(void);
+extern "C"
+{
+    long long unsigned get_active_wid(void);
+}
 
 #if defined __APPLE__
 #define HOST_ICON ""
@@ -178,7 +181,7 @@ void notify_desktop(char const *last_command, struct Interval const *interval)
 void write_report(
     char const *last_command, size_t last_command_len, int exit_code, struct Interval const *interval, int columns)
 {
-    char *report = malloc((last_command_len + 64) * sizeof *report);
+    char *report = (char *)malloc((last_command_len + 64) * sizeof *report);
     char *report_ptr = report;
 
     LOG_DEBUG("Terminal width is %d.", columns);
@@ -283,14 +286,15 @@ void update_terminal_title(char const *pwd)
 /******************************************************************************
  * Show the primary prompt.
  *
- * @param git_info Description of the status of the current Git repository.
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(char const *git_info, int shlvl)
+void display_primary_prompt(int shlvl)
 {
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
+    static char git_info[256];
+    // fgets(git_info, sizeof git_info / sizeof *git_info, stdin);
     if (git_info[0] != '\0')
     {
         printf("   %s", git_info);
@@ -323,12 +327,11 @@ int main(int const argc, char const *argv[])
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
     long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
     int columns = strtol(argv[5], NULL, 10);
-    char const *git_info = argv[6];
-    int shlvl = strtol(argv[7], NULL, 10);
-    char const *pwd = argv[8];
+    int shlvl = strtol(argv[6], NULL, 10);
+    char const *pwd = argv[7];
 
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
-    display_primary_prompt(git_info, shlvl);
+    display_primary_prompt(shlvl);
     update_terminal_title(pwd);
 
     return EXIT_SUCCESS;
