@@ -27,10 +27,10 @@ jobs:
   build_other:
     name: build on ${{ matrix.os }}
     runs-on: ubuntu-22.04
-    container: ${{ matrix.os }}
+    container: ${{ matrix.os }}/alpine:3.19
     strategy:
       matrix:
-        os: [arm64v8/alpine:3.19, i386/alpine:3.19]
+        os: [arm64v8, i386]
     steps:
       - uses: actions/checkout@v4
       - run: sudo apk add libnotify
