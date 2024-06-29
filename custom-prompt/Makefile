@@ -33,11 +33,11 @@ $(MainBashObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects)
-	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects)
-	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)

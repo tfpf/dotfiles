@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <thread>
 
 #ifdef __linux__
 #include <libnotify/notify.h>
@@ -288,13 +289,14 @@ void update_terminal_title(char const *pwd)
  *
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(int shlvl)
+void display_primary_prompt(char const *shlvl_s)
 {
+    static char git_info[256];
+    fgets(git_info, sizeof git_info / sizeof *git_info, stdin);
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
+    int shlvl = strtol(shlvl_s, NULL, 10);
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
-    static char git_info[256];
-    // fgets(git_info, sizeof git_info / sizeof *git_info, stdin);
     if (git_info[0] != '\0')
     {
         printf("   %s", git_info);
@@ -319,6 +321,8 @@ int main(int const argc, char const *argv[])
         printf("%llu %llu\n", ts, get_active_wid());
         return EXIT_SUCCESS;
     }
+    char const *shlvl_s = argv[6];
+    std::thread worker(display_primary_prompt, shlvl_s);
 
     // Mark the first argument as mutable (this is allowed in C) to avoid
     // copying it in the function which receives it.
@@ -327,12 +331,11 @@ int main(int const argc, char const *argv[])
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
     long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
     int columns = strtol(argv[5], NULL, 10);
-    int shlvl = strtol(argv[6], NULL, 10);
     char const *pwd = argv[7];
 
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
-    display_primary_prompt(shlvl);
     update_terminal_title(pwd);
 
+    worker.join();
     return EXIT_SUCCESS;
 }
