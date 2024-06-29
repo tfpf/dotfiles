@@ -24,9 +24,26 @@ jobs:
           name: ${{ matrix.os }}
           path: 'custom-prompt/bin/*'
 
+  build_other:
+    name: build on ${{ matrix.os }}
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [i386/alpine:3.19]
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apk add libnotify
+      - run: make -j release CC=gcc
+        working-directory: custom-prompt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: 'custom-prompt/bin/*'
+
   release:
     if: github.ref_type == 'tag'
-    needs: build
+    needs: [build, build_other]
     runs-on: ubuntu-22.04
     env:
       GH_TOKEN: ${{ github.token }}
