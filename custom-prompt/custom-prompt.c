@@ -18,8 +18,6 @@ struct Interval
     unsigned milliseconds;
 };
 
-long long unsigned get_active_wid(void);
-
 #if defined __APPLE__
 #define HOST_ICON ""
 #elif defined __linux__
@@ -90,9 +88,9 @@ long long unsigned get_active_wid(void);
 void log_debug(char const *file_name, char const *function_name, int line_number, char const *fmt, ...)
 {
     time_t now = time(NULL);
-    static char timebuf[64];
-    strftime(timebuf, sizeof timebuf / sizeof *timebuf, "%FT%T%z", localtime(&now));
-    fprintf(stderr, B_GREY_RAW "%s" RESET_RAW " ", timebuf);
+    static char local_iso[64];
+    strftime(local_iso, sizeof local_iso / sizeof *local_iso, "%FT%T%z", localtime(&now));
+    fprintf(stderr, B_GREY_RAW "%s" RESET_RAW " ", local_iso);
     fprintf(stderr, D_CYAN_RAW "%s" RESET_RAW ":", file_name);
     fprintf(stderr, D_CYAN_RAW "%s" RESET_RAW ":", function_name);
     fprintf(stderr, D_CYAN_RAW "%d" RESET_RAW " ", line_number);
@@ -102,6 +100,13 @@ void log_debug(char const *file_name, char const *function_name, int line_number
     // va_end(ap);
     fprintf(stderr, "\n");
 }
+
+/******************************************************************************
+ * Get the ID of the currently-focused window.
+ *
+ * @return Active window ID.
+ *****************************************************************************/
+long long unsigned get_active_wid(void);
 
 /******************************************************************************
  * Get the current timestamp.
@@ -136,31 +141,33 @@ void delay_to_interval(long long unsigned delay, struct Interval *interval)
  * Show a completed command using a desktop notification.
  *
  * @param last_command Most-recently run command.
+ * @param exit_code Code with which the command exited.
  * @param interval Running time of the command.
  *****************************************************************************/
-void notify_desktop(char const *last_command, struct Interval const *interval)
+void notify_desktop(char const *last_command, int exit_code, struct Interval const *interval)
 {
-    static char intervalbuf[64];
-    char *intervalbuf_ptr = intervalbuf;
+    static char description[64];
+    char *description_ptr = description;
+    description_ptr += sprintf(description_ptr, "exit %d in ", exit_code);
     if (interval->hours > 0)
     {
-        intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u h ", interval->hours);
+        description_ptr += sprintf(description_ptr, "%u h ", interval->hours);
     }
     if (interval->hours > 0 || interval->minutes > 0)
     {
-        intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u m ", interval->minutes);
+        description_ptr += sprintf(description_ptr, "%u m ", interval->minutes);
     }
-    intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u s %u ms", interval->seconds, interval->milliseconds);
-    LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command, intervalbuf);
+    description_ptr += sprintf(description_ptr, "%u s %u ms", interval->seconds, interval->milliseconds);
+    LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command, description);
 #if defined __APPLE__ || defined _WIN32
     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
     // use on these systems respectively.
-    fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;%s;%s" ESCAPE BACKSLASH, last_command, intervalbuf);
+    fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;%s;%s" ESCAPE BACKSLASH, last_command, description);
 #else
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
     notify_init(__FILE__);
-    NotifyNotification *notification = notify_notification_new(last_command, intervalbuf, NULL);
+    NotifyNotification *notification = notify_notification_new(last_command, description, "terminal");
     notify_notification_show(notification, NULL);
     // notify_uninit();
 #endif
@@ -261,7 +268,7 @@ void report_command_status(
         LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
         if (prev_active_wid != curr_active_wid)
         {
-            notify_desktop(last_command, &interval);
+            notify_desktop(last_command, exit_code, &interval);
         }
     }
 }
@@ -293,7 +300,7 @@ void display_primary_prompt(char const *git_info, int shlvl)
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
     if (git_info[0] != '\0')
     {
-        printf("   %s", git_info);
+        printf("  %s", git_info);
     }
     if (venv != NULL)
     {
