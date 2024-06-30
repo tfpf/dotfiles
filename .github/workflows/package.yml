@@ -32,14 +32,15 @@ jobs:
       matrix:
         arch: [i386, amd64]
     steps:
+      - run: git clone https://github.com/tfpf/dotfiles.git
       - uses: actions/checkout@v4
       - run: apt install libnotify-dev
       - run: make -j release
-        working-directory: custom-prompt
+        working-directory: dotfiles/custom-prompt
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arch }}
-          path: 'custom-prompt/bin/*'
+          path: 'dotfiles/custom-prompt/bin/*'
 
   release:
     if: github.ref_type == 'tag'
