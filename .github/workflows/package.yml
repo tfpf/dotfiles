@@ -25,16 +25,16 @@ jobs:
           path: 'custom-prompt/bin/*'
 
   build_other:
-    name: build on ${{ matrix.arch }}/alpine:3.19
+    name: build on ${{ matrix.arch }}/debian:12
     runs-on: ubuntu-22.04
-    container: ${{ matrix.arch }}/alpine:3.19
+    container: ${{ matrix.arch }}/debian:12
     strategy:
       matrix:
-        arch: [amd64]
+        arch: [i386]
     steps:
       - uses: actions/checkout@v4
-      - run: apk add libnotify make
-      - run: make -j release CC=gcc
+      - run: sudo apt install libnotify-dev
+      - run: make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
         with:
