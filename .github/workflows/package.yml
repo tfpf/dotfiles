@@ -33,7 +33,7 @@ jobs:
         arch: [i386, amd64]
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt install libnotify-dev
+      - run: apt install libnotify-dev
       - run: make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
