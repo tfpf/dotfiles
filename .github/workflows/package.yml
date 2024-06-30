@@ -34,7 +34,7 @@ jobs:
     steps:
       - run: apt update && apt install -y git libnotify-dev make
       # Clone manually. See https://github.com/actions/checkout/issues/1681.
-      - run: git clone ${{ github.repositoryUrl }}
+      - run: git clone https://github.com/tfpf/dotfiles.git
       - run: make -j release
         working-directory: dotfiles/custom-prompt
       - uses: actions/upload-artifact@v4
