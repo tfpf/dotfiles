@@ -30,7 +30,7 @@ jobs:
     container: ${{ matrix.arch }}/debian:12
     strategy:
       matrix:
-        arch: [i386]
+        arch: [i386, amd64]
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt install libnotify-dev
