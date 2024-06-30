@@ -162,7 +162,7 @@ void notify_desktop(char const *last_command, int exit_code, struct Interval con
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
     notify_init(__FILE__);
-    NotifyNotification *notification = notify_notification_new(last_command, description, NULL);
+    NotifyNotification *notification = notify_notification_new(last_command, description, "terminal");
     notify_notification_show(notification, NULL);
     // notify_uninit();
 #endif
