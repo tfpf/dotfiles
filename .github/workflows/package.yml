@@ -32,7 +32,7 @@ jobs:
       matrix:
         arch: [i386, amd64]
     steps:
-      - run: apt update && apt install -y git libnotify-dev make
+      - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       # Clone manually. See https://github.com/actions/checkout/issues/1681.
       - run: git clone https://github.com/tfpf/dotfiles.git
       - run: make -j release
