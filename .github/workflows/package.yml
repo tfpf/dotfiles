@@ -34,7 +34,7 @@ jobs:
     steps:
       - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       # Clone manually. See https://github.com/actions/checkout/issues/1681.
-      - run: git clone https://github.com/tfpf/dotfiles.git
+      - uses: actions/checkout@v1
       - run: make -j release
         working-directory: dotfiles/custom-prompt
       - uses: actions/upload-artifact@v4
