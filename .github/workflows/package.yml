@@ -32,9 +32,9 @@ jobs:
       matrix:
         arch: [i386, amd64]
     steps:
-      - run: apt update && apt install -y git libnotify-dev
+      - run: apt update && apt install -y git libnotify-dev make
       # Clone manually. See https://github.com/actions/checkout/issues/1681.
-      - run: git clone https://github.com/tfpf/dotfiles.git
+      - run: git clone ${{ github.repositoryUrl }}
       - run: make -j release
         working-directory: dotfiles/custom-prompt
       - uses: actions/upload-artifact@v4
