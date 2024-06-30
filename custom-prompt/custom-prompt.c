@@ -18,8 +18,6 @@ struct Interval
     unsigned milliseconds;
 };
 
-long long unsigned get_active_wid(void);
-
 #if defined __APPLE__
 #define HOST_ICON ""
 #elif defined __linux__
@@ -102,6 +100,13 @@ void log_debug(char const *file_name, char const *function_name, int line_number
     // va_end(ap);
     fprintf(stderr, "\n");
 }
+
+/******************************************************************************
+ * Get the ID of the currently-focused window.
+ *
+ * @return Active window ID.
+ *****************************************************************************/
+long long unsigned get_active_wid(void);
 
 /******************************************************************************
  * Get the current timestamp.
@@ -295,7 +300,7 @@ void display_primary_prompt(char const *git_info, int shlvl)
     printf("\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]");
     if (git_info[0] != '\0')
     {
-        printf("   %s", git_info);
+        printf("  %s", git_info);
     }
     if (venv != NULL)
     {
