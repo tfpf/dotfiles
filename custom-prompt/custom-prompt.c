@@ -136,31 +136,33 @@ void delay_to_interval(long long unsigned delay, struct Interval *interval)
  * Show a completed command using a desktop notification.
  *
  * @param last_command Most-recently run command.
+ * @param exit_code Code with which the command exited.
  * @param interval Running time of the command.
  *****************************************************************************/
-void notify_desktop(char const *last_command, struct Interval const *interval)
+void notify_desktop(char const *last_command, int exit_code, struct Interval const *interval)
 {
-    static char intervalbuf[64];
-    char *intervalbuf_ptr = intervalbuf;
+    static char bodybuf[64];
+    char *bodybuf_ptr = bodybuf;
+    bodybuf_ptr += sprintf(bodybuf_ptr, "exit %d in ", exit_code);
     if (interval->hours > 0)
     {
-        intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u h ", interval->hours);
+        bodybuf_ptr += sprintf(bodybuf_ptr, "%u h ", interval->hours);
     }
     if (interval->hours > 0 || interval->minutes > 0)
     {
-        intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u m ", interval->minutes);
+        bodybuf_ptr += sprintf(bodybuf_ptr, "%u m ", interval->minutes);
     }
-    intervalbuf_ptr += sprintf(intervalbuf_ptr, "%u s %u ms", interval->seconds, interval->milliseconds);
-    LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command, intervalbuf);
+    bodybuf_ptr += sprintf(bodybuf_ptr, "%u s %u ms", interval->seconds, interval->milliseconds);
+    LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command, bodybuf);
 #if defined __APPLE__ || defined _WIN32
     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
     // use on these systems respectively.
-    fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;%s;%s" ESCAPE BACKSLASH, last_command, intervalbuf);
+    fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;%s;%s" ESCAPE BACKSLASH, last_command, bodybuf);
 #else
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
     notify_init(__FILE__);
-    NotifyNotification *notification = notify_notification_new(last_command, intervalbuf, NULL);
+    NotifyNotification *notification = notify_notification_new(last_command, bodybuf, NULL);
     notify_notification_show(notification, NULL);
     // notify_uninit();
 #endif
@@ -261,7 +263,7 @@ void report_command_status(
         LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
         if (prev_active_wid != curr_active_wid)
         {
-            notify_desktop(last_command, &interval);
+            notify_desktop(last_command, exit_code, &interval);
         }
     }
 }
