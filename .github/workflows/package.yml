@@ -36,11 +36,11 @@ jobs:
       # Clone manually. See https://github.com/actions/checkout/issues/1681.
       - uses: actions/checkout@v1
       - run: make -j release
-        working-directory: dotfiles/custom-prompt
+        working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.arch }}
-          path: 'dotfiles/custom-prompt/bin/*'
+          path: 'custom-prompt/bin/*'
 
   release:
     if: github.ref_type == 'tag'
