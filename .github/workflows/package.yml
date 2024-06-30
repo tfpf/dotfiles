@@ -37,6 +37,11 @@ jobs:
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
+      - run: |
+          pwd
+          ls -al
+          ls -al *
+          ls -al */*
       - uses: actions/upload-artifact@v1
         with:
           name: ${{ matrix.arch }}
