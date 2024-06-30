@@ -1,5 +1,4 @@
-CFLAGS = -flto -O2 -std=c11 -Wall -Wextra
-LDFLAGS = -flto -O2
+CFLAGS = -std=c11 -Wall -Wextra
 
 MainSource = custom-prompt.c
 MainBashObject = custom-bash-prompt.o
@@ -24,7 +23,8 @@ endif
 debug: $(MainBashExecutable) $(MainZshExecutable)
 
 release: CPPFLAGS += -DNDEBUG
-release: LDFLAGS += -s
+release: CFLAGS += -flto -O2
+release: LDFLAGS += -flto -O2 -s
 release: debug
 
 $(MainBashObject): CPPFLAGS += -DBASH
