@@ -33,19 +33,13 @@ jobs:
         arch: [i386, amd64]
     steps:
       - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
-      # Clone manually. See https://github.com/actions/checkout/issues/1681.
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
-      - run: |
-          pwd
-          ls -al
-          ls -al *
-          ls -al */*
       - uses: actions/upload-artifact@v1
         with:
           name: ${{ matrix.arch }}
-          path: 'custom-prompt/bin/*'
+          path: 'custom-prompt/bin'
 
   release:
     if: github.ref_type == 'tag'
