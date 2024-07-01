@@ -28,7 +28,7 @@ jobs:
     container: ${{ matrix.arch }}/debian:12
     strategy:
       matrix:
-        arch: [i386, amd64]
+        arch: [amd64, i386]
     steps:
       - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       - uses: actions/checkout@v1
@@ -39,40 +39,33 @@ jobs:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
 
-  temp:
-    needs: [build_macos_windows, build_linux]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/download-artifact@v4
-      - uses: actions/download-artifact@v1
-        with:
-          name: i386
-      - uses: actions/download-artifact@v1
-        with:
-          name: amd64
-      - run: |
-          ls -l $(find . -type f)
-          file $(find . -type f)
-
   release:
     if: github.ref_type == 'tag'
     needs: [build_macos_windows, build_linux]
     runs-on: ubuntu-22.04
-    env:
-      GH_TOKEN: ${{ github.token }}
     permissions: write-all
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v1
+        with:
+          name: amd64
+      - uses: actions/download-artifact@v1
+        with:
+          name: i386
       - run: chmod +x . -R
-      - run: tar czf custom-prompt-amd64-macos.tgz *
+      - run: tar vczf custom-prompt-amd64-macos.tgz *
         working-directory: macos-13
-      - run: tar czf custom-prompt-aarch64-macos.tgz *
+      - run: tar vczf custom-prompt-aarch64-macos.tgz *
         working-directory: macos-14
-      - run: tar czf custom-prompt-amd64-linux.tgz *
-        working-directory: ubuntu-22.04
-      - run: tar czf custom-prompt-amd64-windows.tgz *
+      - run: tar vczf custom-prompt-amd64-windows.tgz *
         working-directory: windows-2022
+      - run: tar vczf custom-prompt-i386-linux.tgz *
+        working-directory: i386
+      - run: tar vczf custom-prompt-amd64-linux.tgz *
+        working-directory: amd64
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
+        env:
+          GH_TOKEN: ${{ github.token }}
