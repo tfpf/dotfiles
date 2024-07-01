@@ -52,6 +52,7 @@ jobs:
           name: amd64
       - run: |
           ls -l $(find . -type f)
+          file $(find . -type f)
 
   release:
     if: github.ref_type == 'tag'
