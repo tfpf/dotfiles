@@ -58,7 +58,7 @@ jobs:
 
   release:
     if: github.ref_type == 'tag'
-    needs: [build_macos_windows, build_linux]
+    needs: [build_macos_windows, build_linux_x86, build_linux_arm]
     runs-on: ubuntu-22.04
     permissions: write-all
     steps:
