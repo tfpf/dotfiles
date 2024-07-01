@@ -28,7 +28,7 @@ jobs:
     container: ${{ matrix.arch }}/debian:12
     strategy:
       matrix:
-        arch: [amd64, i386]
+        arch: [amd64, arm32v7, arm64v8, i386]
     steps:
       - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       - uses: actions/checkout@v1
@@ -52,6 +52,12 @@ jobs:
           name: amd64
       - uses: actions/download-artifact@v1
         with:
+          name: arm32v7
+      - uses: actions/download-artifact@v1
+        with:
+          name: arm64v8
+      - uses: actions/download-artifact@v1
+        with:
           name: i386
       - run: chmod +x . -R
       - run: tar vczf custom-prompt-amd64-macos.tgz *
@@ -60,10 +66,14 @@ jobs:
         working-directory: macos-14
       - run: tar vczf custom-prompt-amd64-windows.tgz *
         working-directory: windows-2022
-      - run: tar vczf custom-prompt-i386-linux.tgz *
-        working-directory: i386
       - run: tar vczf custom-prompt-amd64-linux.tgz *
         working-directory: amd64
+      - run: tar vczf custom-prompt-arm32v7-linux.tgz *
+        working-directory: arm32v7
+      - run: tar vczf custom-prompt-arm64v8-linux.tgz *
+        working-directory: arm64v8
+      - run: tar vczf custom-prompt-i386-linux.tgz *
+        working-directory: i386
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
