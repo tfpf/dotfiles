@@ -46,7 +46,10 @@ jobs:
       - uses: actions/download-artifact@v4
       - uses: actions/download-artifact@v1
         with:
-          name: [i386, amd64]
+          name: i386
+      - uses: actions/download-artifact@v1
+        with:
+          name: amd64
       - run: |
           ls -l
 
