@@ -22,7 +22,7 @@ jobs:
           name: ${{ matrix.os }}
           path: 'custom-prompt/bin'
 
-  build_linux_x86:
+  build_linux:
     name: build on ${{ matrix.arch }}/debian:12
     runs-on: ubuntu-22.04
     container: ${{ matrix.arch }}/debian:12
@@ -39,26 +39,9 @@ jobs:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
 
-  build_linux_arm:
-    name: build on ${{ matrix.arch }}/debian:12
-    runs-on: macos-14
-    container: ${{ matrix.arch }}/debian:12
-    strategy:
-      matrix:
-        arch: [arm32v7, arm64v8]
-    steps:
-      - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
-      - uses: actions/checkout@v1
-      - run: make -j release
-        working-directory: custom-prompt
-      - uses: actions/upload-artifact@v1
-        with:
-          name: ${{ matrix.arch }}
-          path: 'custom-prompt/bin'
-
   release:
     if: github.ref_type == 'tag'
-    needs: [build_macos_windows, build_linux_x86, build_linux_arm]
+    needs: [build_macos_windows, build_linux]
     runs-on: ubuntu-22.04
     permissions: write-all
     steps:
