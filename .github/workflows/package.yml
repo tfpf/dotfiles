@@ -7,24 +7,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_macos_windows:
     name: build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13, macos-14, ubuntu-22.04, windows-2022]
+        os: [macos-13, macos-14, windows-2022]
     steps:
       - uses: actions/checkout@v4
-      - if: runner.os == 'Linux'
-        run: sudo apt install libnotify-dev
       - run: make -j release CC=gcc
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: 'custom-prompt/bin/*'
+          path: 'custom-prompt/bin'
 
-  build_other:
+  build_linux:
     name: build on ${{ matrix.arch }}/debian:12
     runs-on: ubuntu-22.04
     container: ${{ matrix.arch }}/debian:12
@@ -40,6 +38,13 @@ jobs:
         with:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
+
+  temp:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v4
+      - run: |
+          ls -l
 
   release:
     if: github.ref_type == 'tag'
