@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: make -j release CC=gcc
         working-directory: custom-prompt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v1
         with:
           name: ${{ matrix.os }}
           path: 'custom-prompt/bin'
@@ -43,7 +43,7 @@ jobs:
     needs: [build_macos_windows, build_linux]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v1
       - run: |
           ls -l
 
