@@ -23,17 +23,17 @@ jobs:
           path: 'custom-prompt/bin'
 
   build_linux:
-    name: build on ${{ matrix.arch }}/${{ matrix.os }}
+    name: build on ${{ matrix.arch }}/${{ matrix.os.name }}:${{ matrix.os.tag }}
     runs-on: ubuntu-22.04
-    container: ${{ matrix.arch }}/${{ matrix.os }}
+    container: ${{ matrix.arch }}/${{ matrix.os.name }}:${{ matrix.os.tag }}
     strategy:
       matrix:
         arch: [amd64, i386]
-        os: ['alpine:3.20', 'debian:12']
+        os: [{name: alpine, tag: 3.20}, {name: debian, tag: 12}]
     steps:
-      - if: startsWith(matrix.os, 'alpine')
+      - if: matrix.os.name == 'alpine'
         run: apk add build-base libnotify-dev libx11-dev
-      - if: startsWith(matrix.os, 'debian')
+      - if: matrix.os.name == 'debian'
         run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
