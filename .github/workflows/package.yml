@@ -39,6 +39,12 @@ jobs:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
 
+  temp:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/download-artifact@v3
+      - run: ls -l $(find . -type f)
+
   release:
     if: github.ref_type == 'tag'
     needs: [build_macos_windows, build_linux]
