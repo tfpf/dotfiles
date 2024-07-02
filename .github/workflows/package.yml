@@ -23,14 +23,14 @@ jobs:
           path: 'custom-prompt/bin'
 
   build_linux:
-    name: build on ${{ matrix.arch }}/debian:12
+    name: build on ${{ matrix.arch }}/alpine:3.20
     runs-on: ubuntu-22.04
-    container: ${{ matrix.arch }}/debian:12
+    container: ${{ matrix.arch }}/alpine:3.20
     strategy:
       matrix:
         arch: [amd64, i386]
     steps:
-      - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
+      - run: apk add libnotify-dev libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
