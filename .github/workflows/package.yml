@@ -30,9 +30,11 @@ jobs:
       matrix:
         arch: [amd64, i386]
     steps:
-      - run: apt update && apt install -y gcc libnotify-dev libx11-dev make
-      - uses: actions/checkout@v2
-      - run: make -j release
+      - uses: actions/checkout@v1
+      - run: |
+          apt update
+          apt install -y gcc libnotify-dev libx11-dev make
+          make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v3
         with:
