@@ -32,7 +32,7 @@ jobs:
     steps:
       - run: apk add libnotify-dev libx11-dev make
       - uses: actions/checkout@v1
-      - run: make -j release
+      - run: make -j release CC=clang
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v1
         with:
