@@ -27,9 +27,6 @@ release: CFLAGS += -flto -O2
 release: LDFLAGS += -flto -O2 -s
 release: debug
 
-static: LDFLAGS += -static
-static: release
-
 $(MainBashObject): CPPFLAGS += -DBASH
 $(MainBashObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
