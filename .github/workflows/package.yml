@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64, i386]
-        os: [alpine:3.20, debian:12]
+        os: ['alpine:3.20', 'debian:12']
     steps:
       - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       - uses: actions/checkout@v1
