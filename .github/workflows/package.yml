@@ -60,10 +60,10 @@ jobs:
         working-directory: windows-2022
       - run: tar vczf custom-prompt-amd64-linux-musl.tgz *
         working-directory: amd64-alpine
-      - run: tar vczf custom-prompt-i386-linux-musl.tgz *
-        working-directory: i386-alpine
       - run: tar vczf custom-prompt-amd64-linux-glibc.tgz *
         working-directory: amd64-debian
+      - run: tar vczf custom-prompt-i386-linux-musl.tgz *
+        working-directory: i386-alpine
       - run: tar vczf custom-prompt-i386-linux-glibc.tgz *
         working-directory: i386-debian
       - run: |
