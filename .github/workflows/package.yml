@@ -30,7 +30,7 @@ jobs:
       matrix:
         arch: [amd64, i386]
     steps:
-      - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
+      - run: apt update && apt install -y gcc libnotify-dev make libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
@@ -43,7 +43,7 @@ jobs:
     needs: [build_macos_windows, build_linux]
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - run: ls -l $(find . -type f)
 
   release:
