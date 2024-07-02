@@ -36,17 +36,10 @@ jobs:
           apt install -y gcc libnotify-dev libx11-dev make
           make -j release
         working-directory: custom-prompt
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v1
         with:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
-
-  temp:
-    needs: [build_macos_windows, build_linux]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/download-artifact@v3
-      - run: ls -l $(find . -type f)
 
   release:
     if: github.ref_type == 'tag'
@@ -55,13 +48,7 @@ jobs:
     permissions: write-all
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-      - uses: actions/download-artifact@v1
-        with:
-          name: amd64
-      - uses: actions/download-artifact@v1
-        with:
-          name: i386
+      - uses: actions/download-artifact@v3
       - run: chmod +x . -R
       - run: tar vczf custom-prompt-amd64-macos.tgz *
         working-directory: macos-13
