@@ -23,21 +23,24 @@ jobs:
           path: 'custom-prompt/bin'
 
   build_linux:
-    name: build on ${{ matrix.arch }}/debian:12
+    name: build on ${{ matrix.arch }}/${{ matrix.os }}
     runs-on: ubuntu-22.04
-    container: ${{ matrix.arch }}/debian:12
+    container: ${{ matrix.arch }}/${{ matrix.os }}
     strategy:
       matrix:
         arch: [amd64, i386]
         os: ['alpine:3.20', 'debian:12']
     steps:
-      - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
+      - if: startsWith(matrix.os, 'alpine')
+        run: apk add build-base libnotify-dev libx11-dev
+      - if: startsWith(matrix.os, 'debian')
+        run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v1
         with:
-          name: ${{ matrix.arch }}
+          name: ${{ matrix.arch }}-${{ matrix.os }}
           path: 'custom-prompt/bin'
 
   release:
