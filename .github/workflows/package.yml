@@ -23,20 +23,24 @@ jobs:
           path: 'custom-prompt/bin'
 
   build_linux:
-    name: build on ${{ matrix.arch }}/debian:12
+    name: build on ${{ matrix.arch }}/${{ matrix.os.name }}:${{ matrix.os.tag }}
     runs-on: ubuntu-22.04
-    container: ${{ matrix.arch }}/debian:12
+    container: ${{ matrix.arch }}/${{ matrix.os.name }}:${{ matrix.os.tag }}
     strategy:
       matrix:
         arch: [amd64, i386]
+        os: [{name: 'alpine', tag: '3.20'}, {name: 'debian', tag: '12'}]
     steps:
-      - run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
+      - if: matrix.os.name == 'alpine'
+        run: apk add build-base libnotify-dev libx11-dev
+      - if: matrix.os.name == 'debian'
+        run: apt update && apt install -y build-essential git libnotify-dev libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v1
         with:
-          name: ${{ matrix.arch }}
+          name: ${{ matrix.arch }}-${{ matrix.os.name }}
           path: 'custom-prompt/bin'
 
   release:
@@ -54,10 +58,14 @@ jobs:
         working-directory: macos-14
       - run: tar vczf custom-prompt-amd64-windows.tgz *
         working-directory: windows-2022
-      - run: tar vczf custom-prompt-amd64-linux.tgz *
-        working-directory: amd64
-      - run: tar vczf custom-prompt-i386-linux.tgz *
-        working-directory: i386
+      - run: tar vczf custom-prompt-amd64-linux-musl.tgz *
+        working-directory: amd64-alpine
+      - run: tar vczf custom-prompt-amd64-linux-glibc.tgz *
+        working-directory: amd64-debian
+      - run: tar vczf custom-prompt-i386-linux-musl.tgz *
+        working-directory: i386-alpine
+      - run: tar vczf custom-prompt-i386-linux-glibc.tgz *
+        working-directory: i386-debian
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
