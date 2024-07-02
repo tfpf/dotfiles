@@ -36,7 +36,7 @@ jobs:
           apt install -y gcc libnotify-dev libx11-dev make
           make -j release
         working-directory: custom-prompt
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
