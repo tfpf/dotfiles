@@ -31,10 +31,10 @@ jobs:
         arch: [amd64, i386]
     steps:
       - run: apt update && apt install -y gcc libnotify-dev libx11-dev make
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - run: make -j release
         working-directory: custom-prompt
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.arch }}
           path: 'custom-prompt/bin'
