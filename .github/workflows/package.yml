@@ -31,7 +31,7 @@ jobs:
         arch: [amd64, i386]
     steps:
       - run: apt update && apt install -y gcc libnotify-dev libx11-dev make
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - run: make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v3
