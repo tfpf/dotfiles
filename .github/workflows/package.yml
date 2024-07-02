@@ -30,7 +30,7 @@ jobs:
       matrix:
         arch: [amd64, i386]
     steps:
-      - run: apk add gcc libnotify-dev libx11-dev make
+      - run: apk add build-base libnotify-dev libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt
