@@ -60,8 +60,10 @@ jobs:
               tar cfvz ${package_directory}.tgz *
             )
           done
+        name: Create compressed archives of executable binaries
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
+        name: Publish compressed archives
         env:
           GH_TOKEN: ${{ github.token }}
