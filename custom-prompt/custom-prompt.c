@@ -327,6 +327,8 @@ int main(int const argc, char const *argv[])
     // taken.
     if (argv[1][0] == 't')
     {
+        // This needs to be mutable (see below), so it cannot be a string
+        // literal.
         char last_command[] = "[] last_command";
         return main(9, (char const *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "git_info", "1", "/" });
     }
