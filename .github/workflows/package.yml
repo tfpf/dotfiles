@@ -55,7 +55,10 @@ jobs:
           chmod --recursive +x .
           for package_directory in custom-prompt-*
           do
-              tar cfvz ${package_directory}.tgz $package_directory
+            (
+              cd $package_directory
+              tar cfvz ${package_directory}.tgz *
+            )
           done
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
