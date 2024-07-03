@@ -325,7 +325,7 @@ int main(int const argc, char const *argv[])
 
     // For testing. Simulate dummy arguments so that the longer branch is
     // taken.
-    if (argv[1][0] == 't')
+    if (argc == 2 && argv[1][0] == 't')
     {
         // This needs to be mutable (see below), so it cannot be a string
         // literal.
