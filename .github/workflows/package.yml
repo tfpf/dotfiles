@@ -8,18 +8,18 @@ on:
 
 jobs:
   build_macos_windows:
-    name: build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: build on ${{ matrix.os.name }}
+    runs-on: ${{ matrix.os.name }}
     strategy:
       matrix:
-        os: [macos-13, macos-14, windows-2022]
+        os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}, {name: 'windows-2022', id: 'amd64-windows'}]
     steps:
       - uses: actions/checkout@v4
       - run: make -j release CC=gcc
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.os }}
+          name: custom-prompt-${{ matrix.os.id }}
           path: 'custom-prompt/bin'
 
   build_linux:
@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         arch: [amd64, i386]
-        os: [{name: 'alpine', tag: '3.20'}, {name: 'debian', tag: '12'}]
+        os: [{name: 'alpine', tag: '3.20', libc: 'musl'}, {name: 'debian', tag: '12', libc: 'gnu'}]
     steps:
       - if: matrix.os.name == 'alpine'
         run: apk add build-base libnotify-dev libx11-dev
@@ -40,7 +40,7 @@ jobs:
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v1
         with:
-          name: ${{ matrix.arch }}-${{ matrix.os.name }}
+          name: custom-prompt-${{ matrix.arch }}-linux-${{ matrix.os.libc }}
           path: 'custom-prompt/bin'
 
   release:
@@ -51,23 +51,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
-      - run: chmod +x . -R
-      - run: tar vczf custom-prompt-amd64-macos.tgz *
-        working-directory: macos-13
-      - run: tar vczf custom-prompt-aarch64-macos.tgz *
-        working-directory: macos-14
-      - run: tar vczf custom-prompt-amd64-windows.tgz *
-        working-directory: windows-2022
-      - run: tar vczf custom-prompt-amd64-linux-musl.tgz *
-        working-directory: amd64-alpine
-      - run: tar vczf custom-prompt-amd64-linux-glibc.tgz *
-        working-directory: amd64-debian
-      - run: tar vczf custom-prompt-i386-linux-musl.tgz *
-        working-directory: i386-alpine
-      - run: tar vczf custom-prompt-i386-linux-glibc.tgz *
-        working-directory: i386-debian
+      - run: |
+          chmod --recursive +x .
+          for package_directory in custom-prompt-*
+          do
+            (
+              cd $package_directory
+              tar cfvz ${package_directory}.tgz *
+            )
+          done
+        name: Create compressed archives of executable binaries
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n 'Release intended as proof-of-concept. Binaries are dynamically-linked.'
           gh release upload ${{ github.ref_name }} */*.tgz
+        name: Publish compressed archives
         env:
           GH_TOKEN: ${{ github.token }}
