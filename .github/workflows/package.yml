@@ -40,7 +40,7 @@ jobs:
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v1
         with:
-          name: custom-prompt-${{ matrix.arch }-linux-${{ matrix.os.libc }}
+          name: custom-prompt-${{ matrix.arch }}-linux-${{ matrix.os.libc }}
           path: 'custom-prompt/bin'
 
   temp:
