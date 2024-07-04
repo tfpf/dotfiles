@@ -7,7 +7,7 @@ I use these files on Linux, macOS and Windows.
 Git repository (from `__git_ps1`) and the current Python virtual environment. It looks like
 
 ```console
-┌[tfpf  Alpine ~/Documents/projects/dotfiles</span>]  main *  dotfiles
+┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main *  dotfiles
 └─▶%
 ```
 
