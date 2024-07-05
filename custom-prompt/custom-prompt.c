@@ -1,9 +1,11 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <threads.h>
 #include <time.h>
 
 #ifdef __linux__
@@ -314,6 +316,19 @@ void display_primary_prompt(char const *git_info, int shlvl)
     printf(PROMPT_SYMBOL " ");
 }
 
+int work(void *arg)
+{
+    char **argv = arg;
+    long long unsigned ts = *(long long unsigned *)argv[0];
+    char *last_command = argv[1];
+    int exit_code = strtol(argv[2], NULL, 10);
+    long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
+    long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
+    int columns = strtol(argv[5], NULL, 10);
+    report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
+    return EXIT_SUCCESS;
+}
+
 int main(int argc, char *argv[])
 {
     long long unsigned ts = get_timestamp();
@@ -333,21 +348,17 @@ int main(int argc, char *argv[])
         return main(9, (char *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "git_info", "1", "/" });
     }
 
-    // The function which receives the first argument may modify it. (This is
-    // allowed in C.) That's why the command line arguments were not declared
-    // read-only.
-    char *last_command = argv[1];
-    int exit_code = strtol(argv[2], NULL, 10);
-    long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
-    long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
-    int columns = strtol(argv[5], NULL, 10);
+    argv[0] = (char *)&ts;
+    thrd_t worker;
+    thrd_create(&worker, work, argv);
+
     char const *git_info = argv[6];
     int shlvl = strtol(argv[7], NULL, 10);
     char const *pwd = argv[8];
 
-    report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
     display_primary_prompt(git_info, shlvl);
     update_terminal_title(pwd);
 
+    thrd_join(worker, NULL);
     return EXIT_SUCCESS;
 }
