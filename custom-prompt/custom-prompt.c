@@ -314,7 +314,7 @@ void display_primary_prompt(char const *git_info, int shlvl)
     printf(PROMPT_SYMBOL " ");
 }
 
-int main(int const argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     long long unsigned ts = get_timestamp();
     if (argc <= 1)
@@ -330,12 +330,13 @@ int main(int const argc, char const *argv[])
         // This needs to be mutable (see below), so it cannot be a string
         // literal.
         char last_command[] = "[] last_command";
-        return main(9, (char const *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "git_info", "1", "/" });
+        return main(9, (char *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "git_info", "1", "/" });
     }
 
-    // Mark the first argument as mutable (this is allowed in C) to avoid
-    // copying it in the function which receives it.
-    char *last_command = (char *)argv[1];
+    // The function which receives the first argument may modify it. (This is
+    // allowed in C.) That's why the command line arguments were not declared
+    // read-only.
+    char *last_command = argv[1];
     int exit_code = strtol(argv[2], NULL, 10);
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
     long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
