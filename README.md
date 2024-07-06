@@ -5,7 +5,7 @@ I use these files on Linux, macOS and Windows.
 
 [`custom-prompt`](custom-prompt) contains code to create a prompt for Bash or Zsh with information about the current
 Git repository (from `__git_ps1`) and the current Python virtual environment, and report the running time of long
-commands. A typical session may look like
+commands. A session may typically look like
 
 <pre>
 ┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main
