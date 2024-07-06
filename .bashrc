@@ -69,9 +69,9 @@ export TIME_STYLE=long-iso
 # Do not change the terminal prompt when in a Python virtual environment.
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-export GIT_PS1_SHOWCOLORHINTS=1
-export GIT_PS1_SHOWDIRTYSTATE=1
-export GIT_PS1_SHOWUNTRACKEDFILES=1
+GIT_PS1_SHOWCOLORHINTS=1
+GIT_PS1_SHOWDIRTYSTATE=1
+GIT_PS1_SHOWUNTRACKEDFILES=1
 
 export HISTCONTROL=ignoreboth
 export HISTFILE=$HOME/.bash_history
