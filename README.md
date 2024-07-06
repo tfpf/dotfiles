@@ -13,7 +13,7 @@ commands. A typical session may look like
 
 ┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main %  dotfiles
 └─▶% exit
-<span style="float:right"> pipenv shell  00:43.735</span>
+                                         pipenv shell  00:43.735
 
 ┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main %
 └─%
