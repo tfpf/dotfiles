@@ -1,5 +1,3 @@
-I use these files on Linux, macOS and Windows.
-
 [![style](https://github.com/tfpf/dotfiles/actions/workflows/style.yml/badge.svg)](https://github.com/tfpf/dotfiles/actions/workflows/style.yml)
 [![package](https://github.com/tfpf/dotfiles/actions/workflows/package.yml/badge.svg)](https://github.com/tfpf/dotfiles/actions/workflows/package.yml)
 
@@ -10,6 +8,8 @@ I use these files on Linux, macOS and Windows.
 No part of the code in this repository has been written by or in consultation with artificial intelligence chatbots such as (but not limited to) Bard and ChatGPT.
 
 ---
+
+These are the configuration files I use on Linux, macOS and Windows to set up a consistent development environment.
 
 [`custom-prompt`](custom-prompt) contains code to create a prompt for Bash or Zsh with information about the current
 Git repository (from `__git_ps1`) and the current Python virtual environment, and report the running time of long
