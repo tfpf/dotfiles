@@ -122,7 +122,8 @@ long long unsigned get_timestamp(void)
 }
 
 /******************************************************************************
- * Represent an amount of time in human-readable form.
+ * Represent an amount of time in human-readable form. Write it into the
+ * provided object.
  *
  * @param delay Time measured in nanoseconds.
  * @param interval Time measured in easier-to-understand units.
