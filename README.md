@@ -1,13 +1,21 @@
-I use these files on Linux, macOS and Windows.
-
 [![style](https://github.com/tfpf/dotfiles/actions/workflows/style.yml/badge.svg)](https://github.com/tfpf/dotfiles/actions/workflows/style.yml)
 [![package](https://github.com/tfpf/dotfiles/actions/workflows/package.yml/badge.svg)](https://github.com/tfpf/dotfiles/actions/workflows/package.yml)
+
+<p align="center">
+  <img src="res/certified_human.svg" />
+</p>
+
+No part of the code in this repository has been written by or in consultation with artificial intelligence chatbots such as (but not limited to) Bard and ChatGPT.
+
+---
+
+These are the configuration files I use on Linux, macOS and Windows to set up a consistent development environment.
 
 [`custom-prompt`](custom-prompt) contains code to create a prompt for Bash or Zsh with information about the current
 Git repository (from `__git_ps1`) and the current Python virtual environment, and report the running time of long
 commands. A session may typically look like
 
-<pre>
+```console
 ┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main
 └─% pipenv shell
 
@@ -17,7 +25,7 @@ commands. A session may typically look like
 
 ┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main %
 └─%
-</pre>
+```
 
 but with colours. (The number of right-pointing triangles just before the prompt symbol is one less than the current
 shell level.) If the terminal is not the active window when a long command terminates, a desktop notification will also
