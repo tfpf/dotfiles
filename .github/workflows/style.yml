@@ -11,4 +11,5 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - run: cd custom-prompt && ./clang-format.bash check
+      - run: ./clang-format.bash check
+        working-directory: custom-prompt
