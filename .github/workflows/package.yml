@@ -64,6 +64,6 @@ jobs:
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} --notes 'Binaries are dynamically-linked.' --generate-notes
           gh release upload ${{ github.ref_name }} */*.tgz
-        name: Publish compressed archives
+        name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
