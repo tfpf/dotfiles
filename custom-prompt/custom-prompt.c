@@ -109,6 +109,13 @@ void log_debug(char const *file_name, char const *function_name, int line_number
 long long unsigned get_active_wid(void);
 
 /******************************************************************************
+ * Obtain information about the current Git repository.
+ *
+ * @return Git string.
+ *****************************************************************************/
+char const *get_git_info(void);
+
+/******************************************************************************
  * Get the current timestamp.
  *
  * @return Time in nanoseconds since a fixed but unspecified reference point.
