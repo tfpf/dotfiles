@@ -3,7 +3,7 @@
 shopt -s globstar
 
 cd $(dirname "$0")
-files=(*.c *.cc)
+files=(*.c *.cc *.h)
 if [ "$1" = check ]
 then
     clang-format --verbose --dry-run --Werror ${files[@]}
