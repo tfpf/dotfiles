@@ -2,44 +2,69 @@
 #include <fstream>
 #include <iostream>
 
+/******************************************************************************
+ * Store information about a Git repository.
+ *****************************************************************************/
 class GitRepository
 {
 public:
     GitRepository(void);
+    char const *describe(void);
 
 private:
-    void parse(void);
-    void parse_index(void);
+private:
+    bool started_in_git_dir;
+    bool found_git_dir;
 };
 
+/******************************************************************************
+ * Locate and enter a Git directory in the parent directories of the current
+ * working directory.
+ *****************************************************************************/
 GitRepository::GitRepository()
+    : started_in_git_dir(false)
+    , found_git_dir(false)
 {
-    std::filesystem::path directory = std::filesystem::canonical(".");
-    std::filesystem::path root_directory = directory.root_path();
+    std::filesystem::path current_dir = std::filesystem::current_path();
+    std::filesystem::path root_dir = current_dir.root_path();
     while (true)
     {
-        std::filesystem::path git_directory = directory / ".git";
-        if (std::filesystem::is_directory(git_directory))
+        if (current_dir.filename() == ".git")
         {
-            std::filesystem::current_path(git_directory);
-            this->parse();
-            break;
+            this->started_in_git_dir = true;
+            return;
         }
-        if (directory == root_directory)
+        std::filesystem::path git_dir = current_dir / ".git";
+        if (std::filesystem::is_directory(git_dir))
         {
-            break;
+            std::filesystem::current_path(git_dir);
+            this->found_git_dir = true;
+            return;
         }
-        directory = directory.parent_path();
+        if (current_dir == root_dir)
+        {
+            return;
+        }
+        current_dir = current_dir.parent_path();
     }
 }
 
-void GitRepository::parse(void)
+/******************************************************************************
+ * Obtain information suitable for use in a shell prompt.
+ *
+ * @return Concise description of the status of the current Git repository.
+ *****************************************************************************/
+char const *GitRepository::describe(void)
 {
-    this->parse_index();
-}
-
-void GitRepository::parse_index(void)
-{
+    if (this->started_in_git_dir)
+    {
+        return ".git!";
+    }
+    if (!this->found_git_dir)
+    {
+        return "";
+    }
+    return "git branch";
 }
 
 extern "C"
@@ -47,6 +72,6 @@ extern "C"
     char const *get_git_info(void)
     {
         GitRepository git_repository;
-        return "git branch";
+        return git_repository.describe();
     }
 }
