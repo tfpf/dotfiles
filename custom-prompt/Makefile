@@ -30,16 +30,16 @@ release: CXXFLAGS += -flto -O2
 release: LDFLAGS += -flto -O2 -s
 release: debug
 
+$(MainBashObject): CPPFLAGS += -DBASH
 $(MainBashObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
-$(MainBashExecutable): CPPFLAGS += -DBASH
 $(MainBashExecutable): $(MainBashObject) $(Objects)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
+$(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
-$(MainZshExecutable): CPPFLAGS += -DZSH
 $(MainZshExecutable): $(MainZshObject) $(Objects)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
