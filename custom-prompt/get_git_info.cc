@@ -31,7 +31,8 @@ GitRepository::GitRepository()
     }
 }
 
-void GitRepository::parse(void){
+void GitRepository::parse(void)
+{
 }
 
 extern "C"
