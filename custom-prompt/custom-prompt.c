@@ -349,14 +349,13 @@ int main(int argc, char *argv[])
     long long unsigned delay = ts - strtoll(argv[3], NULL, 10);
     long long unsigned prev_active_wid = strtoull(argv[4], NULL, 10);
     int columns = strtol(argv[5], NULL, 10);
-    char const *git_info = argv[6];
-    int shlvl = strtol(argv[7], NULL, 10);
-    char const *pwd = argv[8];
+    char const *git_info = get_git_info();
+    int shlvl = strtol(argv[6], NULL, 10);
+    char const *pwd = argv[7];
 
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
     display_primary_prompt(git_info, shlvl);
     update_terminal_title(pwd);
-    LOG_DEBUG("%s", get_git_info());
 
     return EXIT_SUCCESS;
 }
