@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 
 class GitRepository
@@ -8,6 +9,7 @@ public:
 
 private:
     void parse(void);
+    void parse_index(void);
 };
 
 GitRepository::GitRepository()
@@ -32,6 +34,11 @@ GitRepository::GitRepository()
 }
 
 void GitRepository::parse(void)
+{
+    this->parse_index();
+}
+
+void GitRepository::parse_index(void)
 {
 }
 
