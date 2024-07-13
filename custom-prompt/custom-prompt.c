@@ -356,6 +356,7 @@ int main(int argc, char *argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
     display_primary_prompt(git_info, shlvl);
     update_terminal_title(pwd);
+    LOG_DEBUG("%s", get_git_info());
 
     return EXIT_SUCCESS;
 }
