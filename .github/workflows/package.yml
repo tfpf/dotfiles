@@ -15,7 +15,7 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}, {name: 'windows-2022', id: 'amd64-windows'}]
     steps:
       - uses: actions/checkout@v4
-      - run: make -j release CC=gcc
+      - run: make -j release
         working-directory: custom-prompt
       - uses: actions/upload-artifact@v3
         with:
