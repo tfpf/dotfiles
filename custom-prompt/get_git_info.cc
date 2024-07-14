@@ -14,7 +14,6 @@ public:
     char const *describe(void);
 
 private:
-    std::string get_git_branch(void);
 
 private:
     bool started_in_git_dir;
@@ -68,23 +67,19 @@ char const *GitRepository::describe(void)
     {
         return "";
     }
-    std::string git_branch = this->get_git_branch();
-    static char *git_info = new char[git_branch.size() + 64];
-    std::sprintf(git_info, "%s", git_branch.data());
-    return git_info;
-}
 
-/******************************************************************************
- * Determine the current branch of the Git repository.
- *
- * @return Branch name if available, else latest commit ID.
- *****************************************************************************/
-std::string GitRepository::get_git_branch(void)
-{
+    // Determine the current branch by reading a file. If the latest commit is
+    // not on a branch, the file will contain its ID. Either way, the contents
+    // of the file are what we need.
     std::ifstream head("HEAD");
     std::string line;
     std::getline(head, line);
-    return std::filesystem::path(line).filename().string();
+    // Hack: treat it as a file path to get the branch name if it is a ref or
+    // the commit ID otherwise.
+    std::string git_branch = std::filesystem::path(line).filename().string();
+    static char *git_info = new char[git_branch.size() + 64];
+    std::sprintf(git_info, "%s", git_branch.data());
+    return git_info;
 }
 
 extern "C"
