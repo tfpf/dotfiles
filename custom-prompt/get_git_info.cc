@@ -12,7 +12,7 @@ class GitRepository
 {
 public:
     GitRepository(void);
-    char const *describe(void);
+    char const *describe(char const *, char const *, char const *);
 
 private:
 private:
@@ -55,13 +55,19 @@ GitRepository::GitRepository()
 /******************************************************************************
  * Obtain information suitable for use in a shell prompt.
  *
+ * @param begin_good_colour Code to set a good foreground colour.
+ * @param begin_bad_colour Code to set a bad foreground colour.
+ * @param end_colour Code to reset the foreground colour.
+ *
  * @return Concise description of the status of the current Git repository.
  *****************************************************************************/
-char const *GitRepository::describe(void)
+char const *GitRepository::describe(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour)
 {
     if (this->started_in_git_dir)
     {
-        return ".git!";
+        static char git_info[16];
+        std::sprintf(git_info, "%s.git!%s", begin_good_colour, end_colour);
+        return git_info;
     }
     if (!this->found_git_dir)
     {
@@ -78,19 +84,19 @@ char const *GitRepository::describe(void)
     std::size_t slash_idx = line.rfind('/');
     if (slash_idx != std::string::npos)
     {
-        std::sprintf(git_info, "%s", line.data() + slash_idx + 1);
+        std::sprintf(git_info, "%s%s%s", begin_good_colour, line.data() + slash_idx + 1, end_colour);
     }
     else
     {
-        std::sprintf(git_info, "%.7s", line.data());
+        std::sprintf(git_info, "%s%.7s%s", begin_bad_colour, line.data(), end_colour);
     }
     return git_info;
 }
 
 extern "C"
 {
-    char const *get_git_info(void)
+    char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour)
     {
-        return GitRepository().describe();
+        return GitRepository().describe(begin_good_colour, begin_bad_colour, end_colour);
     }
 }

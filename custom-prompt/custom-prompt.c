@@ -66,6 +66,8 @@ struct Interval
 
 // Dark.
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
+#define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
+#define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
 
 // No formatting.
 #define RESET BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "m" END_INVISIBLE
@@ -111,9 +113,13 @@ long long unsigned get_active_wid(void);
 /******************************************************************************
  * Obtain information about the current Git repository.
  *
+ * @param begin_good_colour Code to set a good foreground colour.
+ * @param begin_bad_colour Code to set a bad foreground colour.
+ * @param end_colour Code to reset the foreground colour.
+ *
  * @return Git string.
  *****************************************************************************/
-char const *get_git_info(void);
+char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour);
 
 /******************************************************************************
  * Get the current timestamp.
@@ -302,7 +308,7 @@ void update_terminal_title(char const *pwd)
  *****************************************************************************/
 void display_primary_prompt(int shlvl)
 {
-    char const *git_info = get_git_info();
+    char const *git_info = get_git_info(D_GREEN, D_RED, RESET);
     LOG_DEBUG("Current Git repository state is '%s'.", git_info);
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);

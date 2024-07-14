@@ -1,3 +1,4 @@
+CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra
 CXXFLAGS = -std=c++17 -Wall -Wextra
 LDLIBS = -lstdc++
@@ -18,6 +19,8 @@ ifneq "$(OS)" "Windows_NT"
         LDLIBS += -framework Cocoa -framework CoreGraphics
         Objects += get_active_wid_macos.o
     endif
+else
+    LDFLAGS += -static
 endif
 
 .PHONY: debug release
