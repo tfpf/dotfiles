@@ -1,3 +1,4 @@
+CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra
 
 MainSource = custom-prompt.c
