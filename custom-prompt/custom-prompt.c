@@ -111,13 +111,14 @@ void log_debug(char const *file_name, char const *function_name, int line_number
 long long unsigned get_active_wid(void);
 
 /******************************************************************************
- * Obtain information about the current Git repository.
+ * Obtain information about the current Git repository in a form suitable to
+ * show in a shell prompt.
  *
  * @param begin_good_colour Code to set a good foreground colour.
  * @param begin_bad_colour Code to set a bad foreground colour.
  * @param end_colour Code to reset the foreground colour.
  *
- * @return Git string.
+ * @return Concise description of the status of the current Git repository.
  *****************************************************************************/
 char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour);
 

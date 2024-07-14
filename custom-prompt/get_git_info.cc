@@ -53,7 +53,9 @@ GitRepository::GitRepository()
 }
 
 /******************************************************************************
- * Obtain information suitable for use in a shell prompt.
+ * Obtain information about the Git repository in a form suitable to show in a
+ * shell prompt. If required, use a static array or allocate one dynamically to
+ * store the information.
  *
  * @param begin_good_colour Code to set a good foreground colour.
  * @param begin_bad_colour Code to set a bad foreground colour.
