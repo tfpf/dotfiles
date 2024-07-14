@@ -1,6 +1,8 @@
+#include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 /******************************************************************************
  * Store information about a Git repository.
@@ -12,6 +14,8 @@ public:
     char const *describe(void);
 
 private:
+    std::string get_git_branch(void);
+
 private:
     bool started_in_git_dir;
     bool found_git_dir;
@@ -64,7 +68,23 @@ char const *GitRepository::describe(void)
     {
         return "";
     }
-    return "git branch";
+    std::string git_branch = this->get_git_branch();
+    static char *git_info = new char[git_branch.size() + 64];
+    std::sprintf(git_info, "%s", git_branch.data());
+    return git_info;
+}
+
+/******************************************************************************
+ * Determine the current branch of the Git repository.
+ *
+ * @return Branch name if available, else latest commit ID.
+ *****************************************************************************/
+std::string GitRepository::get_git_branch(void)
+{
+    std::ifstream head("HEAD");
+    std::string line;
+    std::getline(head, line);
+    return std::filesystem::path(line).filename().string();
 }
 
 extern "C"
