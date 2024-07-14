@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -14,7 +15,6 @@ public:
     char const *describe(void);
 
 private:
-
 private:
     bool started_in_git_dir;
     bool found_git_dir;
@@ -68,17 +68,22 @@ char const *GitRepository::describe(void)
         return "";
     }
 
-    // Determine the current branch by reading a file. If the latest commit is
-    // not on a branch, the file will contain its ID. Either way, the contents
-    // of the file are what we need.
+    // Determine the current ref by reading a file. If the most recent commit
+    // is not on a branch, the file will contain its ID. Else, it will contain
+    // the symbolic name of the ref.
     std::ifstream head("HEAD");
     std::string line;
     std::getline(head, line);
-    // Hack: treat it as a file path to get the branch name if it is a ref or
-    // the commit ID otherwise.
-    std::string git_branch = std::filesystem::path(line).filename().string();
-    static char *git_info = new char[git_branch.size() + 64];
-    std::sprintf(git_info, "%s", git_branch.data());
+    static char *git_info = new char[line.size()];
+    std::size_t slash_idx = line.rfind('/');
+    if (slash_idx != std::string::npos)
+    {
+        std::sprintf(git_info, "%s", line.data() + slash_idx + 1);
+    }
+    else
+    {
+        std::sprintf(git_info, "%.7s", line.data());
+    }
     return git_info;
 }
 
