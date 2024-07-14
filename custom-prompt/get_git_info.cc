@@ -71,7 +71,6 @@ extern "C"
 {
     char const *get_git_info(void)
     {
-        GitRepository git_repository;
-        return git_repository.describe();
+        return GitRepository().describe();
     }
 }
