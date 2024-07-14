@@ -96,9 +96,7 @@ char const *GitRepository::describe(char const *begin_good_colour, char const *b
 }
 
 extern "C"
+char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour)
 {
-    char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour)
-    {
-        return GitRepository().describe(begin_good_colour, begin_bad_colour, end_colour);
-    }
+    return GitRepository().describe(begin_good_colour, begin_bad_colour, end_colour);
 }
