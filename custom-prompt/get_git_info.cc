@@ -65,7 +65,7 @@ char const *GitRepository::describe(char const *begin_good_colour, char const *b
 {
     if (this->started_in_git_dir)
     {
-        static char git_info[16];
+        static char git_info[64];
         std::sprintf(git_info, "%s.git!%s", begin_good_colour, end_colour);
         return git_info;
     }
