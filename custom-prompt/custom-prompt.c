@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
         // This needs to be mutable (see below), so it cannot be a string
         // literal.
         char last_command[] = "[] last_command";
-        return main(9, (char *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "git_info", "1", "/" });
+        return main(8, (char *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "1", "/" });
     }
 
     // The function which receives the first argument may modify it. (This is
