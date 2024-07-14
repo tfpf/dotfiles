@@ -82,13 +82,13 @@ char const *GitRepository::describe(char const *begin_good_colour, char const *b
     std::getline(head, line);
     static char *git_info = new char[line.size()];
     std::size_t slash_idx = line.rfind('/');
-    if (slash_idx != std::string::npos)
+    if (slash_idx == std::string::npos)
     {
-        std::sprintf(git_info, "%s%s%s", begin_good_colour, line.data() + slash_idx + 1, end_colour);
+        std::sprintf(git_info, "%s%.7s%s", begin_bad_colour, line.data(), end_colour);
     }
     else
     {
-        std::sprintf(git_info, "%s%.7s%s", begin_bad_colour, line.data(), end_colour);
+        std::sprintf(git_info, "%s%s%s", begin_good_colour, line.data() + slash_idx + 1, end_colour);
     }
     return git_info;
 }
