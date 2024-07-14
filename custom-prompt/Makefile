@@ -1,7 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra
 CXXFLAGS = -std=c++17 -Wall -Wextra
-LDLIBS = -lstdc++
 
 MainSource = custom-prompt.c
 MainBashObject = custom-bash-prompt.o
@@ -10,7 +9,11 @@ MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
 Objects = get_active_wid_linux.o get_active_wid_windows.o get_git_info.o
 
-ifneq "$(OS)" "Windows_NT"
+ifeq "$(OS)" "Windows_NT"
+    # MSYS2 places the C++ standard library file in a folder Windows doesn't
+    # search for DLL files, so just link statically.
+    LDFLAGS += -static
+else
     UNAME = $(shell uname)
     ifeq "$(UNAME)" "Linux"
         CPPFLAGS += $(shell pkg-config --cflags glib-2.0 libnotify x11)
@@ -19,8 +22,6 @@ ifneq "$(OS)" "Windows_NT"
         LDLIBS += -framework Cocoa -framework CoreGraphics
         Objects += get_active_wid_macos.o
     endif
-else
-    LDFLAGS += -static
 endif
 
 .PHONY: debug release
@@ -38,11 +39,11 @@ $(MainBashObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(MainBashExecutable): $(MainBashObject) $(Objects)
-	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(MainZshExecutable): $(MainZshObject) $(Objects)
-	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
