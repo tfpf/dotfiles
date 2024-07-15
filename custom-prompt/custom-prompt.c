@@ -10,6 +10,8 @@
 #include <libnotify/notify.h>
 #endif
 
+#include "macros.h"
+
 struct Interval
 {
     unsigned hours;
@@ -17,61 +19,6 @@ struct Interval
     unsigned seconds;
     unsigned milliseconds;
 };
-
-#if defined __APPLE__
-#define HOST_ICON ""
-#elif defined __linux__
-#define HOST_ICON ""
-#elif defined _WIN32
-#define HOST_ICON ""
-#else
-#error "unknown OS"
-#endif
-
-#if defined BASH
-#define BEGIN_INVISIBLE "\x01"
-#define END_INVISIBLE "\x02"
-#define USER "\\u"
-#define HOST "\\h"
-#define DIRECTORY "\\w"
-#define PROMPT_SYMBOL "\\$"
-#elif defined ZSH
-#define BEGIN_INVISIBLE "%%\x7B"
-#define END_INVISIBLE "%%\x7D"
-#define USER "%%n"
-#define HOST "%%m"
-#define DIRECTORY "%%~"
-#define PROMPT_SYMBOL "%%#"
-#else
-#error "unknown shell"
-#endif
-
-#define ESCAPE "\x1B"
-#define LEFT_SQUARE_BRACKET "\x5B"
-#define BACKSLASH "\x5C"
-#define RIGHT_SQUARE_BRACKET "\x5D"
-
-// Bold, bright and italic.
-#define BBI_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;3;93m" END_INVISIBLE
-
-// Bold and bright.
-#define BB_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;96m" END_INVISIBLE
-#define BB_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;92m" END_INVISIBLE
-
-// Bright.
-#define B_BLUE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "94m" END_INVISIBLE
-#define B_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "92m"
-#define B_GREY_RAW ESCAPE LEFT_SQUARE_BRACKET "90m"
-#define B_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "91m"
-
-// Dark.
-#define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
-#define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
-#define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
-
-// No formatting.
-#define RESET BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "m" END_INVISIBLE
-#define RESET_RAW ESCAPE LEFT_SQUARE_BRACKET "m"
 
 #ifndef NDEBUG
 #define LOG_DEBUG(fmt, ...) log_debug(__FILE__, __func__, __LINE__, fmt __VA_OPT__(, ) __VA_ARGS__)
@@ -114,13 +61,9 @@ long long unsigned get_active_wid(void);
  * Obtain information about the current Git repository in a form suitable to
  * show in a shell prompt.
  *
- * @param begin_good_colour Code to set a good foreground colour.
- * @param begin_bad_colour Code to set a bad foreground colour.
- * @param end_colour Code to reset the foreground colour.
- *
  * @return Concise description of the status of the current Git repository.
  *****************************************************************************/
-char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour);
+char const *get_git_info(void);
 
 /******************************************************************************
  * Get the current timestamp.
@@ -309,7 +252,7 @@ void update_terminal_title(char const *pwd)
  *****************************************************************************/
 void display_primary_prompt(int shlvl)
 {
-    char const *git_info = get_git_info(D_GREEN, D_RED, RESET);
+    char const *git_info = get_git_info();
     LOG_DEBUG("Current Git repository state is '%s'.", git_info);
     char const *venv = getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);

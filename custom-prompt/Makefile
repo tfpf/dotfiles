@@ -7,7 +7,10 @@ MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
-Objects = get_active_wid_linux.o get_active_wid_windows.o get_git_info.o
+GetGitInfoSource = get_git_info.cc
+GetGitInfoBashObject = get_git_info_bash.o
+GetGitInfoZshObject = get_git_info_zsh.o
+GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
 ifeq "$(OS)" "Windows_NT"
     # MSYS2 places the C++ standard library file in a folder Windows doesn't
@@ -20,7 +23,7 @@ else
         LDLIBS += $(shell pkg-config --libs glib-2.0 libnotify x11)
     else
         LDLIBS += -framework Cocoa -framework CoreGraphics
-        Objects += get_active_wid_macos.o
+        GetActiveWidObjects += get_active_wid_macos.o
     endif
 endif
 
@@ -38,12 +41,20 @@ $(MainBashObject): CPPFLAGS += -DBASH
 $(MainBashObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
-$(MainBashExecutable): $(MainBashObject) $(Objects)
+$(GetGitInfoBashObject): CPPFLAGS += -DBASH
+$(GetGitInfoBashObject): $(GetGitInfoSource)
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+$(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects) $(GetGitInfoBashObject)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
-$(MainZshExecutable): $(MainZshObject) $(Objects)
+$(GetGitInfoZshObject): CPPFLAGS += -DZSH
+$(GetGitInfoZshObject): $(GetGitInfoSource)
+	$(COMPILE.cc) $(OUTPUT_OPTION) $<
+
+$(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects) $(GetGitInfoZshObject)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)

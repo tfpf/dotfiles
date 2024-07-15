@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string>
 
+#include "macros.h"
+
 /******************************************************************************
  * Store information about a Git repository.
  *****************************************************************************/
@@ -11,10 +13,11 @@ class GitRepository
 {
 public:
     GitRepository(void);
-    char const *describe(char const *, char const *, char const *);
+    char const *describe(void);
 
 private:
-void parse_index(void);
+    void parse_index(void);
+
 private:
     bool started_in_git_dir;
     bool found_git_dir;
@@ -54,22 +57,15 @@ GitRepository::GitRepository()
 
 /******************************************************************************
  * Obtain information about the Git repository in a form suitable to show in a
- * shell prompt. If required, use a static array or allocate one dynamically to
- * store the information.
- *
- * @param begin_good_colour Code to set a good foreground colour.
- * @param begin_bad_colour Code to set a bad foreground colour.
- * @param end_colour Code to reset the foreground colour.
+ * shell prompt.
  *
  * @return Concise description of the status of the current Git repository.
  *****************************************************************************/
-char const *GitRepository::describe(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour)
+char const *GitRepository::describe(void)
 {
     if (this->started_in_git_dir)
     {
-        static char git_info[64];
-        std::sprintf(git_info, "%s.git!%s", begin_good_colour, end_colour);
-        return git_info;
+        return D_GREEN ".git!" RESET;
     }
     if (!this->found_git_dir)
     {
@@ -86,11 +82,11 @@ char const *GitRepository::describe(char const *begin_good_colour, char const *b
     std::size_t slash_idx = line.rfind('/');
     if (slash_idx == std::string::npos)
     {
-        std::sprintf(git_info, "%s%.7s%s", begin_bad_colour, line.data(), end_colour);
+        std::sprintf(git_info, D_RED "%.7s" RESET, line.data());
     }
     else
     {
-        std::sprintf(git_info, "%s%s%s", begin_good_colour, line.data() + slash_idx + 1, end_colour);
+        std::sprintf(git_info, D_GREEN "%s" RESET, line.data() + slash_idx + 1);
     }
 
     this->parse_index();
@@ -101,11 +97,11 @@ char const *GitRepository::describe(char const *begin_good_colour, char const *b
 /******************************************************************************
  * Read the index file and check whether and files have been changed.
  *****************************************************************************/
-void GitRepository::parse_index(void){
+void GitRepository::parse_index(void)
+{
 }
 
-extern "C"
-char const *get_git_info(char const *begin_good_colour, char const *begin_bad_colour, char const *end_colour)
+extern "C" char const *get_git_info(void)
 {
-    return GitRepository().describe(begin_good_colour, begin_bad_colour, end_colour);
+    return GitRepository().describe();
 }
