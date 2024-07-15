@@ -98,7 +98,7 @@ char const *GitRepository::describe(void)
 }
 
 /******************************************************************************
- * Read the index file and check whether and files have been changed.
+ * Read the index file and check whether any files have been changed.
  *****************************************************************************/
 void GitRepository::parse_index(void)
 {
