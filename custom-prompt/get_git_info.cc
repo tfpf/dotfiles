@@ -67,7 +67,7 @@ char const *GitRepository::describe(void)
     if (this->started_in_git_dir)
     {
         static char git_info[64];
-        std::sprintf(git_info, D_GREEN ".git!" RESET);
+        std::sprintf(git_info, D_YELLOW ".git!" RESET);
         return git_info;
     }
     if (!this->found_git_dir)
