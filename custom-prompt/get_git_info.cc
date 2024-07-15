@@ -78,7 +78,7 @@ char const *GitRepository::describe(void)
     std::ifstream head("HEAD");
     std::string line;
     std::getline(head, line);
-    static char *git_info = new char[line.size()];
+    char *git_info = new char[line.size()];
     std::size_t slash_idx = line.rfind('/');
     if (slash_idx == std::string::npos)
     {
