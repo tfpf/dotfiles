@@ -14,6 +14,7 @@ public:
     char const *describe(char const *, char const *, char const *);
 
 private:
+void parse_index(void);
 private:
     bool started_in_git_dir;
     bool found_git_dir;
@@ -91,7 +92,16 @@ char const *GitRepository::describe(char const *begin_good_colour, char const *b
     {
         std::sprintf(git_info, "%s%s%s", begin_good_colour, line.data() + slash_idx + 1, end_colour);
     }
+
+    this->parse_index();
+
     return git_info;
+}
+
+/******************************************************************************
+ * Read the index file and check whether and files have been changed.
+ *****************************************************************************/
+void GitRepository::parse_index(void){
 }
 
 extern "C"
