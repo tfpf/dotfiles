@@ -57,7 +57,8 @@ GitRepository::GitRepository()
 
 /******************************************************************************
  * Obtain information about the Git repository in a form suitable to show in a
- * shell prompt.
+ * shell prompt. If required, use a static array or allocate one dynamically to
+ * store the information.
  *
  * @return Concise description of the status of the current Git repository.
  *****************************************************************************/
@@ -65,7 +66,9 @@ char const *GitRepository::describe(void)
 {
     if (this->started_in_git_dir)
     {
-        return D_GREEN ".git!" RESET;
+        static char git_info[64];
+        std::sprintf(git_info, D_GREEN ".git!" RESET);
+        return git_info;
     }
     if (!this->found_git_dir)
     {
