@@ -38,22 +38,22 @@ release: LDFLAGS += -flto -O2 -s
 release: debug
 
 $(MainBashObject): CPPFLAGS += -DBASH
-$(MainBashObject): $(MainSource)
+$(MainBashObject): $(MainSource) macros.h
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(GetGitInfoBashObject): CPPFLAGS += -DBASH
-$(GetGitInfoBashObject): $(GetGitInfoSource)
+$(GetGitInfoBashObject): $(GetGitInfoSource) macros.h
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects) $(GetGitInfoBashObject)
 	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
-$(MainZshObject): $(MainSource)
+$(MainZshObject): $(MainSource) macros.h
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 $(GetGitInfoZshObject): CPPFLAGS += -DZSH
-$(GetGitInfoZshObject): $(GetGitInfoSource)
+$(GetGitInfoZshObject): $(GetGitInfoSource) macros.h
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
 $(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects) $(GetGitInfoZshObject)

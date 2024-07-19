@@ -3,8 +3,13 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <climits>
 
 #include "macros.h"
+
+#if CHAR_BIT != 8
+#warning "byte width is not 8; unexpected behaviour may occur"
+#endif
 
 /******************************************************************************
  * Store information about a Git repository.
@@ -32,6 +37,7 @@ GitRepository::GitRepository()
     , found_git_dir(false)
 {
     std::filesystem::path current_dir = std::filesystem::current_path();
+    std::fprintf(stderr, "current_dir=%ls\n", current_dir.c_str());
     std::filesystem::path root_dir = current_dir.root_path();
     while (true)
     {
@@ -98,10 +104,16 @@ char const *GitRepository::describe(void)
 }
 
 /******************************************************************************
- * Read the index file and check whether any files have been changed.
+ * Check whether any files in the repository have been changed.
  *****************************************************************************/
 void GitRepository::parse_index(void)
 {
+    std::ifstream index("index", std::ios::binary);
+    index.ignore(8);
+    long unsigned entries_size;
+    // 044504 041522 000000 001000 000000 042000 113146 036217
+    index.read(reinterpret_cast<char *>(&entries_size), 2);
+    std::fprintf(stderr, "%lx\n", entries_size);
 }
 
 extern "C" char const *get_git_info(void)

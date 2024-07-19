@@ -302,6 +302,7 @@ int main(int argc, char *argv[])
     int columns = strtol(argv[5], NULL, 10);
     int shlvl = strtol(argv[6], NULL, 10);
     char const *pwd = argv[7];
+    LOG_DEBUG("%s", getenv("PWD"));
 
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
     display_primary_prompt(shlvl);
