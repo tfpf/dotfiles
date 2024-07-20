@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra
+CXXFLAGS = -std=c++17 -Wall -Wextra
 LDLIBS = -lstdc++
 
 MainSource = custom-prompt.cc
