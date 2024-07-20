@@ -3,7 +3,9 @@
 #include <cstdlib>
 
 #ifdef __linux__
+namespace C{
 #include <libnotify/notify.h>
+}
 #endif
 
 struct Interval
