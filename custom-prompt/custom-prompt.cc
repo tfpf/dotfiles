@@ -1,6 +1,7 @@
 #include<chrono>
 #include <string>
 #include <cstdlib>
+#include <cstdio>
 
 #ifdef __linux__
 namespace C{
