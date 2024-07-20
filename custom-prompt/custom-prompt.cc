@@ -147,7 +147,8 @@ int main(int const argc, char const *argv[])
         // This needs to be mutable (see below), so it cannot be a string
         // literal.
         char last_command[] = "[] last_command";
-        return main(7, (char const *[]) { "custom-prompt", last_command, "0", "0", "0", "79", "1"});
+        char const *argv[] = { "custom-prompt", last_command, "0", "0", "0", "79", "1"};
+        return main(7, argv);
     }
 
     // The function which receives the first argument may modify it. (This is
