@@ -261,11 +261,11 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 /******************************************************************************
  * Show the primary prompt.
  *
+ * @param git_info Description of the status of the current Git repository.
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(int shlvl)
+void display_primary_prompt(char const *git_info, int shlvl)
 {
-    char const* git_info = "git_info";
     LOG_DEBUG("Current Git repository state is '%s'.", git_info);
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
@@ -326,8 +326,9 @@ int main(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    int shlvl = std::stoi(argv[6]);
-    display_primary_prompt(shlvl);
+    char const *git_info = argv[6];
+    int shlvl = std::stoi(argv[7]);
+    display_primary_prompt(git_info, shlvl);
 
     std::filesystem::path pwd = std::filesystem::current_path();
     set_terminal_title(pwd);
