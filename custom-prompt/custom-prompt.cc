@@ -53,12 +53,12 @@ struct Interval
 #define DIRECTORY "\\w"
 #define PROMPT_SYMBOL "\\$"
 #elif defined ZSH
-#define BEGIN_INVISIBLE "%%\x7B"
-#define END_INVISIBLE "%%\x7D"
-#define USER "%%n"
-#define HOST "%%m"
-#define DIRECTORY "%%~"
-#define PROMPT_SYMBOL "%%#"
+#define BEGIN_INVISIBLE "\x25\x7B"
+#define END_INVISIBLE "\x25\x7D"
+#define USER "\x25n"
+#define HOST "\x25m"
+#define DIRECTORY "\x25~"
+#define PROMPT_SYMBOL "\x25#"
 #else
 #error "unknown shell"
 #endif
