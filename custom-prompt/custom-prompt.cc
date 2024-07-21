@@ -1,3 +1,6 @@
+#include <iostream>
+#include<iomanip>
+#include<sstream>
 #include <cstddef>
 #include<chrono>
 #include <string>
@@ -16,6 +19,18 @@ struct Interval
     unsigned minutes;
     unsigned seconds;
     unsigned milliseconds;
+
+    friend std::ostringstream& operator<<(std::ostringstream& stream, Interval const& interval){
+        stream << std::setfill('0');
+        if(interval.hours > 0){
+            stream << std::setw(2) << interval.hours << ':' ;
+        }
+        stream<< std::setw(2) << interval.minutes << ':';
+        stream << std::setw(2) << interval.seconds << '.';
+        stream << std::setw(3) << interval.milliseconds;
+        stream << std::setfill(' ');
+        return stream;
+    }
 };
 
 #if defined __APPLE__
@@ -119,16 +134,85 @@ Interval delay_to_interval(long long unsigned delay)
 }
 
 /******************************************************************************
+ * Show a completed command using a desktop notification.
+ *
+ * @param last_command Most-recently run command.
+ * @param exit_code Code with which the command exited.
+ * @param interval Running time of the command.
+ *****************************************************************************/
+void notify_desktop(std::string_view const&last_command, int exit_code, Interval const &interval)
+{
+//     std::ostringstream description_stream;
+// 
+//     static char description[64];
+//     char *description_ptr = description;
+//     description_ptr += sprintf(description_ptr, "exit %d in ", exit_code);
+//     if (interval->hours > 0)
+//     {
+//         description_ptr += sprintf(description_ptr, "%u h ", interval->hours);
+//     }
+//     if (interval->hours > 0 || interval->minutes > 0)
+//     {
+//         description_ptr += sprintf(description_ptr, "%u m ", interval->minutes);
+//     }
+//     description_ptr += sprintf(description_ptr, "%u s %u ms", interval->seconds, interval->milliseconds);
+//     LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command, description);
+// #if defined __APPLE__ || defined _WIN32
+//     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
+//     // use on these systems respectively.
+//     fprintf(stderr, ESCAPE RIGHT_SQUARE_BRACKET "777;notify;%s;%s" ESCAPE BACKSLASH, last_command, description);
+// #else
+//     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
+//     // hard way.
+//     notify_init(__FILE__);
+//     NotifyNotification *notification = notify_notification_new(last_command, description, "terminal");
+//     notify_notification_show(notification, NULL);
+//     // notify_uninit();
+#endif
+}
+
+/******************************************************************************
  * Show a completed command textually.
  *
  * @param last_command Most-recently run command.
- * @param last_command_len Length of the command.
  * @param exit_code Code with which the command exited.
  * @param interval Running time of the command.
  * @param columns Width of the terminal window.
  *****************************************************************************/
-void write_report(std::string_view const& last_command, int exit_code, Interval const& interval, int columns)
+void write_report(std::string_view const& last_command, int exit_code, Interval const& interval, std::size_t columns)
 {
+    LOG_DEBUG("Terminal width is %zu.", columns);
+    std::size_t left_piece_len = columns * 3 / 8;
+    std::size_t right_piece_len = left_piece_len;
+    std::size_t last_command_size = last_command.size();
+    std::ostringstream report_stream;
+    if (last_command_size <= left_piece_len + right_piece_len + 5)
+    {
+        report_stream << " " << last_command;
+    }
+    else
+    {
+        LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
+        report_stream << " " << last_command.substr(0, left_piece_len);
+        report_stream << " ... " << last_command.substr(last_command_size - right_piece_len);
+    }
+    if (exit_code == 0)
+    {
+        report_stream << " " B_GREEN_RAW "" RESET_RAW " ";
+    }
+    else
+    {
+        report_stream << " " B_RED_RAW "" RESET_RAW " ";
+    }
+    report_stream << interval;
+
+    // Ensure that the text is right-aligned. Since there are non-printable
+    // characters in it, compensate for the width.
+    std::size_t width = columns + 12;
+    std::string report = report_stream.str();
+    LOG_DEBUG("Report length is %zu.", report.size());
+    LOG_DEBUG("Padding report to %zu characters.", width);
+    std::clog << '\r' << std::setw(width) << report << '\n';
 }
 
 /******************************************************************************
@@ -140,7 +224,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  *****************************************************************************/
-void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid, int columns)
+void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid, std::size_t columns)
 {
     LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command.data(), exit_code, delay);
     if(delay <= 5000000000ULL){
@@ -159,12 +243,21 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
     LOG_DEBUG("Command length is %zu.", last_command.size());
 
     write_report(last_command, exit_code, interval, columns);
+    if(delay > 10000000000ULL){
+        long long unsigned curr_active_wid = get_active_wid();
+        LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
+        LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
+        if (prev_active_wid != curr_active_wid)
+        {
+            notify_desktop(last_command, exit_code, interval);
+        }
+    }
 }
 
 
 void display_primary_prompt(int shlvl)
 {
-    std::printf("$ ");
+    std::printf("%d $ ", shlvl);
 }
 
 int main(int const argc, char const *argv[])
@@ -187,7 +280,7 @@ int main(int const argc, char const *argv[])
     int exit_code = std::stoi(argv[2]);
     long long unsigned delay = ts - std::stoull(argv[3]);
     long long unsigned prev_active_wid = std::stoull(argv[4]);
-    int columns = std::stoi(argv[5]);
+    std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
