@@ -264,7 +264,7 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  * @param git_info Description of the status of the current Git repository.
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(char const *git_info, int shlvl)
+void display_primary_prompt(char const* git_info, int shlvl)
 {
     LOG_DEBUG("Current Git repository state is '%s'.", git_info);
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
@@ -326,7 +326,7 @@ int main(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    char const *git_info = argv[6];
+    char const* git_info = argv[6];
     int shlvl = std::stoi(argv[7]);
     display_primary_prompt(git_info, shlvl);
 
