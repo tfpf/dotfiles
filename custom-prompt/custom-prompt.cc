@@ -295,9 +295,11 @@ void display_primary_prompt(char const* git_info, int shlvl)
  *****************************************************************************/
 void set_terminal_title(std::filesystem::path const& pwd)
 {
-    // Using the divide overload with the empty string does not append the
-    // directory separator, so do it manually.
-    std::filesystem::path::value_type sep = std::filesystem::path::preferred_separator;
+#ifdef _WIN32
+    char sep = '\\';
+#else
+    char sep = '/';
+#endif
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << sep << ESCAPE BACKSLASH;
 }
 
