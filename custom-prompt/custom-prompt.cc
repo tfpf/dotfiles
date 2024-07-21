@@ -167,7 +167,7 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
     // hard way.
     C::notify_init(__FILE__);
     C::NotifyNotification* notif = C::notify_notification_new(last_command.data(), description.data(), "terminal");
-    C::notify_notification_show(notif, NULL);
+    C::notify_notification_show(notif, nullptr);
     // C::notify_uninit();
 #endif
 }
@@ -273,7 +273,7 @@ void display_primary_prompt(char const* git_info, int shlvl)
     {
         std::cout << "  " << git_info;
     }
-    if (venv != NULL)
+    if (venv != nullptr)
     {
         std::cout << "  " B_BLUE << venv << RESET;
     }
@@ -315,7 +315,7 @@ int main(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", NULL };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", nullptr };
         return main(sizeof argv / sizeof *argv - 1, argv);
     }
 
