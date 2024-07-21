@@ -147,16 +147,9 @@ int main(int const argc, char const *argv[])
     // taken.
     if (argc == 2)
     {
-        // This needs to be mutable (see below), so it cannot be a string
-        // literal.
-        char last_command[] = "[] last_command";
-        char const *argv[] = { "custom-prompt", last_command, "0", "0", "0", "79", "1"};
-        return main(7, argv);
+        return main(7, (char const*[]){ "custom-prompt", "[] last_command", "0", "0", "0", "79", "1"});
     }
 
-    // The function which receives the first argument may modify it. (This is
-    // allowed in C++.) That's why the command line arguments were not declared
-    // read-only.
     char const *last_command = argv[1];
     int exit_code = std::stoi(argv[2]);
     long long unsigned delay = ts - std::stoull(argv[3]);
