@@ -315,8 +315,8 @@ int main(int const argc, char const* argv[])
     // taken.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1" };
-        return main(7, argv);
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1" };
+        return main(8, argv);
     }
 
     std::string_view last_command(argv[1]);
