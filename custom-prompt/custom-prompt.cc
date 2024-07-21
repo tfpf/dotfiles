@@ -1,3 +1,4 @@
+#include <cstddef>
 #include<chrono>
 #include <string>
 #include <cstdlib>
@@ -103,15 +104,31 @@ long long unsigned get_timestamp(void)
  * provided object.
  *
  * @param delay Time measured in nanoseconds.
- * @param interval Time measured in easier-to-understand units.
+ *
+ * @return Time measured in easier-to-understand units.
  *****************************************************************************/
-void delay_to_interval(long long unsigned delay, Interval& interval)
+Interval delay_to_interval(long long unsigned delay)
 {
+    Interval interval;
     interval.milliseconds = (delay /= 1000000ULL) % 1000;
     interval.seconds = (delay /= 1000) % 60;
     interval.minutes = (delay /= 60) % 60;
     interval.hours = delay / 60;
     LOG_DEBUG("Calculated interval is %u h %u m %u s %u ms.", interval.hours, interval.minutes, interval.seconds, interval.milliseconds);
+    return interval;
+}
+
+/******************************************************************************
+ * Show a completed command textually.
+ *
+ * @param last_command Most-recently run command.
+ * @param last_command_len Length of the command.
+ * @param exit_code Code with which the command exited.
+ * @param interval Running time of the command.
+ * @param columns Width of the terminal window.
+ *****************************************************************************/
+void write_report(std::string_view const& last_command, int exit_code, Interval const& interval, int columns)
+{
 }
 
 /******************************************************************************
@@ -123,9 +140,25 @@ void delay_to_interval(long long unsigned delay, Interval& interval)
  * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  *****************************************************************************/
-void report_command_status(std::string last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid, int columns)
+void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid, int columns)
 {
     LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command.data(), exit_code, delay);
+    if(delay <= 5000000000ULL){
+#ifdef NDEBUG
+        return;
+#endif
+    }
+
+    Interval interval = delay_to_interval(delay);
+
+#ifdef BASH
+    // Remove the initial part (index and timestamp) of the command.
+    last_command = last_command.substr(last_command.find(RIGHT_SQUARE_BRACKET[0]) + 2);
+#endif
+    last_command.remove_suffix(last_command.size() - 1 - last_command.find_last_not_of(' '));
+    LOG_DEBUG("Command length is %zu.", last_command.size());
+
+    write_report(last_command, exit_code, interval, columns);
 }
 
 
@@ -150,7 +183,7 @@ int main(int const argc, char const *argv[])
         return main(7, (char const*[]){ "custom-prompt", "[] last_command", "0", "0", "0", "79", "1"});
     }
 
-    char const *last_command = argv[1];
+    std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
     long long unsigned delay = ts - std::stoull(argv[3]);
     long long unsigned prev_active_wid = std::stoull(argv[4]);
