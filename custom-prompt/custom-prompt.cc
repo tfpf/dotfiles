@@ -1,16 +1,16 @@
-#include <filesystem>
-#include <string>
-#include <iostream>
-#include<iomanip>
-#include<sstream>
+#include <chrono>
 #include <cstddef>
-#include<chrono>
-#include <string>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <filesystem>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #ifdef __linux__
-namespace C{
+namespace C
+{
 #include <libnotify/notify.h>
 }
 #endif
@@ -22,12 +22,14 @@ struct Interval
     unsigned seconds;
     unsigned milliseconds;
 
-    friend std::ostringstream& operator<<(std::ostringstream& stream, Interval const& interval){
+    friend std::ostringstream& operator<<(std::ostringstream& stream, Interval const& interval)
+    {
         stream << std::setfill('0');
-        if(interval.hours > 0){
-            stream << std::setw(2) << interval.hours << ':' ;
+        if (interval.hours > 0)
+        {
+            stream << std::setw(2) << interval.hours << ':';
         }
-        stream<< std::setw(2) << interval.minutes << ':';
+        stream << std::setw(2) << interval.minutes << ':';
         stream << std::setw(2) << interval.seconds << '.';
         stream << std::setw(3) << interval.milliseconds;
         stream << std::setfill(' ');
@@ -90,7 +92,7 @@ struct Interval
 
 #ifndef NDEBUG
 #define LOG_FMT(fmt) D_CYAN_RAW "%s" RESET_RAW ":" D_CYAN_RAW "%s" RESET_RAW ":" D_CYAN_RAW "%d" RESET_RAW " " fmt "\n"
-#define LOG_DEBUG(fmt, ...) std::fprintf(stderr, LOG_FMT(fmt), __FILE__, __func__, __LINE__ __VA_OPT__(,) __VA_ARGS__);
+#define LOG_DEBUG(fmt, ...) std::fprintf(stderr, LOG_FMT(fmt), __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
 #else
 #define LOG_DEBUG(fmt, ...)
 #endif
@@ -101,7 +103,6 @@ struct Interval
  * @return Active window ID.
  *****************************************************************************/
 extern "C" long long unsigned get_active_wid(void);
-
 
 /******************************************************************************
  * Get the current timestamp.
@@ -131,7 +132,8 @@ Interval delay_to_interval(long long unsigned delay)
     interval.seconds = (delay /= 1000) % 60;
     interval.minutes = (delay /= 60) % 60;
     interval.hours = delay / 60;
-    LOG_DEBUG("Calculated interval is %u h %u m %u s %u ms.", interval.hours, interval.minutes, interval.seconds, interval.milliseconds);
+    LOG_DEBUG("Calculated interval is %u h %u m %u s %u ms.", interval.hours, interval.minutes, interval.seconds,
+        interval.milliseconds);
     return interval;
 }
 
@@ -142,14 +144,16 @@ Interval delay_to_interval(long long unsigned delay)
  * @param exit_code Code with which the command exited.
  * @param interval Running time of the command.
  *****************************************************************************/
-void notify_desktop(std::string_view const&last_command, int exit_code, Interval const &interval)
+void notify_desktop(std::string_view const& last_command, int exit_code, Interval const& interval)
 {
     std::ostringstream description_stream;
     description_stream << "exit " << exit_code << " in ";
-    if(interval.hours > 0){
+    if (interval.hours > 0)
+    {
         description_stream << interval.hours << " h ";
     }
-    if(interval.hours > 0 || interval.minutes > 0){
+    if (interval.hours > 0 || interval.minutes > 0)
+    {
         description_stream << interval.minutes << " m ";
     }
     description_stream << interval.seconds << " s " << interval.milliseconds << " ms";
@@ -163,8 +167,8 @@ void notify_desktop(std::string_view const&last_command, int exit_code, Interval
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
     C::notify_init(__FILE__);
-    C::NotifyNotification *notification = C::notify_notification_new(last_command.data(), description.data(), "terminal");
-    C::notify_notification_show(notification, NULL);
+    C::NotifyNotification* notif = C::notify_notification_new(last_command.data(), description.data(), "terminal");
+    C::notify_notification_show(notif, NULL);
     // C::notify_uninit();
 #endif
 }
@@ -222,10 +226,12 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  *****************************************************************************/
-void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid, std::size_t columns)
+void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay,
+    long long unsigned prev_active_wid, std::size_t columns)
 {
     LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command.data(), exit_code, delay);
-    if(delay <= 5000000000ULL){
+    if (delay <= 5000000000ULL)
+    {
 #ifdef NDEBUG
         return;
 #endif
@@ -241,7 +247,8 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
     LOG_DEBUG("Command length is %zu.", last_command.size());
 
     write_report(last_command, exit_code, interval, columns);
-    if(delay > 10000000000ULL){
+    if (delay > 10000000000ULL)
+    {
         long long unsigned curr_active_wid = get_active_wid();
         LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
         LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
@@ -259,19 +266,22 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  *****************************************************************************/
 void display_primary_prompt(int shlvl)
 {
-    char const *git_info = "git_info";
+    char const* git_info = "git_info";
     LOG_DEBUG("Current Git repository state is '%s'.", git_info);
-    char const *venv = std::getenv("VIRTUAL_ENV_PROMPT");
+    char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
-    std::cout <<"\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]";
-    if(git_info[0] != '\0'){
+    std::cout << "\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]";
+    if (git_info[0] != '\0')
+    {
         std::cout << "  " << git_info;
     }
-    if(venv != NULL){
-        std::cout <<"  " B_BLUE << venv <<  RESET;
+    if (venv != NULL)
+    {
+        std::cout << "  " B_BLUE << venv << RESET;
     }
     std::cout << "\n└─";
-    while(--shlvl > 0){
+    while (--shlvl > 0)
+    {
         std::cout << "▶";
     }
     std::cout << PROMPT_SYMBOL " ";
@@ -289,10 +299,10 @@ void update_terminal_title(std::filesystem::path const& pwd)
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << short_pwd.string() << ESCAPE BACKSLASH;
 }
 
-int main(int const argc, char const *argv[])
+int main(int const argc, char const* argv[])
 {
     long long unsigned ts = get_timestamp();
-    if(argc <= 1)
+    if (argc <= 1)
     {
         std::printf("%llu %llu\n", ts, get_active_wid());
         return EXIT_SUCCESS;
@@ -302,7 +312,7 @@ int main(int const argc, char const *argv[])
     // taken.
     if (argc == 2)
     {
-        return main(7, (char const*[]){ "custom-prompt", "[] last_command", "0", "0", "0", "79", "1"});
+        return main(7, (char const*[]) { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1" });
     }
 
     std::string_view last_command(argv[1]);
