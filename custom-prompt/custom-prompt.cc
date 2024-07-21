@@ -139,7 +139,7 @@ int main(int const argc, char const *argv[])
     long long unsigned ts = get_timestamp();
     if(argc <= 1)
     {
-        printf("%llu %llu\n", ts, get_active_wid());
+        std::printf("%llu %llu\n", ts, get_active_wid());
         return EXIT_SUCCESS;
     }
 
