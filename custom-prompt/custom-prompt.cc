@@ -111,7 +111,7 @@ extern "C" long long unsigned get_active_wid(void);
  *****************************************************************************/
 long long unsigned get_timestamp(void)
 {
-    auto now = std::chrono::system_clock::now();
+    std::chrono::time_point now = std::chrono::system_clock::now();
     long long unsigned ts = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
     LOG_DEBUG("Current time is %lld.%09lld.", ts / 1000000000ULL, ts % 1000000000ULL);
     return ts;
@@ -288,15 +288,19 @@ void display_primary_prompt(int shlvl)
 }
 
 /******************************************************************************
- * Update the title of the current terminal window. This should also
- * automatically update the title of the current terminal tab.
+ * Set the title of the current terminal window to the current directory
+ * followed by the directory separator, unless the current directory is the
+ * Linux/macOS root directory in which case, set the title to just a slash.
+ * This should also automatically update the title of the current terminal tab.
  *
  * @param pwd Current directory.
  *****************************************************************************/
-void update_terminal_title(std::filesystem::path const& pwd)
+void set_terminal_title(std::filesystem::path const& pwd)
 {
-    std::filesystem::path short_pwd = pwd.filename() / "";
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << short_pwd.string() << ESCAPE BACKSLASH;
+    // Using the divide overload with the empty string does not append the
+    // directory separator, so do it manually.
+    std::filesystem::path::value_type sep = std::filesystem::path::preferred_separator;
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << sep << ESCAPE BACKSLASH;
 }
 
 int main(int const argc, char const* argv[])
@@ -312,7 +316,8 @@ int main(int const argc, char const* argv[])
     // taken.
     if (argc == 2)
     {
-        return main(7, (char const*[]) { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1" });
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1" };
+        return main(7, argv);
     }
 
     std::string_view last_command(argv[1]);
@@ -326,7 +331,7 @@ int main(int const argc, char const* argv[])
     display_primary_prompt(shlvl);
 
     std::filesystem::path pwd = std::filesystem::current_path();
-    update_terminal_title(pwd);
+    set_terminal_title(pwd);
 
     return EXIT_SUCCESS;
 }
