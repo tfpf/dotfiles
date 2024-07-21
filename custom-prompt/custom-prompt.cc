@@ -118,8 +118,7 @@ long long unsigned get_timestamp(void)
 }
 
 /******************************************************************************
- * Represent an amount of time in human-readable form. Write it into the
- * provided object.
+ * Represent an amount of time in human-readable form.
  *
  * @param delay Time measured in nanoseconds.
  *
@@ -307,16 +306,17 @@ int main(int const argc, char const* argv[])
     long long unsigned ts = get_timestamp();
     if (argc <= 1)
     {
-        std::printf("%llu %llu\n", ts, get_active_wid());
+        std::cout << ts << ' ' << get_active_wid() << '\n';
         return EXIT_SUCCESS;
     }
 
     // For testing. Simulate dummy arguments so that the longer branch is
-    // taken.
+    // taken. Honour the standard requirement that the argument list be
+    // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1" };
-        return main(8, argv);
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", NULL };
+        return main(sizeof argv / sizeof *argv - 1, argv);
     }
 
     std::string_view last_command(argv[1]);
