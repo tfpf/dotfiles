@@ -213,7 +213,13 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::string report = report_stream.str();
     LOG_DEBUG("Report length is %zu.", report.size());
     LOG_DEBUG("Padding report to %zu characters.", width);
+#ifdef __MINGW32__
+    // TODO Multi-byte characters are not rendered correctly in error streams.
+    // Find out why and fix the problem.
+    std::cout << '\r' << std::setw(width) << report << '\n';
+#else
     std::clog << '\r' << std::setw(width) << report << '\n';
+#endif
 }
 
 /******************************************************************************
