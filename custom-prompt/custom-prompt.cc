@@ -295,12 +295,10 @@ void display_primary_prompt(char const* git_info, int shlvl)
  *****************************************************************************/
 void set_terminal_title(std::filesystem::path const& pwd)
 {
-#ifdef _WIN32
-    char sep = '\\';
-#else
-    char sep = '/';
-#endif
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << sep << ESCAPE BACKSLASH;
+    // The result of converting wide characters to narrow characters, which is
+    // what this line will do on Windows, is unspecified. I can only hope that
+    // nothing goes wrong. (All is good with GCC.)
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << '/' << ESCAPE BACKSLASH;
 }
 
 int main(int const argc, char const* argv[])
