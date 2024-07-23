@@ -10,7 +10,12 @@ MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
 GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
-ifneq "$(OS)" "Windows_NT"
+ifeq "$(OS)" "Windows_NT"
+    # When building using something other than Visual Studio, the shared
+    # libraries the executables are linked with may lie in folders Windows does
+    # not typically search. Avoid the hassle of fixing that.
+    LDFLAGS += -static
+else
     UNAME = $(shell uname)
     ifeq "$(UNAME)" "Linux"
         CPPFLAGS += $(shell pkg-config --cflags glib-2.0 libnotify x11)
@@ -19,8 +24,6 @@ ifneq "$(OS)" "Windows_NT"
         LDLIBS += -framework Cocoa -framework CoreGraphics
         GetActiveWidObjects += get_active_wid_macos.o
     endif
-else
-    LDFLAGS += -static
 endif
 
 .PHONY: debug release
