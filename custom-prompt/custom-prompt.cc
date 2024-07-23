@@ -214,8 +214,12 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     LOG_DEBUG("Report length is %zu.", report.size());
     LOG_DEBUG("Padding report to %zu characters.", width);
 #ifdef __MINGW32__
-    // TODO Multi-byte characters are not rendered correctly in error streams.
-    // Find out why and fix the problem.
+    // TODO Multi-byte characters are not rendered correctly. However, if a
+    // string containing those is saved to a variable (in this case, the
+    // primary prompt) and that variable is printed, all is good. (Writing this
+    // to standard output makes it a part of the primary prompt.) Find out the
+    // cause of the rendering issue and fix it, and change this so that it is
+    // written to standard error.
     std::cout << '\r' << std::setw(width) << report << '\n';
 #else
     std::clog << '\r' << std::setw(width) << report << '\n';
