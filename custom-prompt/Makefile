@@ -11,6 +11,9 @@ MainZshExecutable = bin/$(MainZshObject:.o=)
 GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
 ifeq "$(OS)" "Windows_NT"
+    # When building using something other than Visual Studio, the shared
+    # libraries the executables are linked with may lie in folders Windows does
+    # not typically search. Avoid the hassle of fixing that.
     LDFLAGS += -static
 else
     UNAME = $(shell uname)
