@@ -102,7 +102,7 @@ elseif has('unix')
     au GUIEnter * call system('wmctrl -b add,maximized_horz,maximized_vert -i -r ' . v:windowid)
     nn <silent> <F2> :so ~/.gvimrc<CR>
     se gfn=RecMonoCasual\ Nerd\ Font\ 13
-    se gli=!#$%&()*+-./:;<=>?@[\\]^_w{\|}~
+    se gli=!#-/:<=>?@\|
 endif
 
 " No syntax highlighting in comment strings.
