@@ -185,9 +185,8 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     LOG_DEBUG("Terminal width is %zu.", columns);
     std::size_t left_piece_len = columns * 3 / 8;
     std::size_t right_piece_len = left_piece_len;
-    std::size_t last_command_size = last_command.size();
     std::ostringstream report_stream;
-    if (last_command_size <= left_piece_len + right_piece_len + 5)
+    if (last_command.size() <= left_piece_len + right_piece_len + 5)
     {
         report_stream << " " << last_command;
     }
@@ -195,7 +194,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     {
         LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
         report_stream << " " << last_command.substr(0, left_piece_len);
-        report_stream << " ... " << last_command.substr(last_command_size - right_piece_len);
+        report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
     {
