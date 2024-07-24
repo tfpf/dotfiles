@@ -23,7 +23,7 @@ config.default_cursor_style = 'SteadyBar'
 
 config.default_prog = {'C:/Windows/system32/wsl.exe', '~', '-d', 'Debian'}
 
-config.font = wezterm.font 'CaskaydiaCove Nerd Font'
+config.font = wezterm.font 'RecMonoCasual Nerd Font'
 
 config.font_size = 13
 

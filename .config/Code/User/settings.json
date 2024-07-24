@@ -9,7 +9,7 @@
     "editor.autoSurround": "never",
     "editor.cursorBlinking": "solid",
     "editor.cursorSurroundingLines": 3,
-    "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Droid Sans Mono', 'monospace', monospace",
+    "editor.fontFamily": "'RecMonoCasual Nerd Font', 'Droid Sans Mono', 'monospace', monospace",
     "editor.fontLigatures": true,
     "editor.fontSize": 16,
     "editor.minimap.maxColumn": 79,
