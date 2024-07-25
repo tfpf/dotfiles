@@ -22,7 +22,7 @@ struct Interval
     unsigned seconds;
     unsigned milliseconds;
 
-    void print_short(std::ostringstream& stream)
+    void print_short(std::ostringstream& stream) const
     {
         char fill_character = stream.fill('0');
         if (this->hours > 0)
@@ -35,7 +35,7 @@ struct Interval
         stream.fill(fill_character);
     }
 
-    void print_long(std::ostringstream& stream)
+    void print_long(std::ostringstream& stream) const
     {
         if (this->hours > 0)
         {
