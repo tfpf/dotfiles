@@ -22,18 +22,30 @@ struct Interval
     unsigned seconds;
     unsigned milliseconds;
 
-    friend std::ostringstream& operator<<(std::ostringstream& stream, Interval const& interval)
+    void print_short(std::ostringstream& stream) const
     {
-        stream << std::setfill('0');
-        if (interval.hours > 0)
+        char fill_character = stream.fill('0');
+        if (this->hours > 0)
         {
-            stream << std::setw(2) << interval.hours << ':';
+            stream << this->hours << ':';
         }
-        stream << std::setw(2) << interval.minutes << ':';
-        stream << std::setw(2) << interval.seconds << '.';
-        stream << std::setw(3) << interval.milliseconds;
-        stream << std::setfill(' ');
-        return stream;
+        stream << std::setw(2) << this->minutes << ':';
+        stream << std::setw(2) << this->seconds << '.';
+        stream << std::setw(3) << this->milliseconds;
+        stream.fill(fill_character);
+    }
+
+    void print_long(std::ostringstream& stream) const
+    {
+        if (this->hours > 0)
+        {
+            stream << this->hours << " h ";
+        }
+        if (this->hours > 0 || this->minutes > 0)
+        {
+            stream << this->minutes << " m ";
+        }
+        stream << this->seconds << " s " << this->milliseconds << " ms";
     }
 };
 
@@ -147,15 +159,7 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
 {
     std::ostringstream description_stream;
     description_stream << "exit " << exit_code << " in ";
-    if (interval.hours > 0)
-    {
-        description_stream << interval.hours << " h ";
-    }
-    if (interval.hours > 0 || interval.minutes > 0)
-    {
-        description_stream << interval.minutes << " m ";
-    }
-    description_stream << interval.seconds << " s " << interval.milliseconds << " ms";
+    interval.print_long(description_stream);
     std::string description = description_stream.str();
     LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command.data(), description.data());
 #if defined __APPLE__ || defined _WIN32
@@ -204,7 +208,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     {
         report_stream << " " B_RED_RAW "" RESET_RAW " ";
     }
-    report_stream << interval;
+    interval.print_short(report_stream);
 
     // Ensure that the text is right-aligned. Since there are non-printable
     // characters in it, compensate for the width.
