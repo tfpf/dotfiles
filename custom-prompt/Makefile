@@ -40,12 +40,12 @@ $(MainBashObject): CPPFLAGS += -DBASH
 $(MainBashObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-$(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects)
+$(MainBashExecutable): $(GetActiveWidObjects) $(MainBashObject)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-$(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects)
+$(MainZshExecutable): $(GetActiveWidObjects) $(MainZshObject)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
