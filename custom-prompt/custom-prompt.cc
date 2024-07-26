@@ -15,40 +15,6 @@ namespace C
 }
 #endif
 
-struct Interval
-{
-    unsigned hours;
-    unsigned minutes;
-    unsigned seconds;
-    unsigned milliseconds;
-
-    void print_short(std::ostringstream& stream) const
-    {
-        char fill_character = stream.fill('0');
-        if (this->hours > 0)
-        {
-            stream << this->hours << ':';
-        }
-        stream << std::setw(2) << this->minutes << ':';
-        stream << std::setw(2) << this->seconds << '.';
-        stream << std::setw(3) << this->milliseconds;
-        stream.fill(fill_character);
-    }
-
-    void print_long(std::ostringstream& stream) const
-    {
-        if (this->hours > 0)
-        {
-            stream << this->hours << " h ";
-        }
-        if (this->hours > 0 || this->minutes > 0)
-        {
-            stream << this->minutes << " m ";
-        }
-        stream << this->seconds << " s " << this->milliseconds << " ms";
-    }
-};
-
 #if defined __APPLE__
 #define HOST_ICON ""
 #elif defined __linux__
@@ -108,6 +74,70 @@ struct Interval
 #else
 #define LOG_DEBUG(fmt, ...)
 #endif
+
+struct Interval
+{
+    unsigned hours;
+    unsigned minutes;
+    unsigned seconds;
+    unsigned milliseconds;
+
+    void print_short(std::ostringstream& stream) const
+    {
+        char fill_character = stream.fill('0');
+        if (this->hours > 0)
+        {
+            stream << this->hours << ':';
+        }
+        stream << std::setw(2) << this->minutes << ':';
+        stream << std::setw(2) << this->seconds << '.';
+        stream << std::setw(3) << this->milliseconds;
+        stream.fill(fill_character);
+    }
+
+    void print_long(std::ostringstream& stream) const
+    {
+        if (this->hours > 0)
+        {
+            stream << this->hours << " h ";
+        }
+        if (this->hours > 0 || this->minutes > 0)
+        {
+            stream << this->minutes << " m ";
+        }
+        stream << this->seconds << " s " << this->milliseconds << " ms";
+    }
+};
+
+class GitRepository
+{
+public:
+    GitRepository(std::filesystem::path& pwd);
+    char const *describe(void);
+
+private:
+    void parse_index(void);
+
+private:
+    bool started_in_git_dir;
+    bool found_git_dir;
+};
+
+/******************************************************************************
+ * Locate and enter a Git directory in the parent directories of the current
+ * working directory. This mutates the argument to match the final working
+ * directory of the process.
+ *****************************************************************************/
+GitRepository::GitRepository(std::filesystem::path& pwd)
+    : started_in_git_dir(false)
+    , found_git_dir(false)
+{
+}
+
+char const *GitRepository::describe(void)
+{
+    return "git_info";
+}
 
 /******************************************************************************
  * Get the ID of the currently-focused window.
@@ -271,6 +301,22 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 }
 
 /******************************************************************************
+ * Set the title of the current terminal window to the current directory
+ * followed by the directory separator, unless the current directory is the
+ * Linux/macOS root directory in which case, set the title to just a slash.
+ * This should also automatically update the title of the current terminal tab.
+ *
+ * @param pwd Current directory.
+ *****************************************************************************/
+void set_terminal_title(std::filesystem::path const& pwd)
+{
+    // The result of converting wide characters to narrow characters, which is
+    // what this line will do on Windows, is unspecified. I can only hope that
+    // nothing goes wrong. (All is good with GCC.)
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << '/' << ESCAPE BACKSLASH;
+}
+
+/******************************************************************************
  * Show the primary prompt.
  *
  * @param git_info Description of the status of the current Git repository.
@@ -298,22 +344,6 @@ void display_primary_prompt(char const* git_info, int shlvl)
     std::cout << PROMPT_SYMBOL " ";
 }
 
-/******************************************************************************
- * Set the title of the current terminal window to the current directory
- * followed by the directory separator, unless the current directory is the
- * Linux/macOS root directory in which case, set the title to just a slash.
- * This should also automatically update the title of the current terminal tab.
- *
- * @param pwd Current directory.
- *****************************************************************************/
-void set_terminal_title(std::filesystem::path const& pwd)
-{
-    // The result of converting wide characters to narrow characters, which is
-    // what this line will do on Windows, is unspecified. I can only hope that
-    // nothing goes wrong. (All is good with GCC.)
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << '/' << ESCAPE BACKSLASH;
-}
-
 int main(int const argc, char const* argv[])
 {
     long long unsigned ts = get_timestamp();
@@ -339,12 +369,12 @@ int main(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    char const* git_info = "git_info";
-    int shlvl = std::stoi(argv[6]);
-    display_primary_prompt(git_info, shlvl);
-
     std::filesystem::path pwd = std::filesystem::current_path();
     set_terminal_title(pwd);
+
+    char const* git_info = GitRepository(pwd).describe();
+    int shlvl = std::stoi(argv[6]);
+    display_primary_prompt(git_info, shlvl);
 
     return EXIT_SUCCESS;
 }
