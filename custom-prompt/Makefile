@@ -8,9 +8,6 @@ MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
-GetGitInfoSource = get_git_info.cc
-GetGitInfoBashObject = get_bash_git_info.o
-GetGitInfoZshObject = get_zsh_git_info.o
 GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
 ifeq "$(OS)" "Windows_NT"
