@@ -130,9 +130,7 @@ private:
  *
  * @param pwd Current directory.
  *****************************************************************************/
-GitRepository::GitRepository(std::filesystem::path& pwd)
-    : started_in_git_dir(false)
-    , found_git_dir(false)
+GitRepository::GitRepository(std::filesystem::path& pwd) : started_in_git_dir(false), found_git_dir(false)
 {
 }
 

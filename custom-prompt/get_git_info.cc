@@ -32,9 +32,7 @@ private:
  * Locate and enter a Git directory in the parent directories of the current
  * working directory.
  *****************************************************************************/
-GitRepository::GitRepository()
-    : started_in_git_dir(false)
-    , found_git_dir(false)
+GitRepository::GitRepository() : started_in_git_dir(false), found_git_dir(false)
 {
     std::filesystem::path current_dir = std::filesystem::current_path();
     std::fprintf(stderr, "current_dir=%ls\n", current_dir.c_str());
