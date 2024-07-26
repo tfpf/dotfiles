@@ -328,7 +328,7 @@ int main(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", nullptr };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1", nullptr };
         return main(sizeof argv / sizeof *argv - 1, argv);
     }
 
@@ -339,8 +339,8 @@ int main(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    char const* git_info = argv[6];
-    int shlvl = std::stoi(argv[7]);
+    char const* git_info = "git_info";
+    int shlvl = std::stoi(argv[6]);
     display_primary_prompt(git_info, shlvl);
 
     std::filesystem::path pwd = std::filesystem::current_path();
