@@ -1,8 +1,9 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Wextra
 CXXFLAGS = -std=c++17 -Wall -Wextra
+LDLIBS = -lstdc++
 
-MainSource = custom-prompt.c
+MainSource = custom-prompt.cc
 MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
@@ -13,8 +14,9 @@ GetGitInfoZshObject = get_zsh_git_info.o
 GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
 ifeq "$(OS)" "Windows_NT"
-    # MSYS2 places the C++ standard library file in a folder Windows doesn't
-    # search for DLL files, so just link statically.
+    # When building using something other than Visual Studio, the shared
+    # libraries the executables are linked with may lie in folders Windows does
+    # not typically search. Avoid the hassle of fixing that.
     LDFLAGS += -static
 else
     UNAME = $(shell uname)
@@ -38,23 +40,15 @@ release: LDFLAGS += -flto -O2 -s
 release: debug
 
 $(MainBashObject): CPPFLAGS += -DBASH
-$(MainBashObject): $(MainSource) macros.h
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
-
-$(GetGitInfoBashObject): CPPFLAGS += -DBASH
-$(GetGitInfoBashObject): $(GetGitInfoSource) macros.h
+$(MainBashObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-$(MainBashExecutable): $(MainBashObject) $(GetActiveWidObjects) $(GetGitInfoBashObject)
-	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
+$(MainBashExecutable): $(GetActiveWidObjects) $(MainBashObject)
+	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
-$(MainZshObject): $(MainSource) macros.h
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
-
-$(GetGitInfoZshObject): CPPFLAGS += -DZSH
-$(GetGitInfoZshObject): $(GetGitInfoSource) macros.h
+$(MainZshObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-$(MainZshExecutable): $(MainZshObject) $(GetActiveWidObjects) $(GetGitInfoZshObject)
-	$(CXX) $(LDFLAGS) $^ $(LDLIBS) $(OUTPUT_OPTION)
+$(MainZshExecutable): $(GetActiveWidObjects) $(MainZshObject)
+	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
