@@ -127,6 +127,8 @@ private:
  * Locate and enter a Git directory in the parent directories of the current
  * working directory. Mutate the argument to match the final working directory
  * of this process.
+ *
+ * @param pwd Current directory.
  *****************************************************************************/
 GitRepository::GitRepository(std::filesystem::path& pwd)
     : started_in_git_dir(false)
