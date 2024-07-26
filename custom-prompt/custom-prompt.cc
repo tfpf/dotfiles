@@ -113,7 +113,7 @@ class GitRepository
 {
 public:
     GitRepository(std::filesystem::path& pwd);
-    char const *describe(void);
+    char const* describe(void);
 
 private:
     void parse_index(void);
@@ -134,7 +134,7 @@ GitRepository::GitRepository(std::filesystem::path& pwd)
 {
 }
 
-char const *GitRepository::describe(void)
+char const* GitRepository::describe(void)
 {
     return "git_info";
 }

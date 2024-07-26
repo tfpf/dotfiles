@@ -1,9 +1,9 @@
+#include <climits>
 #include <cstddef>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <climits>
 
 #include "macros.h"
 
@@ -18,7 +18,7 @@ class GitRepository
 {
 public:
     GitRepository(void);
-    char const *describe(void);
+    char const* describe(void);
 
 private:
     void parse_index(void);
@@ -68,7 +68,7 @@ GitRepository::GitRepository()
  *
  * @return Concise description of the status of the current Git repository.
  *****************************************************************************/
-char const *GitRepository::describe(void)
+char const* GitRepository::describe(void)
 {
     if (this->started_in_git_dir)
     {
@@ -87,7 +87,7 @@ char const *GitRepository::describe(void)
     std::ifstream head("HEAD");
     std::string line;
     std::getline(head, line);
-    char *git_info = new char[line.size()];
+    char* git_info = new char[line.size()];
     std::size_t slash_idx = line.rfind('/');
     if (slash_idx == std::string::npos)
     {
@@ -112,11 +112,11 @@ void GitRepository::parse_index(void)
     index.ignore(8);
     long unsigned entries_size;
     // 044504 041522 000000 001000 000000 042000 113146 036217
-    index.read(reinterpret_cast<char *>(&entries_size), 2);
+    index.read(reinterpret_cast<char*>(&entries_size), 2);
     std::fprintf(stderr, "%lx\n", entries_size);
 }
 
-extern "C" char const *get_git_info(void)
+extern "C" char const* get_git_info(void)
 {
     return GitRepository().describe();
 }
