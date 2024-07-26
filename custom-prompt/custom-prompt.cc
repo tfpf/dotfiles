@@ -136,6 +136,12 @@ GitRepository::GitRepository(std::filesystem::path& pwd)
 {
 }
 
+/******************************************************************************
+ * Obtain information about the Git repository in a form suitable to show in a
+ * shell prompt.
+ *
+ * @return Description of the status of the current Git repository.
+ *****************************************************************************/
 char const* GitRepository::describe(void)
 {
     return "git_info";
