@@ -33,7 +33,7 @@ debug: $(MainBashExecutable) $(MainZshExecutable)
 release: CPPFLAGS += -DNDEBUG
 release: CFLAGS += -flto -O2
 release: CXXFLAGS += -flto -O2
-release: LDFLAGS += -flto -O2 -s
+release: LDFLAGS += -flto -O2
 release: debug
 
 $(MainBashObject): CPPFLAGS += -DBASH
