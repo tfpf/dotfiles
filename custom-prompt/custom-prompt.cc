@@ -103,7 +103,7 @@ Interval::Interval(long long unsigned delay)
     this->seconds = (delay /= 1000) % 60;
     this->minutes = (delay /= 60) % 60;
     this->hours = delay / 60;
-    LOG_DEBUG("Split delay is %u h %u m %u s %u ms.", this->hours, this->minutes, this->seconds, this->milliseconds);
+    LOG_DEBUG("Delay is %u h %u m %u s %u ms.", this->hours, this->minutes, this->seconds, this->milliseconds);
 }
 
 /******************************************************************************
