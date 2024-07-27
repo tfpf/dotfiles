@@ -78,7 +78,7 @@ struct Interval
 #endif
 
 #ifdef __MINGW32__
-// Multi-byte characters are not rendered correctly. Use these substitutes.
+// Multi-byte characters are not rendered correctly. Use substitutes.
 #define HISTORY_ICON "$"
 #define SUCCESS_ICON "#"
 #define FAILURE_ICON "#"
