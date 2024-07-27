@@ -90,7 +90,6 @@ public:
     Interval(long long unsigned);
     void print_short(std::ostream&) const;
     void print_long(std::ostream&) const;
-
 };
 
 /******************************************************************************
