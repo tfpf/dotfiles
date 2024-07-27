@@ -269,8 +269,8 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 #endif
     last_command.remove_suffix(last_command.size() - 1 - last_command.find_last_not_of(' '));
     LOG_DEBUG("Command length is %zu.", last_command.size());
-    Interval interval(delay);
 
+    Interval interval(delay);
     write_report(last_command, exit_code, interval, columns);
     if (delay > 10000000000ULL)
     {
