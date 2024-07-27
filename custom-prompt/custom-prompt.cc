@@ -15,40 +15,6 @@ namespace C
 }
 #endif
 
-struct Interval
-{
-    unsigned hours;
-    unsigned minutes;
-    unsigned seconds;
-    unsigned milliseconds;
-
-    void print_short(std::ostringstream& stream) const
-    {
-        char fill_character = stream.fill('0');
-        if (this->hours > 0)
-        {
-            stream << this->hours << ':';
-        }
-        stream << std::setw(2) << this->minutes << ':';
-        stream << std::setw(2) << this->seconds << '.';
-        stream << std::setw(3) << this->milliseconds;
-        stream.fill(fill_character);
-    }
-
-    void print_long(std::ostringstream& stream) const
-    {
-        if (this->hours > 0)
-        {
-            stream << this->hours << " h ";
-        }
-        if (this->hours > 0 || this->minutes > 0)
-        {
-            stream << this->minutes << " m ";
-        }
-        stream << this->seconds << " s " << this->milliseconds << " ms";
-    }
-};
-
 #if defined __APPLE__
 #define HOST_ICON ""
 #elif defined __linux__
@@ -110,6 +76,74 @@ struct Interval
 #endif
 
 /******************************************************************************
+ * Represent an amount of time.
+ *****************************************************************************/
+class Interval
+{
+private:
+    unsigned hours;
+    unsigned minutes;
+    unsigned seconds;
+    unsigned milliseconds;
+
+public:
+    Interval(long long unsigned);
+    void print_short(std::ostream&) const;
+    void print_long(std::ostream&) const;
+
+};
+
+/******************************************************************************
+ * Initialise from the given amount of time.
+ *
+ * @param delay Time measured in nanoseconds.
+ *****************************************************************************/
+Interval::Interval(long long unsigned delay)
+{
+    this->milliseconds = (delay /= 1000000ULL) % 1000;
+    this->seconds = (delay /= 1000) % 60;
+    this->minutes = (delay /= 60) % 60;
+    this->hours = delay / 60;
+    LOG_DEBUG("Split delay is %u h %u m %u s %u ms.", this->hours, this->minutes, this->seconds, this->milliseconds);
+}
+
+/******************************************************************************
+ * Output the amount of time succinctly.
+ *
+ * @param ostream Output stream.
+ *****************************************************************************/
+void Interval::print_short(std::ostream& ostream) const
+{
+    char fill_character = ostream.fill('0');
+    if (this->hours > 0)
+    {
+        ostream << this->hours << ':';
+    }
+    ostream << std::setw(2) << this->minutes << ':';
+    ostream << std::setw(2) << this->seconds << '.';
+    ostream << std::setw(3) << this->milliseconds;
+    ostream.fill(fill_character);
+}
+
+/******************************************************************************
+ * Output the amount of time with units.
+ *
+ * @param ostream Output stream.
+ *****************************************************************************/
+void Interval::print_long(std::ostream& ostream) const
+{
+    if (this->hours > 0)
+    {
+        ostream << this->hours << " h ";
+    }
+    if (this->hours > 0 || this->minutes > 0)
+    {
+        ostream << this->minutes << " m ";
+    }
+    ostream << this->seconds << " s " << this->milliseconds << " ms";
+}
+
+/******************************************************************************
  * Get the ID of the currently-focused window.
  *
  * @return Active window ID.
@@ -127,25 +161,6 @@ long long unsigned get_timestamp(void)
     long long unsigned ts = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
     LOG_DEBUG("Current time is %lld.%09lld.", ts / 1000000000ULL, ts % 1000000000ULL);
     return ts;
-}
-
-/******************************************************************************
- * Represent an amount of time in human-readable form.
- *
- * @param delay Time measured in nanoseconds.
- *
- * @return Time measured in easier-to-understand units.
- *****************************************************************************/
-Interval delay_to_interval(long long unsigned delay)
-{
-    Interval interval;
-    interval.milliseconds = (delay /= 1000000ULL) % 1000;
-    interval.seconds = (delay /= 1000) % 60;
-    interval.minutes = (delay /= 60) % 60;
-    interval.hours = delay / 60;
-    LOG_DEBUG("Calculated interval is %u h %u m %u s %u ms.", interval.hours, interval.minutes, interval.seconds,
-        interval.milliseconds);
-    return interval;
 }
 
 /******************************************************************************
@@ -255,7 +270,7 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 #endif
     last_command.remove_suffix(last_command.size() - 1 - last_command.find_last_not_of(' '));
     LOG_DEBUG("Command length is %zu.", last_command.size());
-    Interval interval = delay_to_interval(delay);
+    Interval interval(delay);
 
     write_report(last_command, exit_code, interval, columns);
     if (delay > 10000000000ULL)
