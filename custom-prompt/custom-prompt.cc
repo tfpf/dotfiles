@@ -77,6 +77,19 @@ struct Interval
 #error "unknown shell"
 #endif
 
+#ifdef __MINGW32__
+// Multi-byte characters are not rendered correctly. Use substitutes.
+#define HISTORY_ICON "$"
+#define SUCCESS_ICON "#"
+#define FAILURE_ICON "#"
+#define REPORT_CORRECTION 8
+#else
+#define HISTORY_ICON ""
+#define SUCCESS_ICON ""
+#define FAILURE_ICON ""
+#define REPORT_CORRECTION 12
+#endif
+
 #define ESCAPE "\x1B"
 #define LEFT_SQUARE_BRACKET "\x5B"
 #define BACKSLASH "\x5C"
@@ -192,41 +205,31 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::ostringstream report_stream;
     if (last_command.size() <= left_piece_len + right_piece_len + 5)
     {
-        report_stream << " " << last_command;
+        report_stream << HISTORY_ICON " " << last_command;
     }
     else
     {
         LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
-        report_stream << " " << last_command.substr(0, left_piece_len);
+        report_stream << HISTORY_ICON " " << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
     {
-        report_stream << " " B_GREEN_RAW "" RESET_RAW " ";
+        report_stream << " " B_GREEN_RAW SUCCESS_ICON RESET_RAW " ";
     }
     else
     {
-        report_stream << " " B_RED_RAW "" RESET_RAW " ";
+        report_stream << " " B_RED_RAW FAILURE_ICON RESET_RAW " ";
     }
     interval.print_short(report_stream);
 
     // Ensure that the text is right-aligned. Since there are non-printable
     // characters in it, compensate for the width.
-    std::size_t width = columns + 12;
+    std::size_t width = columns + REPORT_CORRECTION;
     std::string report = report_stream.str();
     LOG_DEBUG("Report length is %zu.", report.size());
     LOG_DEBUG("Padding report to %zu characters.", width);
-#ifdef __MINGW32__
-    // TODO Multi-byte characters are not rendered correctly. However, if a
-    // string containing those is saved to a variable (in this case, the
-    // primary prompt) and that variable is printed, all is good. (Writing this
-    // to standard output makes it a part of the primary prompt.) Find out the
-    // cause of the rendering issue and fix it, and change this so that it is
-    // written to standard error.
-    std::cout << '\r' << std::setw(width) << report << '\n';
-#else
     std::clog << '\r' << std::setw(width) << report << '\n';
-#endif
 }
 
 /******************************************************************************
