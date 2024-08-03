@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ github.token }}
+          token: ${{ TFPF_PAT }}
       - run: |
           ./clang-format.bash
           git config user.name 'tfpf'
