@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          ./clang-format.bash check
+          ./clang-format.bash
           git config user.name 'tfpf'
           git config user.email '19171016+tfpf@users.noreply.github.com'
           if git commit -am 'Formatted'
