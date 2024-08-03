@@ -245,7 +245,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // terminal.
     std::string report = report_stream.str();
     std::size_t report_size = 0;
-    for (char const& report_char: report)
+    for (char const& report_char : report)
     {
         if ((report_char & 0xC0) != 0x80)
         {
