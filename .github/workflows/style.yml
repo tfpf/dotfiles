@@ -26,9 +26,6 @@ jobs:
           ./clang-format.bash
           git config user.name 'tfpf'
           git config user.email '19171016+tfpf@users.noreply.github.com'
-          if git commit -am 'Formatted'
-          then
-            git push
-          fi
+          git commit -am 'Formatted' && git push
         working-directory: custom-prompt
         name: Format C and C++ headers and sources, commit, and push
