@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdio>
@@ -48,12 +49,10 @@ namespace C
 #define HISTORY_ICON "$"
 #define SUCCESS_ICON "#"
 #define FAILURE_ICON "#"
-#define REPORT_CORRECTION 8
 #else
 #define HISTORY_ICON ""
 #define SUCCESS_ICON ""
 #define FAILURE_ICON ""
-#define REPORT_CORRECTION 12
 #endif
 
 #define ESCAPE "\x1B"
@@ -237,11 +236,27 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     }
     interval.print_short(report_stream);
 
-    // Ensure that the text is right-aligned. Since there are non-printable
-    // characters in it, compensate for the width.
-    std::size_t width = columns + REPORT_CORRECTION;
+    // Determine the number of UTF-8 code points in the report. The C++
+    // standard does not specify a UTF-8 encoding (or any encoding for that
+    // matter) for all characters, but the ones for which it does are enough,
+    // because the characters in the report are either those or Nerd Font
+    // characters (which have specific code points), or are received as input
+    // (whence their encoding doesn't matter, since they will just be output
+    // without processing). Consequently, counting like this should result in
+    // correct output in a UTF-8 terminal.
     std::string report = report_stream.str();
-    LOG_DEBUG("Report length is %zu.", report.size());
+    std::size_t report_size = std::count_if(report.cbegin(), report.cend(),
+        [](char const& report_char)
+        {
+            return (report_char & 0xC0) != 0x80;
+        });
+    LOG_DEBUG("Report length is %zu bytes (%zu code points).", report.size(), report_size);
+
+    // Ensure that the text is right-aligned. Compensate for multi-byte
+    // characters and non-printing sequences.
+    std::size_t multi_byte_correction = report.size() - report_size;
+    std::size_t constexpr non_printable_correction = (sizeof B_GREEN_RAW + sizeof RESET_RAW - 2) / sizeof(char);
+    std::size_t width = columns + multi_byte_correction + non_printable_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
 }
