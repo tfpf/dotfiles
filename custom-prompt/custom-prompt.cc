@@ -241,8 +241,8 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // because the characters in the report are either those or Nerd Font
     // characters (which have specific code points), or are received as input
     // (whence their encoding doesn't matter, since they will just be output
-    // without processing). Consequently, this should work correctly in a UTF-8
-    // terminal.
+    // without processing). Consequently, this should lead to correct output in
+    // a UTF-8 terminal.
     std::string report = report_stream.str();
     std::size_t report_size = 0;
     for (char const& report_char : report)
