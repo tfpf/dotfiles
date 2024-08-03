@@ -258,7 +258,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::size_t constexpr non_printable_correction = (sizeof B_GREEN_RAW + sizeof RESET_RAW - 2) / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printable_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
-std::clog << '\r' << std::setw(width) << report << '\n';
+    std::clog << '\r' << std::setw(width) << report << '\n';
 }
 
 /******************************************************************************
