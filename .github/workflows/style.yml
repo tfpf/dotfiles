@@ -8,7 +8,6 @@ on:
 
 jobs:
   check:
-    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -16,7 +15,7 @@ jobs:
         working-directory: custom-prompt
 
   format:
-    if: github.ref_name != github.event.repository.default_branch
+    if: github.ref_type != 'tag' && github.ref_name != github.event.repository.default_branch
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
