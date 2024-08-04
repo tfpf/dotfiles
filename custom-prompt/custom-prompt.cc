@@ -346,7 +346,16 @@ void set_terminal_title(std::filesystem::path const& pwd)
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << '/' << ESCAPE BACKSLASH;
 }
 
-int main(int const argc, char const* argv[])
+/******************************************************************************
+ * Program entry point. The C++ standard forbids recursively calling `main`, so
+ * the program code is written in this function instead.
+ *
+ * @param argc Number of command line arguments.
+ * @param argv Command line arguments.
+ *
+ * @return Exit code.
+ *****************************************************************************/
+int main_internal(int const argc, char const* argv[])
 {
     long long unsigned ts = get_timestamp();
     if (argc <= 1)
@@ -361,7 +370,8 @@ int main(int const argc, char const* argv[])
     if (argc == 2)
     {
         char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", nullptr };
-        return main(sizeof argv / sizeof *argv - 1, argv);
+        int constexpr argc = sizeof argv / sizeof *argv - 1;
+        return main_internal(argc, argv);
     }
 
     std::string_view last_command(argv[1]);
@@ -379,4 +389,9 @@ int main(int const argc, char const* argv[])
     set_terminal_title(pwd);
 
     return EXIT_SUCCESS;
+}
+
+int main(int const argc, char const* argv[])
+{
+    return main_internal(argc, argv);
 }
