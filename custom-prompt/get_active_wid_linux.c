@@ -18,8 +18,8 @@ long long unsigned get_active_wid(void)
         &actual_format_return, &nitems_return, &bytes_after_return, &prop_return);
 
     Window active_wid = *(Window*)prop_return;
-    //XFree(prop_return);
-    //XCloseDisplay(display);
+    // XFree(prop_return);
+    // XCloseDisplay(display);
     return active_wid;
-     }
+}
 #endif
