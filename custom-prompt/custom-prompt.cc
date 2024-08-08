@@ -75,6 +75,8 @@ namespace C
 
 // Dark.
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
+#define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
+#define D_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "31m"
 
 // No formatting.
 #define RESET BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "m" END_INVISIBLE
@@ -218,21 +220,21 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::ostringstream report_stream;
     if (last_command.size() <= left_piece_len + right_piece_len + 5)
     {
-        report_stream << HISTORY_ICON " " << last_command;
+        report_stream << D_CYAN_RAW HISTORY_ICON RESET_RAW " " << last_command;
     }
     else
     {
         LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
-        report_stream << HISTORY_ICON " " << last_command.substr(0, left_piece_len);
+        report_stream << D_CYAN_RAW HISTORY_ICON RESET_RAW " " << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
     {
-        report_stream << " " B_GREEN_RAW SUCCESS_ICON RESET_RAW " ";
+        report_stream << " " D_GREEN_RAW SUCCESS_ICON RESET_RAW " ";
     }
     else
     {
-        report_stream << " " B_RED_RAW FAILURE_ICON RESET_RAW " ";
+        report_stream << " " D_RED_RAW FAILURE_ICON RESET_RAW " ";
     }
     interval.print_short(report_stream);
 
@@ -255,7 +257,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // Ensure that the text is right-aligned. Compensate for multi-byte
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
-    std::size_t constexpr non_printing_correction = (sizeof B_GREEN_RAW + sizeof RESET_RAW - 2) / sizeof(char);
+    std::size_t constexpr non_printing_correction = (sizeof D_GREEN_RAW + sizeof D_RED_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
