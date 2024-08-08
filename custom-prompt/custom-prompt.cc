@@ -257,7 +257,8 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // Ensure that the text is right-aligned. Compensate for multi-byte
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
-    std::size_t constexpr non_printing_correction = (sizeof D_GREEN_RAW + sizeof D_RED_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
+    std::size_t constexpr non_printing_correction
+        = (sizeof D_GREEN_RAW + sizeof D_RED_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
