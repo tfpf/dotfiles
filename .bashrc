@@ -118,7 +118,7 @@ fi
 # be sourced separately on some Linux distributions.
 if ! command -v __git_ps1 &>/dev/null
 then
-    _source_one /usr/share/git/completion/git-prompt.sh /usr/share/git-core/contrib/completion/git-prompt.sh
+    _source_one $HOME/Documents/projects/git/contrib/completion/git-prompt.sh /usr/share/git/completion/git-prompt.sh /usr/share/git-core/contrib/completion/git-prompt.sh
 fi
 
 PS1='[\u@\h \w]\$ '

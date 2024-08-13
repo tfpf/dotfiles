@@ -91,7 +91,8 @@ rr()
 
 if ! command -v __git_ps1 &>/dev/null
 then
-    . /usr/lib/git-core/git-sh-prompt &>/dev/null  \
+    . ~/Documents/projects/git/contrib/completion/git-prompt.sh &>/dev/null  \
+    || . /usr/lib/git-core/git-sh-prompt &>/dev/null  \
     || . /usr/share/git-core/contrib/completion/git-prompt.sh &>/dev/null  \
     || . /usr/share/git/completion/git-prompt.sh &>/dev/null  \
     || . /usr/share/git/git-prompt.sh &>/dev/null
