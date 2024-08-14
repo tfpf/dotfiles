@@ -105,19 +105,33 @@ setopt completealiases histignoredups histignorespace ignoreeof interactive moni
 unsetopt alwayslastprompt autocd beep extendedglob nomatch notify
 
 bindkey -e
+bindkey "^[OD" backward-char
 bindkey "^?" backward-delete-char
+bindkey "^H" backward-kill-word
 bindkey "^[^?" backward-kill-word
+bindkey "^A" beginning-of-line
+bindkey "^[OH" beginning-of-line
 bindkey "^[[H" beginning-of-line
 bindkey "^[[1;3D" backward-word
 bindkey "^[[1;5D" backward-word
 bindkey "^[[3~" delete-char
+bindkey "^[OB" down-history
 bindkey "^[[B" down-history
+bindkey "^E" end-of-line
+bindkey "^[OF" end-of-line
 bindkey "^[[F" end-of-line
 bindkey "^I" expand-or-complete-prefix
+bindkey "^[OC" forward-char
 bindkey "^[[1;3C" forward-word
 bindkey "^[[1;5C" forward-word
 bindkey "^[[3;5~" kill-word
+bindkey "^[OA" up-history
 bindkey "^[[A" up-history
+bindkey -s "^[OM" "\n"
+bindkey -s "^[Oj" "*"
+bindkey -s "^[Ok" "+"
+bindkey -s "^[Om" "-"
+bindkey -s "^[Oo" "/"
 
 ###############################################################################
 # Environment variables.
