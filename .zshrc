@@ -106,15 +106,16 @@ unsetopt alwayslastprompt autocd beep extendedglob nomatch notify
 
 bindkey -e
 bindkey "^[OD" backward-char
-bindkey "^?" backward-delete-char
-bindkey "^H" backward-kill-word
-bindkey "^[^?" backward-kill-word
+bindkey "^?" backward-delete-char  # Backspace.
+bindkey "^H" backward-delete-word  # Ctrl Backspace.
+bindkey "^[^?" backward-delete-word  # Alt Backspace.
+bindkey "^[[1;3D" backward-word  # Alt ←.
+bindkey "^[[1;5D" backward-word  # Ctrl ←.
 bindkey "^A" beginning-of-line
 bindkey "^[OH" beginning-of-line
 bindkey "^[[H" beginning-of-line
-bindkey "^[[1;3D" backward-word
-bindkey "^[[1;5D" backward-word
-bindkey "^[[3~" delete-char
+bindkey "^[[3~" delete-char  # Delete.
+bindkey "^[[3;5~" delete-word  # Ctrl Delete.
 bindkey "^[OB" down-history
 bindkey "^[[B" down-history
 bindkey "^E" end-of-line
@@ -122,9 +123,8 @@ bindkey "^[OF" end-of-line
 bindkey "^[[F" end-of-line
 bindkey "^I" expand-or-complete-prefix
 bindkey "^[OC" forward-char
-bindkey "^[[1;3C" forward-word
-bindkey "^[[1;5C" forward-word
-bindkey "^[[3;5~" kill-word
+bindkey "^[[1;3C" forward-word  # Alt →.
+bindkey "^[[1;5C" forward-word  # Ctrl →.
 bindkey "^[OA" up-history
 bindkey "^[[A" up-history
 bindkey -s "^[OM" "\n"
