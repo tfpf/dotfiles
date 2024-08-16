@@ -159,7 +159,8 @@ void Interval::print_long(std::ostream& ostream) const
 /******************************************************************************
  * Get the ID of the currently-focused window.
  *
- * @return Active window ID.
+ * @return Active window ID. On Linux, if there is no X display running, 0 is
+ * returned. Likewise, on macOS, if no topmost window is found, 0 is returned.
  *****************************************************************************/
 extern "C" long long unsigned get_active_wid(void);
 
