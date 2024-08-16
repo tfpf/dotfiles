@@ -207,13 +207,15 @@ unset SSH_ASKPASS
 ###############################################################################
 # Built-in functions.
 ###############################################################################
-autoload -Uz add-zsh-hook compinit select-word-style
+autoload -Uz add-zsh-hook bashcompinit compinit select-word-style
 
 # Load these and immediately execute them (Zsh does not do so automatically)
 # because they help set the primary prompt.
 add-zsh-hook precmd _after_command
 add-zsh-hook preexec _before_command
 _before_command && _after_command
+
+bashcompinit
 
 compinit
 zstyle ':completion:*' file-sort name
