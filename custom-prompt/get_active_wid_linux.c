@@ -6,7 +6,10 @@
 long long unsigned get_active_wid(void)
 {
     Display* display = XOpenDisplay(NULL);
-    if(display==NULL){return 0;}
+    if (display == NULL)
+    {
+        return 0;
+    }
 
     Window root_window = DefaultRootWindow(display);
     Atom property = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
