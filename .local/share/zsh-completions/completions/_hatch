@@ -1,0 +1,3 @@
+#compdef hatch
+
+. <(_HATCH_COMPLETE=zsh_source hatch)
