@@ -207,7 +207,7 @@ unset SSH_ASKPASS
 ###############################################################################
 # Built-in functions.
 ###############################################################################
-autoload -Uz add-zsh-hook compinit select-word-style
+autoload -Uz add-zsh-hook bashcompinit compinit select-word-style
 
 # Load these and immediately execute them (Zsh does not do so automatically)
 # because they help set the primary prompt.
@@ -215,6 +215,7 @@ add-zsh-hook precmd _after_command
 add-zsh-hook preexec _before_command
 _before_command && _after_command
 
+# Must be called before the Bash equivalent, according the manual.
 compinit
 zstyle ':completion:*' file-sort name
 zstyle ':completion:*' insert-tab false
@@ -226,6 +227,10 @@ zstyle ':completion:*' special-dirs true
 # any colour. Furthermore, if a completion word is a file (of any type, with
 # 'type' as specified in `LS_COLORS`), display it without any colour.
 zstyle -e ':completion:*:default' list-colors 'PREFIX=${PREFIX##*/} && reply=("${PREFIX:+=(#b)($PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
+
+# Needed for some programs (like pipx) which supply only Bash completion
+# scripts.
+bashcompinit
 
 select-word-style bash
 
