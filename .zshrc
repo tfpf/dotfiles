@@ -228,6 +228,8 @@ zstyle ':completion:*' special-dirs true
 # 'type' as specified in `LS_COLORS`), display it without any colour.
 zstyle -e ':completion:*:default' list-colors 'PREFIX=${PREFIX##*/} && reply=("${PREFIX:+=(#b)($PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
 
+# Needed for some programs (like pipx) which supply only Bash completion
+# scripts.
 bashcompinit
 
 select-word-style bash
