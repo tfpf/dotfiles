@@ -215,8 +215,7 @@ add-zsh-hook precmd _after_command
 add-zsh-hook preexec _before_command
 _before_command && _after_command
 
-bashcompinit
-
+# Must be called before the Bash equivalent, according the manual.
 compinit
 zstyle ':completion:*' file-sort name
 zstyle ':completion:*' insert-tab false
@@ -228,6 +227,8 @@ zstyle ':completion:*' special-dirs true
 # any colour. Furthermore, if a completion word is a file (of any type, with
 # 'type' as specified in `LS_COLORS`), display it without any colour.
 zstyle -e ':completion:*:default' list-colors 'PREFIX=${PREFIX##*/} && reply=("${PREFIX:+=(#b)($PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
+
+bashcompinit
 
 select-word-style bash
 
