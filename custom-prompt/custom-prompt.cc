@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
-#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -342,12 +341,12 @@ void display_primary_prompt(char const* git_info, int shlvl)
  *
  * @param pwd Current directory.
  *****************************************************************************/
-void set_terminal_title(std::filesystem::path const& pwd)
+void set_terminal_title(std::string_view & pwd)
 {
-    // The result of converting wide characters to narrow characters, which is
-    // what this line will do on Windows, is unspecified. I can only hope that
-    // nothing goes wrong. (All is good with GCC.)
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd.filename().string() << '/' << ESCAPE BACKSLASH;
+    LOG_DEBUG("Current directory path is '%s'.", pwd.data());
+    pwd.remove_prefix(pwd.rfind('/') + 1);
+    LOG_DEBUG("Current directory name is '%s'.", pwd.data());
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 }
 
 /******************************************************************************
@@ -373,7 +372,7 @@ int main_internal(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", nullptr };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "git_info", "1", "", nullptr };
         int constexpr argc = sizeof argv / sizeof *argv - 1;
         return main_internal(argc, argv);
     }
@@ -389,7 +388,7 @@ int main_internal(int const argc, char const* argv[])
     int shlvl = std::stoi(argv[7]);
     display_primary_prompt(git_info, shlvl);
 
-    std::filesystem::path pwd = std::filesystem::current_path();
+    std::string_view pwd(argv[8]);
     set_terminal_title(pwd);
 
     return EXIT_SUCCESS;
