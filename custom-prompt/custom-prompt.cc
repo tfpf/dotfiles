@@ -341,7 +341,7 @@ void display_primary_prompt(char const* git_info, int shlvl)
  *
  * @param pwd Current directory.
  *****************************************************************************/
-void set_terminal_title(std::string_view & pwd)
+void set_terminal_title(std::string_view& pwd)
 {
     LOG_DEBUG("Current directory path is '%s'.", pwd.data());
     pwd.remove_prefix(pwd.rfind('/') + 1);
