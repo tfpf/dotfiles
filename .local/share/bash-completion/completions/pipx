@@ -1,1 +1,1 @@
-. <(register-python-argcomplete pipx)
+command -v register-python-argcomplete &>/dev/null && . <(register-python-argcomplete pipx)

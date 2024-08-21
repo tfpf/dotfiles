@@ -1,1 +1,1 @@
-. <(rustup completions bash cargo)
+command -v rustup &>/dev/null && . <(rustup completions bash cargo)

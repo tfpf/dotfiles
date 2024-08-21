@@ -1,1 +1,1 @@
-. <(_HATCH_COMPLETE=bash_source hatch)
+command -v hatch &>/dev/null && . <(_HATCH_COMPLETE=bash_source hatch)

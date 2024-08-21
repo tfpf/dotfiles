@@ -1,1 +1,1 @@
-. <(pip completion --bash)
+command -v pip &>/dev/null && . <(pip completion --bash)

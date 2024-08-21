@@ -1,1 +1,1 @@
-. <(goreleaser completion bash)
+command -v goreleaser &>/dev/null && . <(goreleaser completion bash)
