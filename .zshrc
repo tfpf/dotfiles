@@ -221,12 +221,10 @@ zstyle ':completion:*' file-sort name
 zstyle ':completion:*' insert-tab false
 zstyle ':completion:*' menu false
 zstyle ':completion:*' special-dirs true
-# When displaying a completion word, show whatever matches the suffix of
-# `PREFIX` (i.e. the base name of `PREFIX` if it is a path, else `PREFIX`) in
-# grey, the rest of the word without any colour, and other words also without
-# any colour. Furthermore, if a completion word is a file (of any type, with
-# 'type' as specified in `LS_COLORS`), display it without any colour.
-zstyle -e ':completion:*:default' list-colors 'PREFIX=${PREFIX##*/} && reply=("${PREFIX:+=(#b)($PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
+# When displaying a completion word, `PREFIX` is the string already typed at
+# the prompt. Show whatever matches either `PREFIX` or its base name in grey,
+# and the rest of the word without any colour.
+zstyle -e ':completion:*:default' list-colors 'BASE_OF_PREFIX=${PREFIX##*/} && reply=("${BASE_OF_PREFIX:+=(#b)($BASE_OF_PREFIX)(*)=0=1;90=0}:${PREFIX:+=(#b)($PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
 
 # Needed for some programs (like pipx) which supply only Bash completion
 # scripts.
