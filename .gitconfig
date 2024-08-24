@@ -31,6 +31,8 @@
 	preloadindex = true
 [diff]
 	algorithm = minimal
+[diff "utf16toutf8"]
+	textconv = "iconv -f utf-16 -t utf-8"
 [fetch]
 	prune = true
 	pruneTags = true
