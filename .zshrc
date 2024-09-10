@@ -203,9 +203,14 @@ zstyle ':completion:*' insert-tab false
 zstyle ':completion:*' menu false
 zstyle ':completion:*' special-dirs true
 # When displaying a completion word, `PREFIX` is the string already typed at
-# the prompt. Show whatever matches either `PREFIX` or its base name in grey,
-# and the rest of the word without any colour.
-zstyle -e ':completion:*:default' list-colors 'BASE_OF_PREFIX=${PREFIX##*/} && reply=("${BASE_OF_PREFIX:+=(#b)($BASE_OF_PREFIX)(*)=0=1;90=0}:${PREFIX:+=(#b)($PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
+# the prompt. Show whatever matches the base name of `PREFIX` in grey, and the
+# rest of the word without any colour. Get the base name using parameter
+# expansion rather than the Zsh idiom, because if `PREFIX` is, say, `/usr/`,
+# the former will return the empty string, while the latter will return `usr`:
+# as a result, `usr` will be coloured grey in the list of completion words
+# (wherever it appears at the start of any of them), which is incorrect
+# behaviour.
+zstyle -e ':completion:*:default' list-colors 'BASE_OF_PREFIX=${PREFIX##*/} && reply=("${BASE_OF_PREFIX:+=(#b)($BASE_OF_PREFIX)(*)=0=1;90=0}:$LS_COLORS")'
 
 # Needed for some programs (like pipx) which supply only Bash completion
 # scripts.
