@@ -39,8 +39,8 @@
 [gc]
 	auto = 256
 [gui]
-	fontui = -family Signika -size 11
 	fontdiff = -family \"RecMonoCasual Nerd Font\" -size 11
+	fontui = -family Signika -size 11
 [init]
 	defaultBranch = main
 [log]
