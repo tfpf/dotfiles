@@ -16,20 +16,6 @@ _before_command()
     __begin_window=$(custom-zsh-prompt)
 }
 
-c()
-{
-    [ ! -f "$1" ] && printf "Usage:\n  ${FUNCNAME[0]} <file>\n" >&2 && return 1
-    if [ "$2" == ++ ]
-    then
-        local c=g++
-        local l=c++
-    else
-        local c=gcc
-        local l=c
-    fi
-    clang-format <($c -E "$1" | command grep -Fv '#') | bat -l $l --file-name "$1"
-}
-
 cfs()
 {
     local files=(/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor)
@@ -124,6 +110,7 @@ bindkey "^I" expand-or-complete-prefix
 bindkey "^[OC" forward-char
 bindkey "^[[1;3C" forward-word  # Alt →.
 bindkey "^[[1;5C" forward-word  # Ctrl →.
+bindkey "^[[3;3~" kill-word  # Alt Delete.
 bindkey "^[[3;5~" kill-word  # Ctrl Delete.
 bindkey "^[OA" up-history
 bindkey "^[[A" up-history
@@ -179,21 +166,15 @@ envarmunge PATH /usr/sbin
 envarmunge PKG_CONFIG_PATH /usr/local/lib/pkgconfig
 envarmunge PKG_CONFIG_PATH /usr/local/share/pkgconfig
 
-envarmunge CARGO_HOME ~/.cargo
+export CARGO_HOME=~/.cargo
 envarmunge PATH ~/.cargo/bin
 
-envarmunge C_INCLUDE_PATH /opt/gurobi*/linux64/include
-envarmunge CPLUS_INCLUDE_PATH /opt/gurobi*/linux64/include
-envarmunge GUROBI_HOME /opt/gurobi*/linux64
-envarmunge LD_LIBRARY_PATH /opt/gurobi*/linux64/lib
-envarmunge PATH /opt/gurobi*/linux64/bin
+export IPELATEXDIR=~/.ipe/latexrun
+export IPELATEXPATH=~/.ipe/latexrun
 
-envarmunge IPELATEXDIR ~/.ipe/latexrun
-envarmunge IPELATEXPATH ~/.ipe/latexrun
-
-envarmunge INFOPATH /usr/local/texlive/*/texmf-dist/doc/info
-envarmunge MANPATH /usr/local/texlive/*/texmf-dist/doc/man
-envarmunge PATH /usr/local/texlive/*/bin/x86_64-linux
+envarmunge INFOPATH /usr/local/texlive/2024/texmf-dist/doc/info
+envarmunge MANPATH /usr/local/texlive/2024/texmf-dist/doc/man
+envarmunge PATH /usr/local/texlive/2024/bin/x86_64-linux
 
 . <(dircolors -b ~/.dircolors)
 
@@ -237,6 +218,8 @@ select-word-style bash
 ###############################################################################
 unalias -a
 
+alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat --language=c'
+alias cxxpreprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat --language=c'
 alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
 alias less='command less -i'
@@ -271,6 +254,7 @@ then
     alias cat='bat'
 fi
 
+alias json.tool='python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat --language=json --style=plain'
 alias p='python3 -B'
-alias t='python3 -m timeit'
 alias pip='python3 -m pip'
+alias timeit='python3 -m timeit'
