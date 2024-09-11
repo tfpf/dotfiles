@@ -99,12 +99,14 @@ bindkey "^[[1;3D" backward-word  # Alt ←.
 bindkey "^[[1;5D" backward-word  # Ctrl ←.
 bindkey "^A" beginning-of-line
 bindkey "^[OH" beginning-of-line
+bindkey "^[[1;9D" beginning-of-line  # Command ←.
 bindkey "^[[H" beginning-of-line
 bindkey "^[[3~" delete-char  # Delete.
 bindkey "^[OB" down-history
 bindkey "^[[B" down-history
 bindkey "^E" end-of-line
 bindkey "^[OF" end-of-line
+bindkey "^[[1;9C" beginning-of-line  # Command →.
 bindkey "^[[F" end-of-line
 bindkey "^I" expand-or-complete-prefix
 bindkey "^[OC" forward-char
