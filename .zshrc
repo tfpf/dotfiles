@@ -225,8 +225,8 @@ select-word-style bash
 ###############################################################################
 unalias -a
 
-alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat --language=c'
-alias c++preprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat --language=c'
+alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
+alias c++preprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
 alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
 alias less='command less -i'
@@ -261,7 +261,7 @@ then
     alias cat='bat'
 fi
 
-alias json.tool='python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat --language=json --style=plain'
+alias json.tool='python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json --style=plain'
 alias p='python3 -B'
 alias pip='python3 -m pip'
 alias timeit='python3 -m timeit'
