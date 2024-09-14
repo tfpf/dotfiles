@@ -18,8 +18,8 @@ _before_command()
 
 cfs()
 {
+    [ ! -d /sys/devices/system/cpu ] && printf "CPU frequency files not found.\n" >&2 && return 1
     local files=(/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor)
-    [ ! -f $files[1] ] && printf "CPU frequency files not found.\n" >&2 && return 1
     if [ $# -lt 1 ]
     then
         column $files
