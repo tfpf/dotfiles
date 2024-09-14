@@ -237,7 +237,7 @@ alias time=$'/usr/bin/time -f "\n\e[3mReal %e s · User %U s · Kernel %S s · M
 alias valgrind='command valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose '
 alias x='xdg-open'
 
-alias f='watch -n 1 "command grep -F MHz /proc/cpuinfo | nl -n rz -w 2 | sort -k 5 -gr | sed s/^0/\ /g"'
+alias f='watch -n 1 "command grep -F MHz /proc/cpuinfo | nl | sort -k 5 -gr"'
 alias htop='command htop -d 10 -t -u $USER'
 alias m='watch -d -n 1 free -ht'
 alias s='watch -d -n 1 sensors'
