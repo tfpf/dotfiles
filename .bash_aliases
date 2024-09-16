@@ -1,6 +1,8 @@
 unalias -a
 
 alias bye='true && exit'
+alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
+alias c++preprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
 alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
 alias less='command less -i'
@@ -35,9 +37,10 @@ then
     alias cat='bat'
 fi
 
+alias json.tool='python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json --style=plain'
 alias p='python3 -B'
-alias t='python3 -m timeit'
 alias pip='python3 -m pip'
+alias timeit='python3 -m timeit'
 
 alias L="$HOME/.bash_hacks.py L"
 alias P="$HOME/.bash_hacks.py P"
