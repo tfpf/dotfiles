@@ -106,7 +106,7 @@ bindkey "^[OB" down-history
 bindkey "^[[B" down-history
 bindkey "^E" end-of-line
 bindkey "^[OF" end-of-line
-bindkey "^[[1;9C" beginning-of-line  # Command →.
+bindkey "^[[1;9C" end-of-line  # Command →.
 bindkey "^[[F" end-of-line
 bindkey "^I" expand-or-complete-prefix
 bindkey "^[OC" forward-char
