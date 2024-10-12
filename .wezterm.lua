@@ -21,7 +21,7 @@ config.cursor_thickness = 1
 
 config.default_cursor_style = 'SteadyBar'
 
-config.default_prog = {'C:/Windows/system32/wsl.exe', '~', '-d', 'Debian'}
+config.default_prog = {'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-start', '-ucrt64'}
 
 config.font = wezterm.font 'RecMonoCasual Nerd Font'
 
@@ -31,7 +31,7 @@ config.keys = {}
 for i = 1, 9 do
   table.insert(config.keys, {key = tostring(i), mods = 'ALT', action = wezterm.action.ActivateTab(i - 1)})
 end
-table.insert(config.keys, {key = 'F1', action = wezterm.action.SpawnCommandInNewTab {args = {'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-start', '-ucrt64'}}})
+table.insert(config.keys, {key = 'F1', action = wezterm.action.SpawnCommandInNewTab {args = {'C:/Windows/system32/wsl.exe', '~', '-d', 'Debian'}}})
 table.insert(config.keys, {key = 'Tab', mods = 'CTRL', action = wezterm.action.ActivateLastTab})
 
 config.mouse_bindings = {
