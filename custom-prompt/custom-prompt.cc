@@ -176,7 +176,7 @@ private:
     std::filesystem::path gitdir;
     std::string ref;
     bool detached;
-    bool merging, rebasing;
+    bool cherrypicking, merging, rebasing, reverting;
 
 public:
     GitRepository(void);
@@ -187,7 +187,7 @@ public:
 /******************************************************************************
  * Read the current Git repository.
  *****************************************************************************/
-GitRepository::GitRepository(void) : merging(false), rebasing(false)
+GitRepository::GitRepository(void) : cherrypicking(false), merging(false), rebasing(false), reverting(false)
 {
     C::git_libgit2_init();
     if (C::git_repository_open_ext(&this->repo, ".", 0, nullptr) != 0)
@@ -200,6 +200,10 @@ GitRepository::GitRepository(void) : merging(false), rebasing(false)
     this->detached = C::git_repository_head_detached(this->repo);
     switch (C::git_repository_state(this->repo))
     {
+    case C::GIT_REPOSITORY_STATE_CHERRYPICK:
+    case C::GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
+        this->cherrypicking = true;
+        break;
     case C::GIT_REPOSITORY_STATE_MERGE:
         this->merging = true;
         break;
@@ -207,6 +211,11 @@ GitRepository::GitRepository(void) : merging(false), rebasing(false)
     case C::GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
     case C::GIT_REPOSITORY_STATE_REBASE_MERGE:
         this->rebasing = true;
+        break;
+    case C::GIT_REPOSITORY_STATE_REVERT:
+    case C::GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
+        this->reverting = true;
+        break;
     }
 }
 
@@ -239,8 +248,10 @@ std::string GitRepository::info(void)
 {
     LOG_DEBUG("ref=%s", this->ref.data());
     LOG_DEBUG("detached=%d", this->detached);
+    LOG_DEBUG("cherrypicking=%d", this->cherrypicking);
     LOG_DEBUG("merging=%d", this->merging);
     LOG_DEBUG("rebasing=%d", this->rebasing);
+    LOG_DEBUG("reverting=%d", this->reverting);
     return "";
 }
 
