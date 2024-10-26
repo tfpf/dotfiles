@@ -175,16 +175,19 @@ private:
     C::git_repository* repo;
     std::filesystem::path gitdir;
     std::string ref;
+    bool detached;
+    bool merging, rebasing;
 
 public:
     GitRepository(void);
     std::string reference(void);
+    std::string info(void);
 };
 
 /******************************************************************************
  * Read the current Git repository.
  *****************************************************************************/
-GitRepository::GitRepository(void)
+GitRepository::GitRepository(void) : merging(false), rebasing(false)
 {
     C::git_libgit2_init();
     if (C::git_repository_open_ext(&this->repo, ".", 0, nullptr) != 0)
@@ -194,13 +197,17 @@ GitRepository::GitRepository(void)
     }
     this->gitdir = C::git_repository_path(this->repo);
     this->ref = this->reference();
-    LOG_DEBUG("ref=%s", this->ref.data());
-    // if (C::git_repository_head(&this->ref, this->repo) != 0)
-    // {
-    //     LOG_DEBUG("Failed to get HEAD.");
-    //     return;
-    // }
-    // LOG_DEBUG("ref=%s", git_reference_name(this->ref));
+    this->detached = C::git_repository_head_detached(this->repo);
+    switch (C::git_repository_state(this->repo))
+    {
+    case C::GIT_REPOSITORY_STATE_MERGE:
+        this->merging = true;
+        break;
+    case C::GIT_REPOSITORY_STATE_REBASE:
+    case C::GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+    case C::GIT_REPOSITORY_STATE_REBASE_MERGE:
+        this->rebasing = true;
+    }
 }
 
 /******************************************************************************
@@ -210,6 +217,8 @@ GitRepository::GitRepository(void)
  *****************************************************************************/
 std::string GitRepository::reference(void)
 {
+    // The head is not resolved correctly if there are no commits yet, so just
+    // do this manually.
     std::ifstream head_file(this->gitdir / "HEAD");
     std::string head_contents;
     std::getline(head_file, head_contents);
@@ -218,6 +227,21 @@ std::string GitRepository::reference(void)
         return head_contents.substr(16);
     }
     return head_contents.substr(0, 8);
+}
+
+/******************************************************************************
+ * Provide information about the current Git repository in a manner suitable to
+ * display in the shell prompt.
+ *
+ * @return Git information.
+ *****************************************************************************/
+std::string GitRepository::info(void)
+{
+    LOG_DEBUG("ref=%s", this->ref.data());
+    LOG_DEBUG("detached=%d", this->detached);
+    LOG_DEBUG("merging=%d", this->merging);
+    LOG_DEBUG("rebasing=%d", this->rebasing);
+    return "";
 }
 
 /******************************************************************************
@@ -441,7 +465,7 @@ int main_internal(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    GitRepository();
+    GitRepository().info();
     std::string_view git_info(argv[6]);
     int shlvl = std::stoi(argv[7]);
     display_primary_prompt(git_info, shlvl);
