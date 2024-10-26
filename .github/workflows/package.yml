@@ -32,9 +32,9 @@ jobs:
         os: [{name: 'alpine', tag: '3.20', libc: 'musl'}, {name: 'debian', tag: '12', libc: 'gnu'}]
     steps:
       - if: matrix.os.name == 'alpine'
-        run: apk add build-base libnotify-dev libx11-dev
+        run: apk add build-base libgit2 libnotify-dev libx11-dev
       - if: matrix.os.name == 'debian'
-        run: apt-get update && apt-get install -y build-essential libnotify-dev libx11-dev
+        run: apt-get update && apt-get install -y build-essential libgit2-dev libnotify-dev libx11-dev
       - uses: actions/checkout@v1
       - run: make -j release
         working-directory: custom-prompt

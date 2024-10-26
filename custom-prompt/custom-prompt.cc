@@ -167,7 +167,7 @@ void Interval::print_long(std::ostream& ostream) const
 extern "C" long long unsigned get_active_wid(void);
 
 /******************************************************************************
- * Load the current Git repository.
+ * Store information about the current Git repository.
  *****************************************************************************/
 class GitRepository
 {
