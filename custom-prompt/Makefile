@@ -1,7 +1,8 @@
 CC = gcc
+CPPFLAGS = $(shell pkg-config --cflags libgit2)
 CFLAGS = -fstrict-aliasing -std=c11 -Wall -Wextra
 CXXFLAGS = -fstrict-aliasing -std=c++17 -Wall -Wextra
-LDLIBS = -lstdc++
+LDLIBS = -lstdc++ $(shell pkg-config --libs libgit2)
 
 MainSource = custom-prompt.cc
 MainBashObject = custom-bash-prompt.o

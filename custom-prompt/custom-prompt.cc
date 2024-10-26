@@ -3,17 +3,20 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#ifdef __linux__
 namespace C
 {
+#include <git2.h>
+#ifdef __linux__
 #include <libnotify/notify.h>
-}
 #endif
+}
 
 #if defined __APPLE__
 #define HOST_ICON ""
@@ -162,6 +165,60 @@ void Interval::print_long(std::ostream& ostream) const
  * returned. Likewise, on macOS, if no topmost window is found, 0 is returned.
  *****************************************************************************/
 extern "C" long long unsigned get_active_wid(void);
+
+/******************************************************************************
+ * Load the current Git repository.
+ *****************************************************************************/
+class GitRepository
+{
+private:
+    C::git_repository* repo;
+    std::filesystem::path gitdir;
+    std::string ref;
+
+public:
+    GitRepository(void);
+    std::string reference(void);
+};
+
+/******************************************************************************
+ * Read the current Git repository.
+ *****************************************************************************/
+GitRepository::GitRepository(void)
+{
+    C::git_libgit2_init();
+    if (C::git_repository_open_ext(&this->repo, ".", 0, nullptr) != 0)
+    {
+        LOG_DEBUG("Failed to open.");
+        return;
+    }
+    this->gitdir = C::git_repository_path(this->repo);
+    this->ref = this->reference();
+    LOG_DEBUG("ref=%s", this->ref.data());
+    // if (C::git_repository_head(&this->ref, this->repo) != 0)
+    // {
+    //     LOG_DEBUG("Failed to get HEAD.");
+    //     return;
+    // }
+    // LOG_DEBUG("ref=%s", git_reference_name(this->ref));
+}
+
+/******************************************************************************
+ * Read the reference of the current Git repository.
+ *
+ * @return Git reference (branch name or commit hash).
+ *****************************************************************************/
+std::string GitRepository::reference(void)
+{
+    std::ifstream head_file(this->gitdir / "HEAD");
+    std::string head_contents;
+    std::getline(head_file, head_contents);
+    if (head_contents.rfind("ref: refs/heads/", 0) == 0)
+    {
+        return head_contents.substr(16);
+    }
+    return head_contents.substr(0, 8);
+}
 
 /******************************************************************************
  * Get the current timestamp.
@@ -384,6 +441,7 @@ int main_internal(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
+    GitRepository();
     std::string_view git_info(argv[6]);
     int shlvl = std::stoi(argv[7]);
     display_primary_prompt(git_info, shlvl);
