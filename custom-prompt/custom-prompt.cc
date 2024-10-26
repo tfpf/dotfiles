@@ -176,7 +176,7 @@ private:
     std::filesystem::path gitdir;
     std::string ref;
     bool detached;
-    bool cherrypicking, merging, rebasing, reverting;
+    bool bisecting, cherrypicking, merging, rebasing, reverting;
 
 public:
     GitRepository(void);
@@ -187,12 +187,12 @@ public:
 /******************************************************************************
  * Read the current Git repository.
  *****************************************************************************/
-GitRepository::GitRepository(void) : cherrypicking(false), merging(false), rebasing(false), reverting(false)
+GitRepository::GitRepository(void) :
+    bisecting(false), cherrypicking(false), merging(false), rebasing(false), reverting(false)
 {
     C::git_libgit2_init();
     if (C::git_repository_open_ext(&this->repo, ".", 0, nullptr) != 0)
     {
-        LOG_DEBUG("Failed to open.");
         return;
     }
     this->gitdir = C::git_repository_path(this->repo);
@@ -200,6 +200,9 @@ GitRepository::GitRepository(void) : cherrypicking(false), merging(false), rebas
     this->detached = C::git_repository_head_detached(this->repo);
     switch (C::git_repository_state(this->repo))
     {
+    case C::GIT_REPOSITORY_STATE_BISECT:
+        this->bisecting = true;
+        break;
     case C::GIT_REPOSITORY_STATE_CHERRYPICK:
     case C::GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
         this->cherrypicking = true;
@@ -248,6 +251,7 @@ std::string GitRepository::info(void)
 {
     LOG_DEBUG("ref=%s", this->ref.data());
     LOG_DEBUG("detached=%d", this->detached);
+    LOG_DEBUG("bisecting=%d", this->bisecting);
     LOG_DEBUG("cherrypicking=%d", this->cherrypicking);
     LOG_DEBUG("merging=%d", this->merging);
     LOG_DEBUG("rebasing=%d", this->rebasing);
