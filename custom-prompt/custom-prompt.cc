@@ -187,7 +187,9 @@ public:
 private:
     void set_description(void);
     void set_state(void);
+    void set_status(void);
     static int compare_tag_update_description(char const* name, C::git_oid* oid, void* self_);
+    static int update_status(char const* path, unsigned status_flags, void* self_);
 };
 
 /******************************************************************************
@@ -208,6 +210,7 @@ GitRepository::GitRepository(void) :
     this->set_description();
     this->detached = C::git_repository_head_detached(this->repo);
     this->set_state();
+    this->set_status();
 }
 
 /******************************************************************************
@@ -275,6 +278,15 @@ void GitRepository::set_state(void)
 }
 
 /******************************************************************************
+ * Obtain the current status of the index and working tree of the current Git
+ * repository.
+ *****************************************************************************/
+void GitRepository::set_status(void)
+{
+    C::git_status_foreach(this->repo, this->update_status, this);
+}
+
+/******************************************************************************
  * Check whether the given tag matches the reference of the given
  * `GitRepository` instance. If it does, update the description of the latter
  * with the tag name.
@@ -302,6 +314,23 @@ int GitRepository::compare_tag_update_description(char const* name, C::git_oid* 
     }
     self->description += " 󰓼 " + tag_name;
     return 1;
+}
+
+/******************************************************************************
+ * Check whether the given file is modified, staged or untracked, and update
+ * the corresponding members of the given `GitRepository` instance.
+ *
+ * @param path File path.
+ * @param status_flags Flags indicating the status of the file.
+ * @param self_ `GitRepository` instance whose members should be updated.
+ *
+ * @return 1 if all statuses are recorded, 0 otherwise.
+ *****************************************************************************/
+int GitRepository::update_status(char const* path, unsigned status_flags, void* self_)
+{
+    GitRepository* self = static_cast<GitRepository*>(self_);
+    LOG_DEBUG("path=%s", path);
+    return 0;
 }
 
 /******************************************************************************
