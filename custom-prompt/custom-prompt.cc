@@ -188,6 +188,8 @@ private:
     void set_description(void);
     void set_state(void);
     void set_status(void);
+    // These are static methods because otherwise, their signatures do not
+    // match the required signatures for use as callback functions.
     static int compare_tag_update_description(char const* name, C::git_oid* oid, void* self_);
     static int update_status(char const* path, unsigned status_flags, void* self_);
 };
@@ -290,9 +292,6 @@ void GitRepository::set_status(void)
  * Check whether the given tag matches the reference of the given
  * `GitRepository` instance. If it does, update the description of the latter
  * with the tag name.
- *
- * This is a static method because otherwise, its signature does not match the
- * required signature for use as a callback function.
  *
  * @param name Tag name.
  * @param oid Tag object ID.
