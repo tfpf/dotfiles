@@ -218,15 +218,12 @@ void GitRepository::set_description(void)
 {
     if (C::git_repository_head(&this->ref, this->repo) == 0)
     {
-        if (C::git_reference_is_branch(this->ref))
+        char const* branch_name;
+        if (C::git_branch_name(&branch_name, this->ref) == 0)
         {
-            char const* branch_name;
-            if (C::git_branch_name(&branch_name, this->ref) == 0)
-            {
-                this->description = branch_name;
-                return;
-            };
-        }
+            this->description = branch_name;
+            return;
+        };
 
         // If not on a branch, use the commit hash and the tag (if there is
         // one).
