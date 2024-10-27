@@ -174,14 +174,20 @@ class GitRepository
 private:
     C::git_repository* repo;
     std::filesystem::path gitdir;
-    std::string ref;
+    C::git_reference* ref;
+    C::git_oid const* oid;
+    std::string description;
     bool detached;
     bool bisecting, cherrypicking, merging, rebasing, reverting;
 
 public:
     GitRepository(void);
-    std::string reference(void);
-    std::string info(void);
+    std::string get_information(void);
+
+private:
+    void set_description(void);
+    void set_state(void);
+    static int compare_tag_update_description(char const* name, C::git_oid* oid, void* self_);
 };
 
 /******************************************************************************
@@ -190,14 +196,63 @@ public:
 GitRepository::GitRepository(void) :
     bisecting(false), cherrypicking(false), merging(false), rebasing(false), reverting(false)
 {
-    C::git_libgit2_init();
+    if (C::git_libgit2_init() <= 0)
+    {
+        return;
+    }
     if (C::git_repository_open_ext(&this->repo, ".", 0, nullptr) != 0)
     {
         return;
     }
     this->gitdir = C::git_repository_path(this->repo);
-    this->ref = this->reference();
+    this->set_description();
     this->detached = C::git_repository_head_detached(this->repo);
+    this->set_state();
+}
+
+/******************************************************************************
+ * Obtain a human-readable description of the current working tree of the
+ * current Git repository. This shall be the branch name, commit hash or tag.
+ *****************************************************************************/
+void GitRepository::set_description(void)
+{
+    if (C::git_repository_head(&this->ref, this->repo) == 0)
+    {
+        if (C::git_reference_is_branch(this->ref))
+        {
+            char const* branch_name;
+            if (C::git_branch_name(&branch_name, this->ref) == 0)
+            {
+                this->description = branch_name;
+                return;
+            };
+        }
+
+        // If not on a branch, use the commit hash and the tag (if there is
+        // one).
+        this->oid = C::git_reference_target(this->ref);
+        this->description = C::git_oid_tostr_s(this->oid);
+        this->description.erase(7);
+        C::git_tag_foreach(this->repo, this->compare_tag_update_description, this);
+        return;
+    }
+
+    // If we are here, we must be on a branch with no commits. Obtain the
+    // required information manually.
+    std::ifstream head_file(this->gitdir / "HEAD");
+    if (!head_file.good())
+    {
+        return;
+    }
+    std::getline(head_file, this->description);
+}
+
+/******************************************************************************
+ * Obtain the current state (operation in progress) of the current Git
+ * repository.
+ *****************************************************************************/
+void GitRepository::set_state(void)
+{
     switch (C::git_repository_state(this->repo))
     {
     case C::GIT_REPOSITORY_STATE_BISECT:
@@ -223,22 +278,33 @@ GitRepository::GitRepository(void) :
 }
 
 /******************************************************************************
- * Read the reference of the current Git repository.
+ * Check whether the given tag matches the reference of the given
+ * `GitRepository` instance. If it does, update the description of the latter
+ * with the tag name.
  *
- * @return Git reference (branch name or commit hash).
+ * This is a static method because otherwise, its signature does not match the
+ * required signature for use as a callback function.
+ *
+ * @param name Tag name.
+ * @param oid Tag object ID.
+ * @param self_ `GitRepository` instance whose description should be updated.
+ *
+ * @return 1 if the tag matches the reference, 0 otherwise.
  *****************************************************************************/
-std::string GitRepository::reference(void)
+int GitRepository::compare_tag_update_description(char const* name, C::git_oid* oid, void* self_)
 {
-    // The head is not resolved correctly if there are no commits yet, so just
-    // do this manually.
-    std::ifstream head_file(this->gitdir / "HEAD");
-    std::string head_contents;
-    std::getline(head_file, head_contents);
-    if (head_contents.rfind("ref: refs/heads/", 0) == 0)
+    GitRepository* self = static_cast<GitRepository*>(self_);
+    if (C::git_oid_cmp(oid, self->oid) != 0)
     {
-        return head_contents.substr(16);
+        return 0;
     }
-    return head_contents.substr(0, 8);
+    std::string tag_name = name;
+    if (tag_name.rfind("refs/tags/", 0) == 0)
+    {
+        tag_name = tag_name.substr(10);
+    }
+    self->description += " 󰓼 " + tag_name;
+    return 1;
 }
 
 /******************************************************************************
@@ -247,9 +313,9 @@ std::string GitRepository::reference(void)
  *
  * @return Git information.
  *****************************************************************************/
-std::string GitRepository::info(void)
+std::string GitRepository::get_information(void)
 {
-    LOG_DEBUG("ref=%s", this->ref.data());
+    LOG_DEBUG("description=%s", this->description.data());
     LOG_DEBUG("detached=%d", this->detached);
     LOG_DEBUG("bisecting=%d", this->bisecting);
     LOG_DEBUG("cherrypicking=%d", this->cherrypicking);
@@ -480,7 +546,7 @@ int main_internal(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    GitRepository().info();
+    GitRepository().get_information();
     std::string_view git_info(argv[6]);
     int shlvl = std::stoi(argv[7]);
     display_primary_prompt(git_info, shlvl);
