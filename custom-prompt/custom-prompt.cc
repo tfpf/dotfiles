@@ -185,13 +185,13 @@ public:
     std::string get_information(void);
 
 private:
-    void set_description(void);
-    void set_state(void);
-    void set_status(void);
+    void establish_description(void);
+    void establish_state(void);
+    void establish_dirty_staged_untracked(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
     static int compare_tag_update_description(char const* name, C::git_oid* oid, void* self_);
-    static int update_status(char const* path, unsigned status_flags, void* self_);
+    static int update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_);
 };
 
 /******************************************************************************
@@ -208,18 +208,20 @@ GitRepository::GitRepository(void)
         return;
     }
     this->gitdir = C::git_repository_path(this->repo);
-    this->set_description();
+    this->establish_description();
     this->bare = C::git_repository_is_bare(this->repo);
     this->detached = C::git_repository_head_detached(this->repo);
-    this->set_state();
-    this->set_status();
+    this->establish_state();
+    this->establish_dirty_staged_untracked();
 }
 
 /******************************************************************************
- * Obtain a human-readable description of the current working tree of the
- * current Git repository. This shall be the branch name, commit hash or tag.
+ * Obtain a human-readable description of the working tree of the current Git
+ * repository. This shall be the name of the current branch if it is available.
+ * Otherwise, it shall be the hash of the most recent commit (and possibly its
+ * tag).
  *****************************************************************************/
-void GitRepository::set_description(void)
+void GitRepository::establish_description(void)
 {
     if (C::git_repository_head(&this->ref, this->repo) == 0)
     {
@@ -254,10 +256,10 @@ void GitRepository::set_description(void)
 }
 
 /******************************************************************************
- * Obtain the current state (operation in progress) of the current Git
- * repository.
+ * Obtain the state of the working tree of the current Git repository. This
+ * shall be the name of the operation currently in progress (if any).
  *****************************************************************************/
-void GitRepository::set_state(void)
+void GitRepository::establish_state(void)
 {
     switch (C::git_repository_state(this->repo))
     {
@@ -284,12 +286,12 @@ void GitRepository::set_state(void)
 }
 
 /******************************************************************************
- * Obtain the current status of the index and working tree of the current Git
+ * Obtain the status of the index and working tree of the current Git
  * repository.
  *****************************************************************************/
-void GitRepository::set_status(void)
+void GitRepository::establish_dirty_staged_untracked(void)
 {
-    C::git_status_foreach(this->repo, this->update_status, this);
+    C::git_status_foreach(this->repo, this->update_dirty_staged_untracked, this);
 }
 
 /******************************************************************************
@@ -329,7 +331,7 @@ int GitRepository::compare_tag_update_description(char const* name, C::git_oid* 
  *
  * @return 1 if all statuses are recorded, 0 otherwise.
  *****************************************************************************/
-int GitRepository::update_status(char const* path, unsigned status_flags, void* self_)
+int GitRepository::update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
     LOG_DEBUG("path=%s", path);
