@@ -203,7 +203,9 @@ private:
 /******************************************************************************
  * Read the current Git repository.
  *****************************************************************************/
-GitRepository::GitRepository(void) : dirty(false), staged(false), untracked(false)
+GitRepository::GitRepository(void) :
+    repo(nullptr), ref(nullptr), oid(nullptr), bare(false), detached(false), dirty(false), staged(false),
+    untracked(false)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -377,6 +379,10 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
  *****************************************************************************/
 std::string GitRepository::get_information(void)
 {
+    if (this->repo == nullptr)
+    {
+        return "";
+    }
     std::ostringstream information_stream;
     if (this->bare)
     {
