@@ -179,6 +179,7 @@ private:
     std::string description;
     bool bare, detached;
     std::string state;
+    bool dirty, staged, untracked;
 
 public:
     GitRepository(void);
@@ -197,7 +198,7 @@ private:
 /******************************************************************************
  * Read the current Git repository.
  *****************************************************************************/
-GitRepository::GitRepository(void)
+GitRepository::GitRepository(void) : dirty(false), staged(false), untracked(false)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -291,7 +292,9 @@ void GitRepository::establish_state(void)
  *****************************************************************************/
 void GitRepository::establish_dirty_staged_untracked(void)
 {
-    C::git_status_foreach(this->repo, this->update_dirty_staged_untracked, this);
+    C::git_status_options opts = GIT_STATUS_OPTIONS_INIT;
+    opts.flags = C::GIT_STATUS_OPT_INCLUDE_UNTRACKED | C::GIT_STATUS_OPT_EXCLUDE_SUBMODULES;
+    C::git_status_foreach_ext(this->repo, &opts, this->update_dirty_staged_untracked, this);
 }
 
 /******************************************************************************
