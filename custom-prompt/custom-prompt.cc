@@ -346,21 +346,24 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
 {
     _path = _path;  // Suppress unused parameter warning.
     GitRepository* self = static_cast<GitRepository*>(self_);
+
+    // The first two branches below are mutually exclusive. The third is not
+    // mutually exclusive with either of them.
     if (status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
             | C::GIT_STATUS_WT_TYPECHANGE))
     {
         self->dirty = true;
     }
-    else if (status_flags
+    else if (status_flags & C::GIT_STATUS_WT_NEW)
+    {
+        self->untracked = true;
+    }
+    if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
             | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
         self->staged = true;
-    }
-    else if (status_flags & C::GIT_STATUS_WT_NEW)
-    {
-        self->untracked = true;
     }
     if (self->dirty && self->staged && self->untracked)
     {
