@@ -321,6 +321,7 @@ int GitRepository::compare_tag_update_description(char const* name, C::git_oid* 
         tag_name = tag_name.substr(10);
     }
     self->description += " 󰓼 " + tag_name;
+    // Found a match. Stop iterating.
     return 1;
 }
 
@@ -337,7 +338,28 @@ int GitRepository::compare_tag_update_description(char const* name, C::git_oid* 
 int GitRepository::update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
-    LOG_DEBUG("path=%s", path);
+    if (status_flags
+        & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
+            | C::GIT_STATUS_WT_TYPECHANGE))
+    {
+        self->dirty = true;
+    }
+    else if (status_flags
+        & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
+            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
+    {
+        self->staged = true;
+    }
+    else if (status_flags & C::GIT_STATUS_WT_NEW)
+    {
+        self->untracked = true;
+    }
+    if (self->dirty && self->staged && self->untracked)
+    {
+        // Found all possible statuses. No use searching further. Stop
+        // iterating.
+        return 1;
+    }
     return 0;
 }
 
