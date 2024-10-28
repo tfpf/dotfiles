@@ -178,7 +178,7 @@ private:
     C::git_oid const* oid;
     std::string description;
     bool detached;
-    bool bisecting, cherrypicking, merging, rebasing, reverting;
+    std::string state;
 
 public:
     GitRepository(void);
@@ -197,8 +197,7 @@ private:
 /******************************************************************************
  * Read the current Git repository.
  *****************************************************************************/
-GitRepository::GitRepository(void) :
-    bisecting(false), cherrypicking(false), merging(false), rebasing(false), reverting(false)
+GitRepository::GitRepository(void)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -247,6 +246,10 @@ void GitRepository::set_description(void)
         return;
     }
     std::getline(head_file, this->description);
+    if (this->description.rfind("ref: refs/heads/", 0) == 0)
+    {
+        this->description.erase(0, 16);
+    }
 }
 
 /******************************************************************************
@@ -258,23 +261,23 @@ void GitRepository::set_state(void)
     switch (C::git_repository_state(this->repo))
     {
     case C::GIT_REPOSITORY_STATE_BISECT:
-        this->bisecting = true;
+        this->state = "bisecting";
         break;
     case C::GIT_REPOSITORY_STATE_CHERRYPICK:
     case C::GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
-        this->cherrypicking = true;
+        this->state = "cherrypicking";
         break;
     case C::GIT_REPOSITORY_STATE_MERGE:
-        this->merging = true;
+        this->state = "merging";
         break;
     case C::GIT_REPOSITORY_STATE_REBASE:
     case C::GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
     case C::GIT_REPOSITORY_STATE_REBASE_MERGE:
-        this->rebasing = true;
+        this->state = "rebasing";
         break;
     case C::GIT_REPOSITORY_STATE_REVERT:
     case C::GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
-        this->reverting = true;
+        this->state = "reverting";
         break;
     }
 }
@@ -342,11 +345,7 @@ std::string GitRepository::get_information(void)
 {
     LOG_DEBUG("description=%s", this->description.data());
     LOG_DEBUG("detached=%d", this->detached);
-    LOG_DEBUG("bisecting=%d", this->bisecting);
-    LOG_DEBUG("cherrypicking=%d", this->cherrypicking);
-    LOG_DEBUG("merging=%d", this->merging);
-    LOG_DEBUG("rebasing=%d", this->rebasing);
-    LOG_DEBUG("reverting=%d", this->reverting);
+    LOG_DEBUG("state=%s", this->state.data());
     return "";
 }
 
