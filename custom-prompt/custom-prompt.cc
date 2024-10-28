@@ -196,7 +196,7 @@ private:
     void establish_dirty_staged_untracked(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
-    static int compare_tag_update_description(char const* name, C::git_oid* oid, void* self_);
+    static int update_description(char const* name, C::git_oid* oid, void* self_);
     static int update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_);
 };
 
@@ -240,12 +240,13 @@ void GitRepository::establish_description(void)
             return;
         };
 
-        // If not on a branch, use the commit hash and the tag (if there is
-        // one).
+        // If not on a branch, use the commit hash and the tag, if there is
+        // one. Unannotated tags cannot be looked up, so the only way to check
+        // is to iterate over all tags.
         this->oid = C::git_reference_target(this->ref);
         this->description = C::git_oid_tostr_s(this->oid);
         this->description.erase(7);
-        C::git_tag_foreach(this->repo, this->compare_tag_update_description, this);
+        C::git_tag_foreach(this->repo, this->update_description, this);
         return;
     }
 
@@ -315,7 +316,7 @@ void GitRepository::establish_dirty_staged_untracked(void)
  *
  * @return 1 if the tag matches the reference, 0 otherwise.
  *****************************************************************************/
-int GitRepository::compare_tag_update_description(char const* name, C::git_oid* oid, void* self_)
+int GitRepository::update_description(char const* name, C::git_oid* oid, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
     if (C::git_oid_cmp(oid, self->oid) != 0)
@@ -333,8 +334,8 @@ int GitRepository::compare_tag_update_description(char const* name, C::git_oid* 
 }
 
 /******************************************************************************
- * Check whether the given file is modified, staged or untracked, and update
- * the corresponding members of the given `GitRepository` instance.
+ * Check whether the given file is modified, staged or untracked. If it is,
+ * update the corresponding members of the given `GitRepository` instance.
  *
  * @param _path File path.
  * @param status_flags Flags indicating the status of the file.
@@ -365,13 +366,9 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     {
         self->staged = true;
     }
-    if (self->dirty && self->staged && self->untracked)
-    {
-        // Found all possible statuses. No use searching further. Stop
-        // iterating.
-        return 1;
-    }
-    return 0;
+
+    // Stop iterating if all possible statuses were found.
+    return self->dirty && self->staged && self->untracked;
 }
 
 /******************************************************************************
