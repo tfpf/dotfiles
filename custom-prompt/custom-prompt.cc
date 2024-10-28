@@ -177,7 +177,7 @@ private:
     C::git_reference* ref;
     C::git_oid const* oid;
     std::string description;
-    bool detached;
+    bool bare, detached;
     std::string state;
 
 public:
@@ -209,6 +209,7 @@ GitRepository::GitRepository(void)
     }
     this->gitdir = C::git_repository_path(this->repo);
     this->set_description();
+    this->bare = C::git_repository_is_bare(this->repo);
     this->detached = C::git_repository_head_detached(this->repo);
     this->set_state();
     this->set_status();
@@ -344,6 +345,7 @@ int GitRepository::update_status(char const* path, unsigned status_flags, void* 
 std::string GitRepository::get_information(void)
 {
     LOG_DEBUG("description=%s", this->description.data());
+    LOG_DEBUG("bare=%d", this->bare);
     LOG_DEBUG("detached=%d", this->detached);
     LOG_DEBUG("state=%s", this->state.data());
     return "";
