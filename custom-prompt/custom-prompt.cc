@@ -71,13 +71,18 @@ namespace C
 
 // Bright.
 #define B_BLUE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "94m" END_INVISIBLE
+#define B_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "92m" END_INVISIBLE
 #define B_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "92m"
 #define B_GREY_RAW ESCAPE LEFT_SQUARE_BRACKET "90m"
+#define B_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "91m" END_INVISIBLE
 #define B_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "91m"
+#define B_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "93m" END_INVISIBLE
 
 // Dark.
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
+#define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
 #define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
+#define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
 #define D_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "31m"
 
 // No formatting.
@@ -269,7 +274,7 @@ void GitRepository::establish_state(void)
         break;
     case C::GIT_REPOSITORY_STATE_CHERRYPICK:
     case C::GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
-        this->state = "cherrypicking";
+        this->state = "cherry-picking";
         break;
     case C::GIT_REPOSITORY_STATE_MERGE:
         this->state = "merging";
@@ -329,14 +334,15 @@ int GitRepository::compare_tag_update_description(char const* name, C::git_oid* 
  * Check whether the given file is modified, staged or untracked, and update
  * the corresponding members of the given `GitRepository` instance.
  *
- * @param path File path.
+ * @param _path File path.
  * @param status_flags Flags indicating the status of the file.
  * @param self_ `GitRepository` instance whose members should be updated.
  *
  * @return 1 if all statuses are recorded, 0 otherwise.
  *****************************************************************************/
-int GitRepository::update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_)
+int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
+    _path = _path;  // Suppress unused parameter warning.
     GitRepository* self = static_cast<GitRepository*>(self_);
     if (status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
@@ -371,11 +377,40 @@ int GitRepository::update_dirty_staged_untracked(char const* path, unsigned stat
  *****************************************************************************/
 std::string GitRepository::get_information(void)
 {
-    LOG_DEBUG("description=%s", this->description.data());
-    LOG_DEBUG("bare=%d", this->bare);
-    LOG_DEBUG("detached=%d", this->detached);
-    LOG_DEBUG("state=%s", this->state.data());
-    return "";
+    std::ostringstream information_stream;
+    if (this->bare)
+    {
+        information_stream << "bare | ";
+    }
+    if (this->detached)
+    {
+        information_stream << D_RED << this->description << RESET;
+    }
+    else
+    {
+        information_stream << D_GREEN << this->description << RESET;
+    }
+    if (this->dirty || this->staged || this->untracked)
+    {
+        information_stream << ' ';
+    }
+    if (this->dirty)
+    {
+        information_stream << B_YELLOW "*" RESET;
+    }
+    if (this->staged)
+    {
+        information_stream << B_GREEN "+" RESET;
+    }
+    if (this->untracked)
+    {
+        information_stream << B_RED "!" RESET;
+    }
+    if (!this->state.empty())
+    {
+        information_stream << " | " << this->state;
+    }
+    return information_stream.str();
 }
 
 /******************************************************************************
@@ -523,18 +558,18 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 /******************************************************************************
  * Show the primary prompt.
  *
- * @param git_info Description of the status of the current Git repository.
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(std::string_view const& git_info, int shlvl)
+void display_primary_prompt(int shlvl)
 {
-    LOG_DEBUG("Current Git repository state is '%s'.", git_info.data());
+    std::string git_repository_information = GitRepository().get_information();
+    LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
     std::cout << "\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]";
-    if (!git_info.empty())
+    if (!git_repository_information.empty())
     {
-        std::cout << "  " << git_info;
+        std::cout << "  " << git_repository_information;
     }
     if (venv != nullptr)
     {
@@ -599,10 +634,8 @@ int main_internal(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    GitRepository().get_information();
-    std::string_view git_info(argv[6]);
     int shlvl = std::stoi(argv[7]);
-    display_primary_prompt(git_info, shlvl);
+    display_primary_prompt(shlvl);
 
     std::string_view pwd(argv[8]);
     set_terminal_title(pwd);
