@@ -181,7 +181,7 @@ private:
     std::filesystem::path gitdir;
     C::git_reference* ref;
     C::git_oid const* oid;
-    std::string description;
+    std::string description, tag;
     bool bare, detached;
     std::string state;
     bool dirty, staged, untracked;
@@ -192,11 +192,12 @@ public:
 
 private:
     void establish_description(void);
+    void establish_tag(void);
     void establish_state(void);
     void establish_dirty_staged_untracked(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
-    static int update_description(char const* name, C::git_oid* oid, void* self_);
+    static int update_tag(char const* name, C::git_oid* oid, void* self_);
     static int update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_);
 };
 
@@ -217,6 +218,7 @@ GitRepository::GitRepository(void) :
     }
     this->gitdir = C::git_repository_path(this->repo);
     this->establish_description();
+    this->establish_tag();
     this->bare = C::git_repository_is_bare(this->repo);
     this->detached = C::git_repository_head_detached(this->repo);
     this->establish_state();
@@ -226,13 +228,19 @@ GitRepository::GitRepository(void) :
 /******************************************************************************
  * Obtain a human-readable description of the working tree of the current Git
  * repository. This shall be the name of the current branch if it is available.
- * Otherwise, it shall be the hash of the most recent commit (and possibly its
- * tag).
+ * Otherwise, it shall be the hash of the most recent commit.
  *****************************************************************************/
 void GitRepository::establish_description(void)
 {
     if (C::git_repository_head(&this->ref, this->repo) == 0)
     {
+        // According to the documentation, this retrieves the OID only if the
+        // reference is direct. However, I observed that it does so even if the
+        // reference is symbolic (i.e. we are on a branch). There is no harm in
+        // leaving it here because if it fails, it will just return a null
+        // pointer.
+        this->oid = C::git_reference_target(this->ref);
+
         char const* branch_name;
         if (C::git_branch_name(&branch_name, this->ref) == 0)
         {
@@ -240,18 +248,15 @@ void GitRepository::establish_description(void)
             return;
         };
 
-        // If not on a branch, use the commit hash and the tag, if there is
-        // one. Unannotated tags cannot be looked up, so the only way to check
-        // is to iterate over all tags.
-        this->oid = C::git_reference_target(this->ref);
+        // We are not on a branch. The reference must be direct. Use the commit
+        // hash.
         this->description = C::git_oid_tostr_s(this->oid);
         this->description.erase(7);
-        C::git_tag_foreach(this->repo, this->update_description, this);
         return;
     }
 
-    // If we are here, we must be on a branch with no commits. Obtain the
-    // required information manually.
+    // We must be on a branch with no commits. Obtain the required information
+    // manually.
     std::ifstream head_file(this->gitdir / "HEAD");
     if (!head_file.good())
     {
@@ -262,6 +267,19 @@ void GitRepository::establish_description(void)
     {
         this->description.erase(0, 16);
     }
+}
+
+/******************************************************************************
+ * Obtain the tag of the working tree of the current Git repository (if there
+ * is one).
+ *****************************************************************************/
+void GitRepository::establish_tag(void)
+{
+    if (this->oid == nullptr)
+    {
+        return;
+    }
+    C::git_tag_foreach(this->repo, this->update_tag, this);
 }
 
 /******************************************************************************
@@ -307,8 +325,8 @@ void GitRepository::establish_dirty_staged_untracked(void)
 
 /******************************************************************************
  * Check whether the given tag matches the reference of the given
- * `GitRepository` instance. If it does, update the description of the latter
- * with the tag name.
+ * `GitRepository` instance. If it does, update the corresponding member of the
+ * latter.
  *
  * @param name Tag name.
  * @param oid Tag object ID.
@@ -316,19 +334,19 @@ void GitRepository::establish_dirty_staged_untracked(void)
  *
  * @return 1 if the tag matches the reference, 0 otherwise.
  *****************************************************************************/
-int GitRepository::update_description(char const* name, C::git_oid* oid, void* self_)
+int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
     if (C::git_oid_cmp(oid, self->oid) != 0)
     {
         return 0;
     }
-    std::string tag_name = name;
-    if (tag_name.rfind("refs/tags/", 0) == 0)
+    std::string tag = name;
+    if (tag.rfind("refs/tags/", 0) == 0)
     {
-        tag_name = tag_name.substr(10);
+        tag = tag.substr(10);
     }
-    self->description += " 󰓼 " + tag_name;
+    self->tag = tag;
     // Found a match. Stop iterating.
     return 1;
 }
@@ -395,6 +413,10 @@ std::string GitRepository::get_information(void)
     else
     {
         information_stream << D_GREEN << this->description << RESET;
+    }
+    if (!this->tag.empty())
+    {
+        information_stream << " 󰓼 " << this->tag;
     }
     if (this->dirty || this->staged || this->untracked)
     {
