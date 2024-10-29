@@ -197,8 +197,8 @@ private:
     void establish_dirty_staged_untracked(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
-    static int update_tag(char const* name, C::git_oid* oid, void* self_);
-    static int update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_);
+    static int update_tag(char const*, C::git_oid*, void*);
+    static int update_dirty_staged_untracked(char const*, unsigned, void*);
 };
 
 /******************************************************************************
