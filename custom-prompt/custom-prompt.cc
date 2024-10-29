@@ -275,7 +275,6 @@ void GitRepository::establish_description(void)
  *****************************************************************************/
 void GitRepository::establish_tag(void)
 {
-    LOG_DEBUG("%d %s", this->detached, C::git_oid_tostr_s(this->oid));
     // If a tag or a tagged commit is not checked out (which is the case if we
     // are on a branch), don't search. (This makes the common case fast.) If
     // the most recent commit is not available, there is nothing to search
@@ -284,7 +283,6 @@ void GitRepository::establish_tag(void)
     {
         return;
     }
-    LOG_DEBUG("searching");
     C::git_tag_foreach(this->repo, this->update_tag, this);
 }
 
@@ -319,7 +317,7 @@ void GitRepository::establish_state(void)
 }
 
 /******************************************************************************
- * Obtain the status of the index and working tree of the current Git
+ * Obtain the statuses of the index and working tree of the current Git
  * repository.
  *****************************************************************************/
 void GitRepository::establish_dirty_staged_untracked(void)
@@ -388,27 +386,16 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
  *****************************************************************************/
 int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
-    _path = _path;  // Suppress unused parameter warning.
     GitRepository* self = static_cast<GitRepository*>(self_);
 
-    // The first two branches below are mutually exclusive. The third is not
-    // mutually exclusive with either of them.
-    if (status_flags
+    // The C++17 standard permits assigning integers to boolean variables.
+    self->dirty |= status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
-            | C::GIT_STATUS_WT_TYPECHANGE))
-    {
-        self->dirty = true;
-    }
-    else if (status_flags & C::GIT_STATUS_WT_NEW)
-    {
-        self->untracked = true;
-    }
-    if (status_flags
+            | C::GIT_STATUS_WT_TYPECHANGE);
+    self->staged |= status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
-            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
-    {
-        self->staged = true;
-    }
+            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE);
+    self->untracked |= status_flags & C::GIT_STATUS_WT_NEW;
 
     // Stop iterating if all possible statuses were found.
     return self->dirty && self->staged && self->untracked;
