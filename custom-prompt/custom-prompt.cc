@@ -178,11 +178,11 @@ class GitRepository
 {
 private:
     C::git_repository* repo;
+    bool bare, detached;
     std::filesystem::path gitdir;
     C::git_reference* ref;
     C::git_oid const* oid;
     std::string description, tag;
-    bool bare, detached;
     std::string state;
     bool dirty, staged, untracked;
 
@@ -205,7 +205,7 @@ private:
  * Read the current Git repository.
  *****************************************************************************/
 GitRepository::GitRepository(void) :
-    repo(nullptr), ref(nullptr), oid(nullptr), bare(false), detached(false), dirty(false), staged(false),
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(false), staged(false),
     untracked(false)
 {
     if (C::git_libgit2_init() <= 0)
@@ -216,11 +216,11 @@ GitRepository::GitRepository(void) :
     {
         return;
     }
+    this->bare = C::git_repository_is_bare(this->repo);
+    this->detached = C::git_repository_head_detached(this->repo);
     this->gitdir = C::git_repository_path(this->repo);
     this->establish_description();
     this->establish_tag();
-    this->bare = C::git_repository_is_bare(this->repo);
-    this->detached = C::git_repository_head_detached(this->repo);
     this->establish_state();
     this->establish_dirty_staged_untracked();
 }
@@ -228,17 +228,17 @@ GitRepository::GitRepository(void) :
 /******************************************************************************
  * Obtain a human-readable description of the working tree of the current Git
  * repository. This shall be the name of the current branch if it is available.
- * Otherwise, it shall be the hash of the most recent commit.
+ * Otherwise, it shall be the object ID of the most recent commit.
  *****************************************************************************/
 void GitRepository::establish_description(void)
 {
     if (C::git_repository_head(&this->ref, this->repo) == 0)
     {
-        // According to the documentation, this retrieves the OID only if the
-        // reference is direct. However, I observed that it does so even if the
-        // reference is symbolic (i.e. we are on a branch). There is no harm in
-        // leaving it here because if it fails, it will just return a null
-        // pointer.
+        // According to the documentation, this retrieves the reference object
+        // ID only if the reference is direct. However, I observed that it does
+        // so even if the reference is symbolic (i.e. if we are on a branch).
+        // There is no harm in leaving it here because if it fails, it will
+        // just return a null pointer.
         this->oid = C::git_reference_target(this->ref);
 
         char const* branch_name;
@@ -249,7 +249,7 @@ void GitRepository::establish_description(void)
         };
 
         // We are not on a branch. The reference must be direct. Use the commit
-        // hash.
+        // object ID.
         this->description = C::git_oid_tostr_s(this->oid);
         this->description.erase(7);
         return;
@@ -275,10 +275,16 @@ void GitRepository::establish_description(void)
  *****************************************************************************/
 void GitRepository::establish_tag(void)
 {
-    if (this->oid == nullptr)
+    LOG_DEBUG("%d %s", this->detached, C::git_oid_tostr_s(this->oid));
+    // If a tag or a tagged commit is not checked out (which is the case if we
+    // are on a branch), don't search. (This makes the common case fast.) If
+    // the most recent commit is not available, there is nothing to search
+    // anyway.
+    if (!this->detached || this->oid == nullptr)
     {
         return;
     }
+    LOG_DEBUG("searching");
     C::git_tag_foreach(this->repo, this->update_tag, this);
 }
 
@@ -330,23 +336,42 @@ void GitRepository::establish_dirty_staged_untracked(void)
  *
  * @param name Tag name.
  * @param oid Tag object ID.
- * @param self_ `GitRepository` instance whose description should be updated.
+ * @param self_ `GitRepository` instance whose member should be updated.
  *
  * @return 1 if the tag matches the reference, 0 otherwise.
  *****************************************************************************/
 int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
+
+    // Compare the object ID of the tag with the object ID of the reference.
     if (C::git_oid_cmp(oid, self->oid) != 0)
     {
-        return 0;
+        C::git_tag* tag;
+        if (C::git_tag_lookup(&tag, self->repo, oid) != 0)
+        {
+            // This is an unannotated tag, meaning that its object ID is the
+            // same as the object ID of the corresponding commit. The latter
+            // does not match the object ID of the reference.
+            return 0;
+        }
+
+        // This is an annotated tag, meaning that its object ID is different
+        // from the object ID of the corresponding commit. Find the latter and
+        // compare it with the object ID of the reference.
+        C::git_oid const* oid = C::git_tag_target_id(tag);
+        if (C::git_oid_cmp(oid, self->oid) != 0)
+        {
+            // The latter does not match the object ID of the reference.
+            return 0;
+        }
     }
-    std::string tag = name;
-    if (tag.rfind("refs/tags/", 0) == 0)
+
+    self->tag = name;
+    if (self->tag.rfind("refs/tags/", 0) == 0)
     {
-        tag = tag.substr(10);
+        self->tag.erase(0, 10);
     }
-    self->tag = tag;
     // Found a match. Stop iterating.
     return 1;
 }
