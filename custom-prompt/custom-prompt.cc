@@ -228,7 +228,7 @@ GitRepository::GitRepository(void) :
 /******************************************************************************
  * Obtain a human-readable description of the working tree of the current Git
  * repository. This shall be the name of the current branch if it is available.
- * Otherwise, it shall be the object ID of the most recent commit.
+ * Otherwise, it shall be the hash of the most recent commit.
  *****************************************************************************/
 void GitRepository::establish_description(void)
 {
@@ -249,7 +249,7 @@ void GitRepository::establish_description(void)
         };
 
         // We are not on a branch. The reference must be direct. Use the commit
-        // object ID.
+        // hash.
         this->description = C::git_oid_tostr_s(this->oid);
         this->description.erase(7);
         return;
