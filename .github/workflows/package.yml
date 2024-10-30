@@ -18,10 +18,11 @@ jobs:
       - run: |
           git clone https://github.com/libgit2/libgit2.git
           mkdir -p libgit2/build libgit2/target && cd libgit2/build
-          cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/../target -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
+          cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
           cmake --build . --target install
           find $PWD/../target
-          make -j release
+      - run: make -j release
+        working-directory: custom-prompt
 
   # build_macos_windows:
   #   name: build on ${{ matrix.os.name }}
