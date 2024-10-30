@@ -114,13 +114,6 @@ then
     _source_one /usr/share/bash-completion/bash_completion /etc/bash_completion
 fi
 
-# Showing the Git branch in the primary prompt depends upon a script which must
-# be sourced separately on some Linux distributions.
-if ! command -v __git_ps1 &>/dev/null
-then
-    _source_one $HOME/Documents/projects/git/contrib/completion/git-prompt.sh /usr/share/git/completion/git-prompt.sh /usr/share/git-core/contrib/completion/git-prompt.sh
-fi
-
 PS1='[\u@\h \w]\$ '
 PS2='──▶ '
 PS3='#? '
