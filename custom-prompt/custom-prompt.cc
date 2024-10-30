@@ -3,17 +3,20 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#ifdef __linux__
 namespace C
 {
+#include <git2.h>
+#ifdef __linux__
 #include <libnotify/notify.h>
-}
 #endif
+}
 
 #if defined __APPLE__
 #define HOST_ICON ""
@@ -68,13 +71,18 @@ namespace C
 
 // Bright.
 #define B_BLUE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "94m" END_INVISIBLE
+#define B_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "92m" END_INVISIBLE
 #define B_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "92m"
 #define B_GREY_RAW ESCAPE LEFT_SQUARE_BRACKET "90m"
+#define B_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "91m" END_INVISIBLE
 #define B_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "91m"
+#define B_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "93m" END_INVISIBLE
 
 // Dark.
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
+#define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
 #define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
+#define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
 #define D_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "31m"
 
 // No formatting.
@@ -162,6 +170,288 @@ void Interval::print_long(std::ostream& ostream) const
  * returned. Likewise, on macOS, if no topmost window is found, 0 is returned.
  *****************************************************************************/
 extern "C" long long unsigned get_active_wid(void);
+
+/******************************************************************************
+ * Store information about the current Git repository.
+ *****************************************************************************/
+class GitRepository
+{
+private:
+    C::git_repository* repo;
+    bool bare, detached;
+    std::filesystem::path gitdir;
+    C::git_reference* ref;
+    C::git_oid const* oid;
+    std::string description, tag;
+    std::string state;
+    bool dirty, staged, untracked;
+
+public:
+    GitRepository(void);
+    std::string get_information(void);
+
+private:
+    void establish_description(void);
+    void establish_tag(void);
+    void establish_state(void);
+    void establish_dirty_staged_untracked(void);
+    // These are static methods because otherwise, their signatures do not
+    // match the required signatures for use as callback functions.
+    static int update_tag(char const*, C::git_oid*, void*);
+    static int update_dirty_staged_untracked(char const*, unsigned, void*);
+};
+
+/******************************************************************************
+ * Read the current Git repository.
+ *****************************************************************************/
+GitRepository::GitRepository(void) :
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(false), staged(false),
+    untracked(false)
+{
+    if (C::git_libgit2_init() <= 0)
+    {
+        return;
+    }
+    if (C::git_repository_open_ext(&this->repo, ".", 0, nullptr) != 0)
+    {
+        return;
+    }
+    this->bare = C::git_repository_is_bare(this->repo);
+    this->detached = C::git_repository_head_detached(this->repo);
+    this->gitdir = C::git_repository_path(this->repo);
+    this->establish_description();
+    this->establish_tag();
+    this->establish_state();
+    this->establish_dirty_staged_untracked();
+}
+
+/******************************************************************************
+ * Obtain a human-readable description of the working tree of the current Git
+ * repository. This shall be the name of the current branch if it is available.
+ * Otherwise, it shall be the hash of the most recent commit.
+ *****************************************************************************/
+void GitRepository::establish_description(void)
+{
+    if (C::git_repository_head(&this->ref, this->repo) == 0)
+    {
+        // According to the documentation, this retrieves the reference object
+        // ID only if the reference is direct. However, I observed that it does
+        // so even if the reference is symbolic (i.e. if we are on a branch).
+        // There is no harm in leaving it here because if it fails, it will
+        // just return a null pointer.
+        this->oid = C::git_reference_target(this->ref);
+
+        char const* branch_name;
+        if (C::git_branch_name(&branch_name, this->ref) == 0)
+        {
+            this->description = branch_name;
+            return;
+        };
+
+        // We are not on a branch. The reference must be direct. Use the commit
+        // hash.
+        this->description = C::git_oid_tostr_s(this->oid);
+        this->description.erase(7);
+        return;
+    }
+
+    // We must be on a branch with no commits. Obtain the required information
+    // manually.
+    std::ifstream head_file(this->gitdir / "HEAD");
+    if (!head_file.good())
+    {
+        return;
+    }
+    std::getline(head_file, this->description);
+    if (this->description.rfind("ref: refs/heads/", 0) == 0)
+    {
+        this->description.erase(0, 16);
+    }
+}
+
+/******************************************************************************
+ * Obtain the tag of the working tree of the current Git repository (if there
+ * is one).
+ *****************************************************************************/
+void GitRepository::establish_tag(void)
+{
+    // If a tag or a tagged commit is not checked out (which is the case if we
+    // are on a branch), don't search. (This makes the common case fast.) If
+    // the most recent commit is not available, there is nothing to search
+    // anyway.
+    if (!this->detached || this->oid == nullptr)
+    {
+        return;
+    }
+    C::git_tag_foreach(this->repo, this->update_tag, this);
+}
+
+/******************************************************************************
+ * Obtain the state of the working tree of the current Git repository. This
+ * shall be the name of the operation currently in progress (if any).
+ *****************************************************************************/
+void GitRepository::establish_state(void)
+{
+    switch (C::git_repository_state(this->repo))
+    {
+    case C::GIT_REPOSITORY_STATE_BISECT:
+        this->state = "bisecting";
+        break;
+    case C::GIT_REPOSITORY_STATE_CHERRYPICK:
+    case C::GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
+        this->state = "cherry-picking";
+        break;
+    case C::GIT_REPOSITORY_STATE_MERGE:
+        this->state = "merging";
+        break;
+    case C::GIT_REPOSITORY_STATE_REBASE:
+    case C::GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+    case C::GIT_REPOSITORY_STATE_REBASE_MERGE:
+        this->state = "rebasing";
+        break;
+    case C::GIT_REPOSITORY_STATE_REVERT:
+    case C::GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
+        this->state = "reverting";
+        break;
+    }
+}
+
+/******************************************************************************
+ * Obtain the statuses of the index and working tree of the current Git
+ * repository.
+ *****************************************************************************/
+void GitRepository::establish_dirty_staged_untracked(void)
+{
+    C::git_status_options opts = GIT_STATUS_OPTIONS_INIT;
+    opts.flags = C::GIT_STATUS_OPT_INCLUDE_UNTRACKED | C::GIT_STATUS_OPT_EXCLUDE_SUBMODULES;
+    C::git_status_foreach_ext(this->repo, &opts, this->update_dirty_staged_untracked, this);
+}
+
+/******************************************************************************
+ * Check whether the given tag matches the reference of the given
+ * `GitRepository` instance. If it does, update the corresponding member of the
+ * latter.
+ *
+ * @param name Tag name.
+ * @param oid Tag object ID.
+ * @param self_ `GitRepository` instance whose member should be updated.
+ *
+ * @return 1 if the tag matches the reference, 0 otherwise.
+ *****************************************************************************/
+int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
+{
+    GitRepository* self = static_cast<GitRepository*>(self_);
+
+    // Compare the object ID of the tag with the object ID of the reference.
+    if (C::git_oid_cmp(oid, self->oid) != 0)
+    {
+        C::git_tag* tag;
+        if (C::git_tag_lookup(&tag, self->repo, oid) != 0)
+        {
+            // This is an unannotated tag, meaning that its object ID is the
+            // same as the object ID of the corresponding commit. The latter
+            // does not match the object ID of the reference.
+            return 0;
+        }
+
+        // This is an annotated tag, meaning that its object ID is different
+        // from the object ID of the corresponding commit. Find the latter and
+        // compare it with the object ID of the reference.
+        C::git_oid const* oid = C::git_tag_target_id(tag);
+        if (C::git_oid_cmp(oid, self->oid) != 0)
+        {
+            // The latter does not match the object ID of the reference.
+            return 0;
+        }
+    }
+
+    self->tag = name;
+    if (self->tag.rfind("refs/tags/", 0) == 0)
+    {
+        self->tag.erase(0, 10);
+    }
+    // Found a match. Stop iterating.
+    return 1;
+}
+
+/******************************************************************************
+ * Check whether the given file is modified, staged or untracked. If it is,
+ * update the corresponding members of the given `GitRepository` instance.
+ *
+ * @param _path File path.
+ * @param status_flags Flags indicating the status of the file.
+ * @param self_ `GitRepository` instance whose members should be updated.
+ *
+ * @return 1 if all statuses are recorded, 0 otherwise.
+ *****************************************************************************/
+int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
+{
+    GitRepository* self = static_cast<GitRepository*>(self_);
+
+    // The C++17 standard permits assigning integers to boolean variables.
+    self->dirty |= status_flags
+        & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
+            | C::GIT_STATUS_WT_TYPECHANGE);
+    self->staged |= status_flags
+        & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
+            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE);
+    self->untracked |= status_flags & C::GIT_STATUS_WT_NEW;
+
+    // Stop iterating if all possible statuses were found.
+    return self->dirty && self->staged && self->untracked;
+}
+
+/******************************************************************************
+ * Provide information about the current Git repository in a manner suitable to
+ * display in the shell prompt.
+ *
+ * @return Git information.
+ *****************************************************************************/
+std::string GitRepository::get_information(void)
+{
+    if (this->repo == nullptr)
+    {
+        return "";
+    }
+    std::ostringstream information_stream;
+    if (this->bare)
+    {
+        information_stream << "bare | ";
+    }
+    if (this->detached)
+    {
+        information_stream << D_RED << this->description << RESET;
+    }
+    else
+    {
+        information_stream << D_GREEN << this->description << RESET;
+    }
+    if (!this->tag.empty())
+    {
+        information_stream << " 󰓼 " << this->tag;
+    }
+    if (this->dirty || this->staged || this->untracked)
+    {
+        information_stream << ' ';
+    }
+    if (this->dirty)
+    {
+        information_stream << B_YELLOW "*" RESET;
+    }
+    if (this->staged)
+    {
+        information_stream << B_GREEN "+" RESET;
+    }
+    if (this->untracked)
+    {
+        information_stream << B_RED "!" RESET;
+    }
+    if (!this->state.empty())
+    {
+        information_stream << " | " << this->state;
+    }
+    return information_stream.str();
+}
 
 /******************************************************************************
  * Get the current timestamp.
@@ -308,18 +598,18 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 /******************************************************************************
  * Show the primary prompt.
  *
- * @param git_info Description of the status of the current Git repository.
  * @param shlvl Current shell level.
  *****************************************************************************/
-void display_primary_prompt(std::string_view const& git_info, int shlvl)
+void display_primary_prompt(int shlvl)
 {
-    LOG_DEBUG("Current Git repository state is '%s'.", git_info.data());
+    std::string git_repository_information = GitRepository().get_information();
+    LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
     std::cout << "\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]";
-    if (!git_info.empty())
+    if (!git_repository_information.empty())
     {
-        std::cout << "  " << git_info;
+        std::cout << "  " << git_repository_information;
     }
     if (venv != nullptr)
     {
@@ -372,7 +662,7 @@ int main_internal(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "main", "1", "/", nullptr };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1", "/", nullptr };
         int constexpr argc = sizeof argv / sizeof *argv - 1;
         return main_internal(argc, argv);
     }
@@ -384,11 +674,10 @@ int main_internal(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    std::string_view git_info(argv[6]);
-    int shlvl = std::stoi(argv[7]);
-    display_primary_prompt(git_info, shlvl);
+    int shlvl = std::stoi(argv[6]);
+    display_primary_prompt(shlvl);
 
-    std::string_view pwd(argv[8]);
+    std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
 
     return EXIT_SUCCESS;

@@ -6,7 +6,7 @@ _after_command()
     local exit_code=$?
     [ -z "${__begin_window+.}" ] && return
     local last_command=$(history -n -1 2>/dev/null)
-    PS1=$(custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS "$(__git_ps1 %s)" $SHLVL $PWD)
+    PS1=$(custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS $SHLVL $PWD)
     unset __begin_window
 }
 
@@ -74,15 +74,6 @@ rr()
         printf "\n"
     done
 }
-
-if ! command -v __git_ps1 &>/dev/null
-then
-    . ~/Documents/projects/git/contrib/completion/git-prompt.sh &>/dev/null  \
-    || . /usr/lib/git-core/git-sh-prompt &>/dev/null  \
-    || . /usr/share/git-core/contrib/completion/git-prompt.sh &>/dev/null  \
-    || . /usr/share/git/completion/git-prompt.sh &>/dev/null  \
-    || . /usr/share/git/git-prompt.sh &>/dev/null
-fi
 
 ###############################################################################
 # Shell options.
