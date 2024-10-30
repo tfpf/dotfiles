@@ -6,10 +6,6 @@ on:
       - 'custom-prompt/*'
   workflow_dispatch:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
   build_windows:
     runs-on: windows-2022
@@ -17,10 +13,10 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           git clone https://github.com/libgit2/libgit2.git
-          mkdir -p libgit2/build libgit2/target && cd libgit2/build
+          mkdir libgit2/build
+          cd libgit2/build
           cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
           cmake --build . --target install
-          find $PWD/../target
       - run: make -j release
         working-directory: custom-prompt
 
