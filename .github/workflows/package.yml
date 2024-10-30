@@ -17,6 +17,7 @@ jobs:
           cd libgit2/build
           cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
           cmake --build . --target install
+          choco install pkgconfiglite
       - run: make -j release
         working-directory: custom-prompt
 
