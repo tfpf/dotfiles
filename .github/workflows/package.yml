@@ -7,26 +7,39 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_windows:
-    runs-on: windows-2022
-    # defaults:
-    #   run:
-    #     shell: msys2 {0}
-    env:
-      PKG_CONFIG_PATH: 'C:/ProgramData/libgit2/lib/pkgconfig'
+  build_macos:
+    name: build on ${{ matrix.os.name }}
+    runs-on: ${{ matrix.os.name }}
+    strategy:
+      matrix:
+        os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
-      # - uses: msys2/setup-msys2@v2
-      #   with:
-      #     msystem: ucrt64
-      #     install: git
-      #     pacboy: cmake gcc make pkgconf #mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make mingw-w64-ucrt-x86_64-pkgconf
-    - run: |
-        choco install pkgconfiglite
-        git clone https://github.com/libgit2/libgit2.git
-        mkdir libgit2/build
-        cd libgit2/build
-        CC=gcc CXX=g++ cmake .. -DCMAKE_INSTALL_PREFIX='C:/ProgramData/libgit2' -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
-        cmake --build . --target install --parallel 4
-    - uses: actions/checkout@v4
-    - run: make -j release
-      working-directory: custom-prompt
+      - uses: actions/checkout@v4
+      - run: brew install libgit2
+      - run: make -j release
+        working-directory: custom-prompt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: custom-prompt-${{ matrix.os.id }}
+          path: 'custom-prompt/bin'
+
+  build_linux:
+    name: build on ${{ matrix.arch }}/${{ matrix.os.name }}:${{ matrix.os.tag }}
+    runs-on: ubuntu-22.04
+    container: ${{ matrix.arch }}/${{ matrix.os.name }}:${{ matrix.os.tag }}
+    strategy:
+      matrix:
+        arch: [amd64]
+        os: [{name: 'alpine', tag: '3.20', libc: 'musl'}, {name: 'debian', tag: '12', libc: 'gnu'}]
+    steps:
+      - if: matrix.os.name == 'alpine'
+        run: apk add build-base libgit2 libnotify-dev libx11-dev
+      - if: matrix.os.name == 'debian'
+        run: apt-get update && apt-get install -y build-essential libgit2-dev  libnotify-dev libx11-dev
+      - uses: actions/checkout@v4
+      - run: make -j release
+        working-directory: custom-prompt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: custom-prompt-${{ matrix.arch }}-linux-${{ matrix.os.libc }}
+          path: 'custom-prompt/bin'
