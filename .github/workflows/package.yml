@@ -43,3 +43,28 @@ jobs:
         with:
           name: custom-prompt-${{ matrix.arch }}-linux-${{ matrix.os.libc }}
           path: 'custom-prompt/bin'
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: [build_macos, build_linux]
+    runs-on: ubuntu-22.04
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+      - run: |
+          chmod --recursive +x .
+          for package_directory in custom-prompt-*
+          do
+            (
+              cd $package_directory
+              tar cfvz ${package_directory}.tgz *
+            )
+          done
+        name: Create compressed archives of executable binaries
+      - run: |
+          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} --generate-notes
+          gh release upload ${{ github.ref_name }} */*.tgz
+        name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
