@@ -9,15 +9,15 @@ on:
 jobs:
   build_windows:
     runs-on: windows-2022
-    defaults:
-      run:
-        shell: msys2 {0}
+    # defaults:
+    #   run:
+    #     shell: msys2 {0}
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: ucrt64
-        install: git
-        pacboy: cmake gcc make pkgconf #mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make mingw-w64-ucrt-x86_64-pkgconf
+      # - uses: msys2/setup-msys2@v2
+      #   with:
+      #     msystem: ucrt64
+      #     install: git
+      #     pacboy: cmake gcc make pkgconf #mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make mingw-w64-ucrt-x86_64-pkgconf
     - run: |
         git clone https://github.com/libgit2/libgit2.git
         mkdir libgit2/build
