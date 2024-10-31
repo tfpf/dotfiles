@@ -1,4 +1,3 @@
-CC = gcc
 CPPFLAGS = $(shell pkg-config --cflags libgit2)
 CFLAGS = -fstrict-aliasing -std=c11 -Wall -Wextra -Wno-unused-parameter
 CXXFLAGS = -fstrict-aliasing -std=c++17 -Wall -Wextra -Wno-unused-parameter
