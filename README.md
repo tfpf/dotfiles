@@ -5,25 +5,26 @@
   <img src="res/certified_human.svg" />
 </p>
 
-No part of the code in this repository has been written by or in consultation with artificial intelligence chatbots such as (but not limited to) Bard and ChatGPT.
+No part of the code in this repository has been written by or in consultation with artificial intelligence chatbots.
+All of it is purely a product of natural intelligence (or stupidity, as the case may be).
 
 ---
 
 These are the configuration files I use on Linux, macOS and Windows to set up a consistent development environment.
 
 [`custom-prompt`](custom-prompt) contains code to create a prompt for Bash or Zsh with information about the current
-Git repository (from `__git_ps1`) and the current Python virtual environment, and report the running time of long
-commands. A session may typically look like
+Git repository and the current Python virtual environment, and report the running time of long commands. A session may
+typically look like
 
 ```console
 ┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main
 └─% pipenv shell
 
-┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main %  dotfiles
+┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main !  dotfiles
 └─▶% exit
                                          pipenv shell  00:43.735
 
-┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main %
+┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main !
 └─%
 ```
 

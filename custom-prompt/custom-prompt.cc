@@ -251,7 +251,7 @@ void GitRepository::establish_description(void)
         // We are not on a branch. The reference must be direct. Use the commit
         // hash.
         this->description = C::git_oid_tostr_s(this->oid);
-        this->description.erase(7);
+        this->description.erase(12);
         return;
     }
 
