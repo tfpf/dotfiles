@@ -16,13 +16,14 @@ jobs:
     - uses: msys2/setup-msys2@v2
       with:
         msystem: ucrt64
-        install: git mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-gcc
+        install: git
+        pacboy: cmake gcc make pkgconf #mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-make mingw-w64-ucrt-x86_64-pkgconf
     - run: |
         git clone https://github.com/libgit2/libgit2.git
         mkdir libgit2/build
         cd libgit2/build
-        cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
-        cmake --build . --target install
+        cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF --parallel 4
+        cmake --build . --target install --parallel 4
     - uses: actions/checkout@v4
     - run: make -j release
       working-directory: custom-prompt
