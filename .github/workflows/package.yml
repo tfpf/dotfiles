@@ -12,6 +12,8 @@ jobs:
     # defaults:
     #   run:
     #     shell: msys2 {0}
+    env:
+      PKG_CONFIG_PATH: 'C:/Program Files (x86)/libgit2/lib/pkgconfig'
     steps:
       # - uses: msys2/setup-msys2@v2
       #   with:
