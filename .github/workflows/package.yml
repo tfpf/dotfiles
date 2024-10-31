@@ -1,0 +1,27 @@
+name: package
+on:
+  push:
+    paths:
+      - '.github/workflows/package.yml'
+      - 'custom-prompt/*'
+  workflow_dispatch:
+
+jobs:
+  build_windows:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: ucrt64
+    - run: |
+        git clone https://github.com/libgit2/libgit2.git
+        mkdir libgit2/build
+        cd libgit2/build
+        cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
+        cmake --build . --target install
+    - uses: actions/checkout@v4
+    - run: make -j release
+      working-directory: custom-prompt
