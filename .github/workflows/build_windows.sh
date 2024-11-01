@@ -11,7 +11,7 @@ export CMAKE_INSTALL_PREFIX="C:/ProgramData/libgit2"
 
 export PKG_CONFIG_PATH="C:/ProgramData/libgit2/lib/pkgconfig"
 LDFLAGS="-static"
-LDLIBS="-lole32 -lstdc++ -lwinhttp -lws2_32 -lz $(pkg-config --libs libgit2)"
+LDLIBS="-lole32 -lrpcrt4 -lstdc++ -lwinhttp -lws2_32 -lz $(pkg-config --libs libgit2)"
 (
     cd custom-prompt
     make LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
