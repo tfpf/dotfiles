@@ -7,6 +7,28 @@ on:
   workflow_dispatch:
 
 jobs:
+  build_windows:
+    name: build on windows-2022
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ucrt64
+          install: git make
+          pacboy: cmake gcc pkgconf
+      - run: |
+          git clone https://github.com/libgit2/libgit2.git
+          mkdir libgit2/build
+          cd libgit2/build
+          cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
+          cmake --build . --target install --parallel 4
+      - uses: actions/checkout@v4
+      - run: make -j release
+        working-directory: custom-prompt
+
   build_macos:
     name: build on ${{ matrix.os.name }}
     runs-on: ${{ matrix.os.name }}
