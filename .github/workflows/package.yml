@@ -19,15 +19,8 @@ jobs:
           msystem: ucrt64
           install: git make
           pacboy: cmake gcc pkgconf
-      - run: |
-          git clone https://github.com/libgit2/libgit2.git
-          mkdir libgit2/build
-          cd libgit2/build
-          cmake .. -DCMAKE_INSTALL_PREFIX='C:/ProgramData/libgit2' -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
-          cmake --build . --target install --parallel 4
       - uses: actions/checkout@v4
-      - run: PKG_CONFIG_PATH='C:/ProgramData/libgit2/lib/pkgconfig' make -j release
-        working-directory: custom-prompt
+      - run: .github/workflows/build_windows.sh
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-amd64-windows
