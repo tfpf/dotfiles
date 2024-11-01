@@ -22,6 +22,7 @@ jobs:
           pacboy: cmake gcc pkgconf
       - uses: actions/checkout@v4
       - run: .github/workflows/build_windows.bash
+        name: Build statically-linked Windows binaries
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-amd64-windows
@@ -38,6 +39,7 @@ jobs:
       - run: brew install libgit2
       - run: make -j release
         working-directory: custom-prompt
+        name: Build dynamically-linked macOS binaries
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-${{ matrix.os.id }}
@@ -59,6 +61,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: make -j release
         working-directory: custom-prompt
+        name: Build dynamically-linked Linux binaries
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-${{ matrix.arch }}-linux-${{ matrix.os.libc }}
@@ -81,7 +84,7 @@ jobs:
               tar cfvz ${package_directory}.tgz *
             )
           done
-        name: Create compressed archives of executable binaries
+        name: Create compressed archives of binaries
       - run: |
           gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n "Linux binaries require libnotify and libgit2, and macOS, just libgit2. Windows binaries are statically linked." --generate-notes
           gh release upload ${{ github.ref_name }} */*.tgz
