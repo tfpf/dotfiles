@@ -96,9 +96,9 @@ namespace C
 #define LOG_DEBUG(fmt, ...)
 #endif
 
-/******************************************************************************
+/**
  * Represent an amount of time.
- *****************************************************************************/
+ */
 class Interval
 {
 private:
@@ -113,11 +113,11 @@ public:
     void print_long(std::ostream&) const;
 };
 
-/******************************************************************************
+/**
  * Initialise from the given amount of time.
  *
  * @param delay Time measured in nanoseconds.
- *****************************************************************************/
+ */
 Interval::Interval(long long unsigned delay)
 {
     this->milliseconds = (delay /= 1000000ULL) % 1000;
@@ -127,11 +127,11 @@ Interval::Interval(long long unsigned delay)
     LOG_DEBUG("Delay is %u h %u m %u s %u ms.", this->hours, this->minutes, this->seconds, this->milliseconds);
 }
 
-/******************************************************************************
+/**
  * Output the amount of time succinctly.
  *
  * @param ostream Output stream.
- *****************************************************************************/
+ */
 void Interval::print_short(std::ostream& ostream) const
 {
     char fill_character = ostream.fill('0');
@@ -145,11 +145,11 @@ void Interval::print_short(std::ostream& ostream) const
     ostream.fill(fill_character);
 }
 
-/******************************************************************************
+/**
  * Output the amount of time with units.
  *
  * @param ostream Output stream.
- *****************************************************************************/
+ */
 void Interval::print_long(std::ostream& ostream) const
 {
     if (this->hours > 0)
@@ -163,17 +163,17 @@ void Interval::print_long(std::ostream& ostream) const
     ostream << this->seconds << " s " << this->milliseconds << " ms";
 }
 
-/******************************************************************************
+/**
  * Get the ID of the currently-focused window.
  *
  * @return Active window ID. On Linux, if there is no X display running, 0 is
  * returned. Likewise, on macOS, if no topmost window is found, 0 is returned.
- *****************************************************************************/
+ */
 extern "C" long long unsigned get_active_wid(void);
 
-/******************************************************************************
+/**
  * Store information about the current Git repository.
- *****************************************************************************/
+ */
 class GitRepository
 {
 private:
@@ -201,9 +201,9 @@ private:
     static int update_dirty_staged_untracked(char const*, unsigned, void*);
 };
 
-/******************************************************************************
+/**
  * Read the current Git repository.
- *****************************************************************************/
+ */
 GitRepository::GitRepository(void) :
     repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0)
 {
@@ -224,11 +224,11 @@ GitRepository::GitRepository(void) :
     this->establish_dirty_staged_untracked();
 }
 
-/******************************************************************************
+/**
  * Obtain a human-readable description of the working tree of the current Git
  * repository. This shall be the name of the current branch if it is available.
  * Otherwise, it shall be the hash of the most recent commit.
- *****************************************************************************/
+ */
 void GitRepository::establish_description(void)
 {
     if (C::git_repository_head(&this->ref, this->repo) == 0)
@@ -268,10 +268,10 @@ void GitRepository::establish_description(void)
     }
 }
 
-/******************************************************************************
+/**
  * Obtain the tag of the working tree of the current Git repository (if there
  * is one).
- *****************************************************************************/
+ */
 void GitRepository::establish_tag(void)
 {
     // If a tag or a tagged commit is not checked out (which is the case if we
@@ -285,10 +285,10 @@ void GitRepository::establish_tag(void)
     C::git_tag_foreach(this->repo, this->update_tag, this);
 }
 
-/******************************************************************************
+/**
  * Obtain the state of the working tree of the current Git repository. This
  * shall be the name of the operation currently in progress (if any).
- *****************************************************************************/
+ */
 void GitRepository::establish_state(void)
 {
     switch (C::git_repository_state(this->repo))
@@ -315,10 +315,10 @@ void GitRepository::establish_state(void)
     }
 }
 
-/******************************************************************************
+/**
  * Obtain the statuses of the index and working tree of the current Git
  * repository.
- *****************************************************************************/
+ */
 void GitRepository::establish_dirty_staged_untracked(void)
 {
     C::git_status_options opts = GIT_STATUS_OPTIONS_INIT;
@@ -326,7 +326,7 @@ void GitRepository::establish_dirty_staged_untracked(void)
     C::git_status_foreach_ext(this->repo, &opts, this->update_dirty_staged_untracked, this);
 }
 
-/******************************************************************************
+/**
  * Check whether the given tag matches the reference of the given
  * `GitRepository` instance. If it does, update the corresponding member of the
  * latter.
@@ -336,7 +336,7 @@ void GitRepository::establish_dirty_staged_untracked(void)
  * @param self_ `GitRepository` instance whose member should be updated.
  *
  * @return 1 if the tag matches the reference, 0 otherwise.
- *****************************************************************************/
+ */
 int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
@@ -373,7 +373,7 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
     return 1;
 }
 
-/******************************************************************************
+/**
  * Check whether the given file is modified, staged or untracked. If it is,
  * update the corresponding members of the given `GitRepository` instance.
  *
@@ -382,7 +382,7 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
  * @param self_ `GitRepository` instance whose members should be updated.
  *
  * @return 1 if all statuses are recorded, 0 otherwise.
- *****************************************************************************/
+ */
 int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
@@ -398,12 +398,12 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     return self->dirty && self->staged && self->untracked;
 }
 
-/******************************************************************************
+/**
  * Provide information about the current Git repository in a manner suitable to
  * display in the shell prompt.
  *
  * @return Git information.
- *****************************************************************************/
+ */
 std::string GitRepository::get_information(void)
 {
     if (this->repo == nullptr)
@@ -450,11 +450,11 @@ std::string GitRepository::get_information(void)
     return information_stream.str();
 }
 
-/******************************************************************************
+/**
  * Get the current timestamp.
  *
  * @return Time in nanoseconds since a fixed but unspecified reference point.
- *****************************************************************************/
+ */
 long long unsigned get_timestamp(void)
 {
     std::chrono::time_point now = std::chrono::system_clock::now();
@@ -463,13 +463,13 @@ long long unsigned get_timestamp(void)
     return ts;
 }
 
-/******************************************************************************
+/**
  * Show a completed command using a desktop notification.
  *
  * @param last_command Most-recently run command.
  * @param exit_code Code with which the command exited.
  * @param interval Running time of the command.
- *****************************************************************************/
+ */
 void notify_desktop(std::string_view const& last_command, int exit_code, Interval const& interval)
 {
     std::ostringstream description_stream;
@@ -491,14 +491,14 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
 #endif
 }
 
-/******************************************************************************
+/**
  * Show a completed command textually.
  *
  * @param last_command Most-recently run command.
  * @param exit_code Code with which the command exited.
  * @param interval Running time of the command.
  * @param columns Width of the terminal window.
- *****************************************************************************/
+ */
 void write_report(std::string_view const& last_command, int exit_code, Interval const& interval, std::size_t columns)
 {
     LOG_DEBUG("Terminal width is %zu.", columns);
@@ -551,7 +551,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::clog << '\r' << std::setw(width) << report << '\n';
 }
 
-/******************************************************************************
+/**
  * Show information about the running time of a command if it ran for long.
  *
  * @param last_command Most-recently run command.
@@ -559,7 +559,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param delay Running time of the command in nanoseconds.
  * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
- *****************************************************************************/
+ */
 void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay,
     long long unsigned prev_active_wid, std::size_t columns)
 {
@@ -592,11 +592,11 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
     }
 }
 
-/******************************************************************************
+/**
  * Show the primary prompt.
  *
  * @param shlvl Current shell level.
- *****************************************************************************/
+ */
 void display_primary_prompt(int shlvl)
 {
     std::string git_repository_information = GitRepository().get_information();
@@ -620,14 +620,14 @@ void display_primary_prompt(int shlvl)
     std::cout << PROMPT_SYMBOL " ";
 }
 
-/******************************************************************************
+/**
  * Set the title of the current terminal window to the current directory
  * followed by the directory separator, unless the current directory is the
  * Linux/macOS root directory in which case, set the title to just a slash.
  * This should also automatically update the title of the current terminal tab.
  *
  * @param pwd Current directory.
- *****************************************************************************/
+ */
 void set_terminal_title(std::string_view& pwd)
 {
     LOG_DEBUG("Current directory path is '%s'.", pwd.data());
@@ -636,7 +636,7 @@ void set_terminal_title(std::string_view& pwd)
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 }
 
-/******************************************************************************
+/**
  * Program entry point. The C++ standard forbids recursively calling `main`, so
  * the program code is written in this function instead.
  *
@@ -644,7 +644,7 @@ void set_terminal_title(std::string_view& pwd)
  * @param argv Command line arguments.
  *
  * @return Exit code.
- *****************************************************************************/
+ */
 int main_internal(int const argc, char const* argv[])
 {
     long long unsigned ts = get_timestamp();
