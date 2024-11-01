@@ -2,6 +2,7 @@ name: package
 on:
   push:
     paths:
+      - '.github/workflows/build_windows.sh'
       - '.github/workflows/package.yml'
       - 'custom-prompt/*'
   workflow_dispatch:
