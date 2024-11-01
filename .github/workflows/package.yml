@@ -27,6 +27,7 @@ jobs:
           cd libgit2/build
           cmake .. -DCMAKE_INSTALL_PREFIX='/usr' -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
           cmake --build . --target install --parallel 4
+          ls -l $PKG_CONFIG_PATH
       - uses: actions/checkout@v4
       - run: make -j release
         working-directory: custom-prompt
