@@ -1,4 +1,4 @@
-#! /usr/bin/env bash -x
+#! /usr/bin/env bash
 
 export CMAKE_INSTALL_PREFIX="C:/ProgramData/libgit2"
 export LDFLAGS="-static"
