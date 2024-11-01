@@ -184,7 +184,7 @@ private:
     C::git_oid const* oid;
     std::string description, tag;
     std::string state;
-    bool dirty, staged, untracked;
+    unsigned dirty, staged, untracked;
 
 public:
     GitRepository(void);
@@ -205,8 +205,7 @@ private:
  * Read the current Git repository.
  *****************************************************************************/
 GitRepository::GitRepository(void) :
-    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(false), staged(false),
-    untracked(false)
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -387,8 +386,6 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
 int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
-
-    // The C++17 standard permits assigning integers to boolean variables.
     self->dirty |= status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
             | C::GIT_STATUS_WT_TYPECHANGE);
