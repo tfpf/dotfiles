@@ -28,6 +28,10 @@ jobs:
       - uses: actions/checkout@v4
       - run: PKG_CONFIG_PATH='C:/ProgramData/libgit2/lib/pkgconfig' make -j release
         working-directory: custom-prompt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: custom-prompt-amd64-windows
+          path: 'custom-prompt/bin'
 
   build_macos:
     name: build on ${{ matrix.os.name }}
