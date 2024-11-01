@@ -11,11 +11,17 @@ jobs:
   build_windows:
     name: build on windows-2022
     runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ucrt64
+          install: git make
+          pacboy: cmake gcc pkgconf
       - uses: actions/checkout@v4
-      - run: choco install pkgconfiglite
       - run: .github/workflows/build_windows.bash
-        shell: bash
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-amd64-windows

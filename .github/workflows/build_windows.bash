@@ -5,7 +5,7 @@ export CMAKE_INSTALL_PREFIX="C:/ProgramData/libgit2"
     git clone https://github.com/libgit2/libgit2.git
     mkdir libgit2/build
     cd libgit2/build
-    cmake .. -DCMAKE_C_COMPILER=gcc -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
+    cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
     cmake --build . --target install --parallel 4
 )
 
