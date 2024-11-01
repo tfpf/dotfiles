@@ -1,0 +1,19 @@
+#! /usr/bin/env bash -x
+
+export CMAKE_INSTALL_PREFIX="C:/ProgramData/libgit2"
+export LDFLAGS="-static"
+export LDLIBS="-lstdc++ -lwinhttp -lws2_32 -lz $(pkg-config --libs libgit2)"
+export PKG_CONFIG_PATH="C:/ProgramData/libgit2/lib/pkgconfig"
+
+(
+    git clone https://github.com/libgit2/libgit2.git
+    mkdir libgit2/build
+    cd libgit2/build
+    cmake .. -DBUILD_CLI=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTS=OFF
+    cmake --build . --target install --parallel 4
+)
+
+(
+    cd custom-prompt
+    make LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
+)
