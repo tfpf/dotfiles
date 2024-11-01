@@ -19,8 +19,8 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ucrt64
-          install: git make cmake
-          pacboy: gcc pkgconf
+          install: git make
+          pacboy: cmake gcc pkgconf
       - run: |
           git clone https://github.com/libgit2/libgit2.git
           mkdir libgit2/build
