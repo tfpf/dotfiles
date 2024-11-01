@@ -11,7 +11,9 @@ MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
 GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
 
-ifneq "$(OS)" "Windows_NT"
+ifeq "$(OS)" "Windows_NT"
+    LDLIBS += -lws2_32
+else
     UNAME = $(shell uname)
     ifeq "$(UNAME)" "Linux"
         CPPFLAGS += $(shell pkg-config --cflags glib-2.0 libnotify x11)
