@@ -14,8 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: choco install pkgconfiglite
-      - run: .github/workflows/build_windows.sh
+      - run: pwd && ls -l && ./build_windows.sh
         shell: bash
+        working-directory: .github/workflows
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-amd64-windows
