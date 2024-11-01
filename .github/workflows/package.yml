@@ -83,7 +83,7 @@ jobs:
           done
         name: Create compressed archives of executable binaries
       - run: |
-          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} --generate-notes
+          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n "Only Windows binaries are statically linked." --generate-notes
           gh release upload ${{ github.ref_name }} */*.tgz
         name: Publish release
         env:
