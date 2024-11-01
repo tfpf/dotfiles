@@ -13,6 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: ./clang-format.bash check
         working-directory: custom-prompt
+        name: Check if C and C++ headers and sources are formatted correctly
 
   format:
     if: github.ref_type != 'tag' && github.ref_name != github.event.repository.default_branch
