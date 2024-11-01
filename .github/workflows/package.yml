@@ -35,7 +35,7 @@ jobs:
       - if: matrix.os.name == 'alpine'
         run: apk add build-base libgit2-dev libnotify-dev libx11-dev
       - if: matrix.os.name == 'debian'
-        run: apt-get update && apt-get install -y build-essential libgit2-dev  libnotify-dev libx11-dev
+        run: apt-get update && apt-get install -y build-essential libgit2-dev libnotify-dev libx11-dev
       - uses: actions/checkout@v4
       - run: make -j release
         working-directory: custom-prompt
