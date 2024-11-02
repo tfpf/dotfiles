@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <future>
 #include <chrono>
 #include <cstddef>
 #include <cstdio>
@@ -188,7 +189,6 @@ private:
 
 public:
     GitRepository(void);
-    void initialise(void);
     std::string get_information(void);
 
 private:
@@ -203,17 +203,10 @@ private:
 };
 
 /**
- * Constructor. Does nothing.
+ * Read the current Git repository.
  */
 GitRepository::GitRepository(void) :
     repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0)
-{
-}
-
-/**
- * Read the current Git repository.
- */
-void GitRepository::initialise(void)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -606,7 +599,7 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  * @param shlvl Current shell level.
  * @param git_repository_information Current Git repository information.
  */
-void display_primary_prompt(std::string const& git_repository_information, int shlvl)
+void display_primary_prompt(int shlvl, std::string const& git_repository_information)
 {
     LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
@@ -672,9 +665,11 @@ int main_internal(int const argc, char const* argv[])
         return main_internal(argc, argv);
     }
 
-    GitRepository git_repository;
-    git_repository.initialise();
-    std::string git_repository_information = git_repository.get_information();
+    // Start another thread to obtain information about the current Git
+    // repository.
+    std::future<std::string> git_repository_information_future = std::async(std::launch::async, [](){
+    return GitRepository().get_information();
+    });
 
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
@@ -684,12 +679,17 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
-    display_primary_prompt(git_repository_information, shlvl);
+    if(git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready){
+    display_primary_prompt(shlvl, git_repository_information_future.get());
+    }else{
+    display_primary_prompt(shlvl, "unknown");
+    }
 
     std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
 
-    return EXIT_SUCCESS;
+    // Exit without waiting for the other thread to terminate.
+    std::exit( EXIT_SUCCESS);
 }
 
 int main(int const argc, char const* argv[])
