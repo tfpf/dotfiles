@@ -11,8 +11,7 @@
 # MSYS2 sets this environment variable, overriding what is specified in the
 # workflow file. Hence, redefine it here.
 export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
-CPPFLAGS="$(pkg-config --cflags --static libgit2)"
-LDFLAGS="-static"
+LDFLAGS="-flto -O2 -static"
 LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)"
 (
     cd custom-prompt
