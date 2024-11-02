@@ -17,15 +17,15 @@ Git repository and the current Python virtual environment, and report the runnin
 typically look like
 
 ```console
-┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main
-└─% pipenv shell
+ Alpine  ~/Documents/projects/dotfiles  main
+% pipenv shell
 
-┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main !  dotfiles
-└─▶% exit
-                                         pipenv shell  00:43.735
+ Alpine  ~/Documents/projects/dotfiles  main !  dotfiles
+▶% exit
+                                   pipenv shell  00:43.735
 
-┌[tfpf  Alpine ~/Documents/projects/dotfiles]  main !
-└─%
+ Alpine  ~/Documents/projects/dotfiles  main !
+%
 ```
 
 but with colours. (The number of right-pointing triangles just before the prompt symbol is one less than the current
