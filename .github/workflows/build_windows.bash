@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-echo "------------------------------" $CMAKE_INSTALL_PREFIX
+export CMAKE_INSTALL_PREFIX="C:/ProgramData/libgit2"
 (
     git clone https://github.com/libgit2/libgit2.git
     mkdir libgit2/build
@@ -9,7 +9,9 @@ echo "------------------------------" $CMAKE_INSTALL_PREFIX
     cmake --build . --target install --parallel 4
 )
 
-echo "------------------------------" $PKG_CONFIG_PATH
+# MSYS2 sets this environment variable, overriding what is specified in the
+# workflow file. Hence, redefine it here.
+export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
 CPPFLAGS="$(pkg-config --cflags --static libgit2)"
 LDFLAGS="-static"
 LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2)"

@@ -22,9 +22,6 @@ jobs:
           pacboy: cmake gcc pkgconf
       - uses: actions/checkout@v4
       - run: .github/workflows/build_windows.bash
-        env:
-          CMAKE_INSTALL_PREFIX: C:/ProgramData/libgit2
-          PKG_CONFIG_PATH: C:/ProgramData/libgit2/lib/pkgconfig
         name: Build statically-linked Windows binaries
       - uses: actions/upload-artifact@v4
         with:
