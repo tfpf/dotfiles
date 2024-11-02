@@ -1,6 +1,5 @@
 #! /usr/bin/env bash
 
-export CMAKE_INSTALL_PREFIX="C:/ProgramData/libgit2"
 (
     git clone https://github.com/libgit2/libgit2.git
     mkdir libgit2/build
