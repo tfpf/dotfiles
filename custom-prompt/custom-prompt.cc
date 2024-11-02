@@ -681,7 +681,10 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
-        display_primary_prompt(shlvl, git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready?git_repository_information_future.get(): "unavailable");
+    display_primary_prompt(shlvl,
+        git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready
+            ? git_repository_information_future.get()
+            : "unavailable");
 
     std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
