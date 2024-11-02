@@ -39,9 +39,9 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
       - uses: actions/checkout@v4
-      - run: sudo .github/workflows/build_windows.bash
+      - run: .github/workflows/build_windows.bash
         env:
-          CMAKE_INSTALL_PREFIX: /usr
+          CMAKE_INSTALL_PREFIX: /Users/runner
           LDLIBS: '-framework Cocoa -framework CoreGraphics'
         name: Build statically-linked macOS binaries
       - uses: actions/upload-artifact@v4
