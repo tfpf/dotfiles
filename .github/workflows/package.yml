@@ -38,10 +38,8 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
       - uses: actions/checkout@v4
-      - run: brew install libgit2
-      - run: make -j release
-        working-directory: custom-prompt
-        name: Build dynamically-linked macOS binaries
+      - run: .github/workflows/build_windows.bash
+        name: Build statically-linked macOS binaries
       - uses: actions/upload-artifact@v4
         with:
           name: custom-prompt-${{ matrix.os.id }}

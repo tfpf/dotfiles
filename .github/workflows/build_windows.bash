@@ -16,5 +16,5 @@ LDFLAGS="-static"
 LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)"
 (
     cd custom-prompt
-    make LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
+    make CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
 )
