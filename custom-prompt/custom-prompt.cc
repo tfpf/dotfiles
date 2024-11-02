@@ -213,7 +213,8 @@ GitRepository::GitRepository(void) :
 /**
  * Read the current Git repository.
  */
-void GitRepository::initialise(void){
+void GitRepository::initialise(void)
+{
     if (C::git_libgit2_init() <= 0)
     {
         return;
