@@ -117,7 +117,7 @@ _after_command()
     local exit_code=$?
     [ -z "${__begin_window+.}" ] && return
     local last_command=$(history 1)
-    PS1=$(custom-bash-prompt "$last_command" $exit_code $__begin_window $COLUMNS $SHLVL "$PWD")
+    PS1=$(custom-bash-prompt "$last_command" $exit_code $__begin_window $COLUMNS "$PWD" $SHLVL)
     unset __begin_window
 }
 

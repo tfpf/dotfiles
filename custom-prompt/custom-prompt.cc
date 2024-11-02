@@ -662,7 +662,7 @@ int main_internal(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "1", "/", nullptr };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
         int constexpr argc = sizeof argv / sizeof *argv - 1;
         return main_internal(argc, argv);
     }
@@ -688,14 +688,14 @@ int main_internal(int const argc, char const* argv[])
     std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
-    int shlvl = std::stoi(argv[6]);
+    std::string_view pwd(argv[6]);
+    set_terminal_title(pwd);
+
+    int shlvl = std::stoi(argv[7]);
     display_primary_prompt(shlvl,
         git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready
             ? git_repository_information_future.get()
             : "unavailable");
-
-    std::string_view pwd(argv[7]);
-    set_terminal_title(pwd);
 
     return EXIT_SUCCESS;
 }
