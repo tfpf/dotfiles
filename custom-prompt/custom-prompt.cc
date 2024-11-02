@@ -603,7 +603,7 @@ void display_primary_prompt(int shlvl)
     LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
-    std::cout << "\n┌[" BB_GREEN USER RESET " " BBI_YELLOW HOST_ICON " " HOST RESET " " BB_CYAN DIRECTORY RESET "]";
+    std::cout << "\n" HOST_ICON " " BBI_YELLOW HOST RESET "  " BB_CYAN  DIRECTORY RESET;
     if (!git_repository_information.empty())
     {
         std::cout << "  " << git_repository_information;
@@ -612,7 +612,7 @@ void display_primary_prompt(int shlvl)
     {
         std::cout << "  " B_BLUE << venv << RESET;
     }
-    std::cout << "\n└─";
+    std::cout << "\n";
     while (--shlvl > 0)
     {
         std::cout << "▶";
