@@ -1,11 +1,11 @@
 #include <algorithm>
-#include <future>
 #include <chrono>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -667,9 +667,11 @@ int main_internal(int const argc, char const* argv[])
 
     // Start another thread to obtain information about the current Git
     // repository.
-    std::future<std::string> git_repository_information_future = std::async(std::launch::async, [](){
-    return GitRepository().get_information();
-    });
+    std::future<std::string> git_repository_information_future = std::async(std::launch::async,
+        []()
+        {
+            return GitRepository().get_information();
+        });
 
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
@@ -679,17 +681,20 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
-    if(git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready){
-    display_primary_prompt(shlvl, git_repository_information_future.get());
-    }else{
-    display_primary_prompt(shlvl, "unknown");
+    if (git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready)
+    {
+        display_primary_prompt(shlvl, git_repository_information_future.get());
+    }
+    else
+    {
+        display_primary_prompt(shlvl, "unknown");
     }
 
     std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
 
     // Exit without waiting for the other thread to terminate.
-    std::exit( EXIT_SUCCESS);
+    std::exit(EXIT_SUCCESS);
 }
 
 int main(int const argc, char const* argv[])
