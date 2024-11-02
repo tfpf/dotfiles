@@ -24,6 +24,7 @@ jobs:
       - run: .github/workflows/build_windows.bash
         env:
           CMAKE_INSTALL_PREFIX: C:/ProgramData/libgit2
+          LDLIBS: '-lwinhttp'
         name: Build statically-linked Windows binaries
       - uses: actions/upload-artifact@v4
         with:
@@ -39,6 +40,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo .github/workflows/build_windows.bash
+        env:
+          CMAKE_INSTALL_PREFIX: /usr
+          LDLIBS: '-framework Cocoa -framework CoreGraphics'
         name: Build statically-linked macOS binaries
       - uses: actions/upload-artifact@v4
         with:

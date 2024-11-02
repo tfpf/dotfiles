@@ -11,10 +11,9 @@
 # MSYS2 sets this environment variable, overriding what is specified in the
 # workflow file. Hence, redefine it here.
 export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
-CPPFLAGS="$(pkg-config --cflags --static libgit2)"
-LDFLAGS="-static"
-LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)"
+LDFLAGS="-flto -O2 -static"
+LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2) $LDLIBS"
 (
     cd custom-prompt
-    make CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
+    make LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
 )
