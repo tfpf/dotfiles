@@ -676,6 +676,8 @@ int main_internal(int const argc, char const* argv[])
         {
             git_repository_information_promise.set_value(GitRepository().get_information());
         },
+        // I prefer to transfer ownership of the promise to the thread, because
+        // it may continue running after the main thread terminates.
         std::move(git_repository_information_promise))
         .detach();
 
