@@ -38,7 +38,7 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
       - uses: actions/checkout@v4
-      - run: .github/workflows/build_windows.bash
+      - run: sudo .github/workflows/build_windows.bash
         name: Build statically-linked macOS binaries
       - uses: actions/upload-artifact@v4
         with:
