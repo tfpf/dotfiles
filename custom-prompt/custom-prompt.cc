@@ -5,10 +5,13 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <thread>
+#include <utility>
 
 namespace C
 {
@@ -596,10 +599,10 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  * Show the primary prompt.
  *
  * @param shlvl Current shell level.
+ * @param git_repository_information Current Git repository information.
  */
-void display_primary_prompt(int shlvl)
+void display_primary_prompt(int shlvl, std::string const& git_repository_information)
 {
-    std::string git_repository_information = GitRepository().get_information();
     LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
@@ -664,6 +667,20 @@ int main_internal(int const argc, char const* argv[])
         return main_internal(argc, argv);
     }
 
+    // Start another thread to obtain information about the current Git
+    // repository.
+    std::promise<std::string> git_repository_information_promise;
+    std::future<std::string> git_repository_information_future = git_repository_information_promise.get_future();
+    std::thread(
+        [](std::promise<std::string> git_repository_information_promise)
+        {
+            git_repository_information_promise.set_value(GitRepository().get_information());
+        },
+        // I prefer to transfer ownership of the promise to the thread, because
+        // it may continue running after the main thread terminates.
+        std::move(git_repository_information_promise))
+        .detach();
+
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
     long long unsigned delay = ts - std::stoull(argv[3]);
@@ -672,7 +689,10 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
-    display_primary_prompt(shlvl);
+    display_primary_prompt(shlvl,
+        git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready
+            ? git_repository_information_future.get()
+            : "unavailable");
 
     std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
