@@ -188,6 +188,7 @@ private:
 
 public:
     GitRepository(void);
+    void initialise(void);
     std::string get_information(void);
 
 private:
@@ -202,11 +203,17 @@ private:
 };
 
 /**
- * Read the current Git repository.
+ * Constructor. Does nothing.
  */
 GitRepository::GitRepository(void) :
     repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0)
 {
+}
+
+/**
+ * Read the current Git repository.
+ */
+void GitRepository::initialise(void){
     if (C::git_libgit2_init() <= 0)
     {
         return;
@@ -664,7 +671,9 @@ int main_internal(int const argc, char const* argv[])
         return main_internal(argc, argv);
     }
 
-    std::string git_repository_information = GitRepository().get_information();
+    GitRepository git_repository;
+    git_repository.initialise();
+    std::string git_repository_information = git_repository.get_information();
 
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
