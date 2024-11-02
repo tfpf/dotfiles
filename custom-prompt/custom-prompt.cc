@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <thread>
 #include <chrono>
 #include <cstddef>
 #include <cstdio>
@@ -11,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <utility>
 
 namespace C
