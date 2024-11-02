@@ -596,10 +596,10 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  * Show the primary prompt.
  *
  * @param shlvl Current shell level.
+ * @param git_repository_information Current Git repository information.
  */
-void display_primary_prompt(int shlvl)
+void display_primary_prompt(std::string const& git_repository_information, int shlvl)
 {
-    std::string git_repository_information = GitRepository().get_information();
     LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
     char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
     LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
@@ -664,6 +664,8 @@ int main_internal(int const argc, char const* argv[])
         return main_internal(argc, argv);
     }
 
+    std::string git_repository_information = GitRepository().get_information();
+
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
     long long unsigned delay = ts - std::stoull(argv[3]);
@@ -672,7 +674,7 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
-    display_primary_prompt(shlvl);
+    display_primary_prompt(git_repository_information, shlvl);
 
     std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
