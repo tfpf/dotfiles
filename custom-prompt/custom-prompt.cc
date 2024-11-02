@@ -667,11 +667,9 @@ int main_internal(int const argc, char const* argv[])
 
     // Start another thread to obtain information about the current Git
     // repository.
-    std::future<std::string> git_repository_information_future = std::async(std::launch::async,
-        []()
-        {
-            return GitRepository().get_information();
-        });
+    std::promise<std::string> git_repository_information_promise;
+    std::future<std::string> git_repository_information_future = git_repository_information_promise.get_future();
+    std::thread([](std::promise<std::string> git_repository_information_promise){git_repository_information_promise.set_value(GitRepository().get_information());}, std::move(git_repository_information_promise)).detach();
 
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
@@ -681,17 +679,12 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     int shlvl = std::stoi(argv[6]);
-    display_primary_prompt(shlvl,
-        git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready
-            ? git_repository_information_future.get()
-            : "unavailable");
+    display_primary_prompt(shlvl,git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready? git_repository_information_future.get(): "unavailable");
 
     std::string_view pwd(argv[7]);
     set_terminal_title(pwd);
 
-    // Exit without waiting for the other thread to terminate. Should not be a
-    // problem, because that thread has no side-effects that I know of.
-    std::exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
 
 int main(int const argc, char const* argv[])
