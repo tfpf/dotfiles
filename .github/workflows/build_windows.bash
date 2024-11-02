@@ -13,7 +13,7 @@
 export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
 CPPFLAGS="$(pkg-config --cflags --static libgit2)"
 LDFLAGS="-static"
-LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2)"
+LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)"
 (
     cd custom-prompt
     make LDFLAGS="$LDFLAGS" LDLIBS="$LDLIBS" -j release
