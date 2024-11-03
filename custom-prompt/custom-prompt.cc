@@ -462,7 +462,6 @@ long long unsigned get_timestamp(void)
 {
     std::chrono::time_point now = std::chrono::system_clock::now();
     long long unsigned ts = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
-    LOG_DEBUG("Current time is %lld.%09lld.", ts / 1000000000ULL, ts % 1000000000ULL);
     return ts;
 }
 
@@ -504,7 +503,6 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
  */
 void write_report(std::string_view const& last_command, int exit_code, Interval const& interval, std::size_t columns)
 {
-    LOG_DEBUG("Terminal width is %zu.", columns);
     std::size_t left_piece_len = columns * 3 / 8;
     std::size_t right_piece_len = left_piece_len;
     std::ostringstream report_stream;
@@ -548,7 +546,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
-        = (sizeof D_GREEN_RAW + sizeof D_RED_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
+        = (sizeof D_CYAN_RAW + sizeof D_GREEN_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
@@ -578,20 +576,22 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
     // Remove the initial part (index and timestamp) of the command.
     last_command.remove_prefix(last_command.find(RIGHT_SQUARE_BRACKET[0]) + 2);
 #endif
+    last_command.remove_prefix(last_command.find_first_not_of(' '));
     last_command.remove_suffix(last_command.size() - 1 - last_command.find_last_not_of(' '));
-    LOG_DEBUG("Command length is %zu.", last_command.size());
 
     Interval interval(delay);
     write_report(last_command, exit_code, interval, columns);
-    if (delay > 10000000000ULL)
+    if (delay <= 10000000000ULL)
     {
-        long long unsigned curr_active_wid = get_active_wid();
-        LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
-        LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
-        if (prev_active_wid != curr_active_wid)
-        {
-            notify_desktop(last_command, exit_code, interval);
-        }
+        return;
+    }
+
+    long long unsigned curr_active_wid = get_active_wid();
+    LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
+    LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
+    if (prev_active_wid != curr_active_wid)
+    {
+        notify_desktop(last_command, exit_code, interval);
     }
 }
 
@@ -635,7 +635,6 @@ void set_terminal_title(std::string_view& pwd)
 {
     LOG_DEBUG("Current directory path is '%s'.", pwd.data());
     pwd.remove_prefix(pwd.rfind('/') + 1);
-    LOG_DEBUG("Current directory name is '%s'.", pwd.data());
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 }
 
@@ -693,7 +692,7 @@ int main_internal(int const argc, char const* argv[])
 
     int shlvl = std::stoi(argv[7]);
     display_primary_prompt(shlvl,
-        git_repository_information_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready
+        git_repository_information_future.wait_for(std::chrono::milliseconds(150)) == std::future_status::ready
             ? git_repository_information_future.get()
             : "unavailable");
 
