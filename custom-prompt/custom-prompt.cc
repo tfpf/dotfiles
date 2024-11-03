@@ -581,15 +581,17 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
 
     Interval interval(delay);
     write_report(last_command, exit_code, interval, columns);
-    if (delay > 10000000000ULL)
+    if (delay <= 10000000000ULL)
     {
-        long long unsigned curr_active_wid = get_active_wid();
-        LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
-        LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
-        if (prev_active_wid != curr_active_wid)
-        {
-            notify_desktop(last_command, exit_code, interval);
-        }
+        return;
+    }
+
+    long long unsigned curr_active_wid = get_active_wid();
+    LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
+    LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
+    if (prev_active_wid != curr_active_wid)
+    {
+        notify_desktop(last_command, exit_code, interval);
     }
 }
 
