@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <chrono>
+#include <csignal>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
@@ -639,7 +640,7 @@ void set_terminal_title(std::string_view& pwd)
 }
 
 /**
- * Program entry point. The C++ standard forbids recursively calling `main`, so
+ * Actual entry point. The C++ standard forbids recursively calling `main`, so
  * the program code is written in this function instead.
  *
  * @param argc Number of command line arguments.
@@ -654,16 +655,6 @@ int main_internal(int const argc, char const* argv[])
     {
         std::cout << ts << ' ' << get_active_wid() << '\n';
         return EXIT_SUCCESS;
-    }
-
-    // For testing. Simulate dummy arguments so that the longer branch is
-    // taken. Honour the standard requirement that the argument list be
-    // null-terminated.
-    if (argc == 2)
-    {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
-        int constexpr argc = sizeof argv / sizeof *argv - 1;
-        return main_internal(argc, argv);
     }
 
     // Start another thread to obtain information about the current Git
@@ -681,16 +672,16 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    int exit_code = std::strtol(argv[2], nullptr, 10);
-    long long unsigned delay = ts - std::strtoull(argv[3], nullptr, 10);
-    long long unsigned prev_active_wid = std::strtoull(argv[4], nullptr, 10);
-    std::size_t columns = std::strtoull(argv[5], nullptr, 10);
+    int exit_code = std::stoi(argv[2]);
+    long long unsigned delay = ts - std::stoull(argv[3]);
+    long long unsigned prev_active_wid = std::stoull(argv[4]);
+    std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     std::string_view pwd(argv[6]);
     set_terminal_title(pwd);
 
-    int shlvl = std::strtol(argv[7], nullptr, 10);
+    int shlvl = std::stoi(argv[7]);
     display_primary_prompt(shlvl,
         git_repository_information_future.wait_for(std::chrono::milliseconds(150)) == std::future_status::ready
             ? git_repository_information_future.get()
@@ -701,5 +692,19 @@ int main_internal(int const argc, char const* argv[])
 
 int main(int const argc, char const* argv[])
 {
+    // Repeated keyboard interrupts cause this program to crash for unclear
+    // reasons. Ignore them. It isn't expected to run for long, after all.
+    std::signal(SIGINT, SIG_IGN);
+
+    // For testing. Simulate dummy arguments so that the longer code path is
+    // taken. Honour the standard requirement that the argument list be
+    // null-terminated.
+    if (argc == 2)
+    {
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
+        int constexpr argc = sizeof argv / sizeof *argv - 1;
+        return main_internal(argc, argv);
+    }
+
     return main_internal(argc, argv);
 }
