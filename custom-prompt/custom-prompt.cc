@@ -1,6 +1,6 @@
-#include <csignal>
 #include <algorithm>
 #include <chrono>
+#include <csignal>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
