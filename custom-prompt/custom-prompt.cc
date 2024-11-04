@@ -1,3 +1,4 @@
+#include <csignal>
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
@@ -701,5 +702,6 @@ int main_internal(int const argc, char const* argv[])
 
 int main(int const argc, char const* argv[])
 {
+    std::signal(SIGINT, SIG_IGN);
     return main_internal(argc, argv);
 }
