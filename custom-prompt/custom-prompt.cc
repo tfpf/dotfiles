@@ -681,16 +681,16 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    int exit_code = std::stoi(argv[2]);
-    long long unsigned delay = ts - std::stoull(argv[3]);
-    long long unsigned prev_active_wid = std::stoull(argv[4]);
-    std::size_t columns = std::stoull(argv[5]);
+    int exit_code = std::strtol(argv[2], nullptr, 10);
+    long long unsigned delay = ts - std::strtoull(argv[3], nullptr, 10);
+    long long unsigned prev_active_wid = std::strtoull(argv[4], nullptr, 10);
+    std::size_t columns = std::strtoull(argv[5], nullptr, 10);
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     std::string_view pwd(argv[6]);
     set_terminal_title(pwd);
 
-    int shlvl = std::stoi(argv[7]);
+    int shlvl = std::strtol(argv[7], nullptr, 10);
     display_primary_prompt(shlvl,
         git_repository_information_future.wait_for(std::chrono::milliseconds(150)) == std::future_status::ready
             ? git_repository_information_future.get()
