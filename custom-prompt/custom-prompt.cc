@@ -640,7 +640,7 @@ void set_terminal_title(std::string_view& pwd)
 }
 
 /**
- * Program entry point. The C++ standard forbids recursively calling `main`, so
+ * Actual entry point. The C++ standard forbids recursively calling `main`, so
  * the program code is written in this function instead.
  *
  * @param argc Number of command line arguments.
@@ -655,16 +655,6 @@ int main_internal(int const argc, char const* argv[])
     {
         std::cout << ts << ' ' << get_active_wid() << '\n';
         return EXIT_SUCCESS;
-    }
-
-    // For testing. Simulate dummy arguments so that the longer branch is
-    // taken. Honour the standard requirement that the argument list be
-    // null-terminated.
-    if (argc == 2)
-    {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
-        int constexpr argc = sizeof argv / sizeof *argv - 1;
-        return main_internal(argc, argv);
     }
 
     // Start another thread to obtain information about the current Git
@@ -702,6 +692,19 @@ int main_internal(int const argc, char const* argv[])
 
 int main(int const argc, char const* argv[])
 {
+    // Repeated keyboard interrupts cause this program to crash for unclear
+    // reasons. Ignore them. It isn't expected to run for long, after all.
     std::signal(SIGINT, SIG_IGN);
+
+    // For testing. Simulate dummy arguments so that the longer code path is
+    // taken. Honour the standard requirement that the argument list be
+    // null-terminated.
+    if (argc == 2)
+    {
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
+        int constexpr argc = sizeof argv / sizeof *argv - 1;
+        return main_internal(argc, argv);
+    }
+
     return main_internal(argc, argv);
 }
