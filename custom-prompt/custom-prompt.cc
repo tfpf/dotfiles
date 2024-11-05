@@ -327,12 +327,14 @@ void GitRepository::establish_state(void)
 void GitRepository::establish_state_rebasing(void){
     this->state = "rebasing";
     std::ifstream msgnum_file(this->gitdir / "rebase-merge/msgnum");
-    if(!msgnum_file.good()){
+    if(!msgnum_file.good()){return;}
+    std::ifstream end_file(this->gitdir / "rebase-merge/end");
+    if(!end_file.good()){return;}
+    std::string msgnum_contents, end_contents;
+    if(!(msgnum_file >> msgnum_contents) || !(end_file >> end_contents)){
         return;
     }
-    std::string msgnum_contents;
-    msgnum_file >> msgnum_contents;
-    this->state += " " + msgnum_contents;
+    this->state += ' ' + msgnum_contents + '/' + end_contents;
 }
 
 /**
