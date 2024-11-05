@@ -320,18 +320,25 @@ void GitRepository::establish_state(void)
     }
 }
 
-
 /**
  * Obtain the rebase state of the working tree of the current Git repository.
  */
-void GitRepository::establish_state_rebasing(void){
+void GitRepository::establish_state_rebasing(void)
+{
     this->state = "rebasing";
     std::ifstream msgnum_file(this->gitdir / "rebase-merge/msgnum");
-    if(!msgnum_file.good()){return;}
+    if (!msgnum_file.good())
+    {
+        return;
+    }
     std::ifstream end_file(this->gitdir / "rebase-merge/end");
-    if(!end_file.good()){return;}
+    if (!end_file.good())
+    {
+        return;
+    }
     std::string msgnum_contents, end_contents;
-    if(!(msgnum_file >> msgnum_contents) || !(end_file >> end_contents)){
+    if (!(msgnum_file >> msgnum_contents) || !(end_file >> end_contents))
+    {
         return;
     }
     this->state += ' ' + msgnum_contents + '/' + end_contents;
