@@ -198,6 +198,7 @@ private:
     void establish_description(void);
     void establish_tag(void);
     void establish_state(void);
+    void establish_state_rebasing(void);
     void establish_dirty_staged_untracked(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
@@ -310,13 +311,28 @@ void GitRepository::establish_state(void)
     case C::GIT_REPOSITORY_STATE_REBASE:
     case C::GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
     case C::GIT_REPOSITORY_STATE_REBASE_MERGE:
-        this->state = "rebasing";
+        this->establish_state_rebasing();
         break;
     case C::GIT_REPOSITORY_STATE_REVERT:
     case C::GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
         this->state = "reverting";
         break;
     }
+}
+
+
+/**
+ * Obtain the rebase state of the working tree of the current Git repository.
+ */
+void GitRepository::establish_state_rebasing(void){
+    this->state = "rebasing";
+    std::ifstream msgnum_file(this->gitdir / "rebase-merge/msgnum");
+    if(!msgnum_file.good()){
+        return;
+    }
+    std::string msgnum_contents;
+    msgnum_file >> msgnum_contents;
+    this->state += " " + msgnum_contents;
 }
 
 /**
