@@ -77,6 +77,7 @@ namespace C
 #define B_BLUE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "94m" END_INVISIBLE
 #define B_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "92m" END_INVISIBLE
 #define B_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "92m"
+#define B_GREY BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "90m" END_INVISIBLE
 #define B_GREY_RAW ESCAPE LEFT_SQUARE_BRACKET "90m"
 #define B_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "91m" END_INVISIBLE
 #define B_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "91m"
@@ -710,7 +711,7 @@ int main_internal(int const argc, char const* argv[])
     display_primary_prompt(shlvl,
         git_repository_information_future.wait_for(std::chrono::milliseconds(150)) == std::future_status::ready
             ? git_repository_information_future.get()
-            : "unavailable");
+            : B_GREY "unavailable" RESET);
 
     return EXIT_SUCCESS;
 }
