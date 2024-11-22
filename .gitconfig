@@ -1,6 +1,7 @@
 [alias]
-	d = diff -b
-	s = show -b
+	d = diff -w
+	l = log
+	s = show -w
 [blame]
 	coloring = repeatedLines
 	date = iso
@@ -31,7 +32,15 @@
 	compression = 9
 	fscache = true
 	hideDotFiles = true
+	pager = delta
 	preloadindex = true
+[delta]
+	blame-timestamp-output-format = "%F %T"
+	color-only = false
+	diff-so-fancy = true
+	line-numbers = true
+	navigate = true
+	syntax-theme = none
 [diff]
 	algorithm = minimal
 	tool = vimdiff
@@ -49,13 +58,15 @@
 	fontui = -family Signika -size 11
 [init]
 	defaultBranch = main
+[interactive]
+	diffFilter = delta
 [log]
 	date = iso
+[merge]
+	conflictstyle = zdiff3
 [pager]
 	branch = false
-	diff = less -iRF
 	log = less -iRFX
-	show = less -iRFX
 [pull]
 	rebase = false
 [user]
