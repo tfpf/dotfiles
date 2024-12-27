@@ -1,0 +1,29 @@
+auto-update = "off"
+
+background = "#000000"
+background-blur-radius = 16
+background-opacity = 0.8
+bold-is-bright = true
+
+cursor-style = "bar"
+cursor-style-blink = false
+
+font-family = "RecMonoCasual Nerd Font"
+font-size = 13
+foreground = "#FFFFFF"
+fullscreen = true
+
+gtk-adwaita = false
+gtk-titlebar = true
+
+initial-window = true
+
+macos-option-as-alt = true
+mouse-hide-while-typing = false
+
+quit-after-last-window-closed = true
+
+selection-invert-fg-bg = true
+shell-integration = "none"
+
+window-decoration = true
