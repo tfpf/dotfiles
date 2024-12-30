@@ -43,4 +43,8 @@ selection-invert-fg-bg = true
 shell-integration = "detect"
 shell-integration-features = "false"
 
+unfocused-split-fill = "#27B4A6"
+unfocused-split-opacity = 0.8
+
 window-decoration = true
+window-theme = "system"
