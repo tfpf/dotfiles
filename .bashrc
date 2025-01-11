@@ -64,6 +64,7 @@ export MAN_POSIXLY_CORRECT=1
 # Disable accessibility bus error messages when using some GTK programs.
 export NO_AT_BRIDGE=1
 export PAGER='less -i'
+export PYTHON_BASIC_REPL=1
 # Time format in directory listing.
 export TIME_STYLE=long-iso
 # Do not change the terminal prompt when in a Python virtual environment.

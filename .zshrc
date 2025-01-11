@@ -134,6 +134,7 @@ PS1='[%n@%m %~]%# '
 PS2='──▶ '
 PS3='#? '
 PS4='▶ '
+export PYTHON_BASIC_REPL=1
 SAVEHIST=1000
 export TIME_STYLE=long-iso
 VIRTUAL_ENV_DISABLE_PROMPT=1
