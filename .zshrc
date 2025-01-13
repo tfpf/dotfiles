@@ -20,12 +20,7 @@ cfs()
 {
     local files=(/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor)
     [ ! -f $files[1] ] && printf "CPU frequency files not found.\n" >&2 && return 1
-    if [ $# -lt 1 ]
-    then
-        column $files
-    else
-        sudo tee $files <<< $1
-    fi
+    [ $# -lt 1 ] && column $files || sudo tee $files <<< $1
 }
 
 e()
@@ -62,11 +57,8 @@ json.toolog()
 {
     while read line
     do
-        echo "$line" | python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null
-        if [ $? -ne 0 ]
-        then
-            echo "$line"
-        fi
+        line_json=$(python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null <<< $line)
+        [ $? -eq 0 ] && bat -l json -pp <<< $line_json || printf "$line\n"
     done
 }
 
