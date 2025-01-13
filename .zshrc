@@ -62,16 +62,11 @@ json.toolog()
 {
     while read line
     do
-        echo "$line" | python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys
-        continue
-        # line_json=$(python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null)
-        # echo "\x1b[96mwoot\x1b[m"
-        # if [ -z "$line_json" ]
-        # then
-        #     echo "$line"
-        # else
-        #     echo $line_json | bat -p json -pp
-        # fi
+        echo "$line" | python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null
+        if [ $? -ne 0 ]
+        then
+            echo "$line"
+        fi
     done
 }
 
