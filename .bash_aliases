@@ -37,7 +37,6 @@ then
     alias cat='bat'
 fi
 
-alias json.tool='python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json --style=plain'
 alias p='python3 -B'
 alias pip='python3 -m pip'
 alias timeit='python3 -m timeit'
@@ -158,4 +157,22 @@ rr()
 import()
 {
     printf "This is Bash. Did you mean to type this in Python?\n" >&2 && return 1
+}
+
+json.tool()
+{
+    python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p
+}
+
+json.toolog()
+{
+    while read -r line
+    do
+        if line_json=$(python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null <<< $line)
+        then
+            bat -l json -pp <<< $line_json
+        else
+            printf -- "%s\n" "$line"
+        fi
+    done
 }
