@@ -53,6 +53,28 @@ import()
     printf "This is Zsh. Did you mean to type this in Python?\n" >&2 && return 1
 }
 
+json.tool()
+{
+    python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p
+}
+
+json.toolog()
+{
+    while read line
+    do
+        echo "$line" | python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys
+        continue
+        # line_json=$(python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null)
+        # echo "\x1b[96mwoot\x1b[m"
+        # if [ -z "$line_json" ]
+        # then
+        #     echo "$line"
+        # else
+        #     echo $line_json | bat -p json -pp
+        # fi
+    done
+}
+
 o()
 {
     [ ! -f "$1" ] && printf "Usage:\n  ${FUNCNAME[0]} <file>\n" >&2 && return 1
@@ -252,7 +274,6 @@ then
     alias cat='bat'
 fi
 
-alias json.tool='python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json --style=plain'
 alias p='python3 -B'
 alias pip='python3 -m pip'
 alias timeit='python3 -m timeit'
