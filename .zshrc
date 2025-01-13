@@ -66,7 +66,7 @@ json.toolog()
         then
             bat -l json -pp <<< $line_json
         else
-            printf "$line\n"
+            printf -- "%s\n" $line
         fi
     done
 }
