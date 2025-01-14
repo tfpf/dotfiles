@@ -166,13 +166,14 @@ json.tool()
 
 json.toolog()
 {
-    while read -r line
-    do
-        if line_json=$(python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys 2>/dev/null <<< $line)
-        then
-            bat -l json -pp <<< $line_json
-        else
-            printf -- "%s\n" "$line"
-        fi
-    done
+    python3 -c '
+import json
+import sys
+
+for line in sys.stdin:
+    try:
+        print(json.dumps(json.loads(line), ensure_ascii=False, indent=2, sort_keys=True), flush=True)
+    except json.decoder.JSONDecodeError:
+        print(line.rstrip(), flush=True)
+    ' | bat -l json -pp
 }
