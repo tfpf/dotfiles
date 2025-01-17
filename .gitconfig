@@ -1,6 +1,6 @@
 [alias]
 	d = diff -w
-	l = log
+	l = log --graph
 	s = show -w
 [blame]
 	coloring = repeatedLines
@@ -39,7 +39,7 @@
 	color-only = false
 	diff-so-fancy = true
 	line-numbers = true
-	navigate = true
+	navigate = false
 	syntax-theme = none
 [diff]
 	algorithm = minimal
