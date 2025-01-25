@@ -629,8 +629,7 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  * @param git_repository_information_future Git information provider.
  * @param venv Python virtual environment.
  */
-void display_primary_prompt(
-    int shlvl, std::future<std::string> & git_repository_information_future, char const* venv)
+void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
 {
     std::cout << "\n" HOST_ICON " " BBI_YELLOW HOST RESET "  " BB_CYAN DIRECTORY RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
