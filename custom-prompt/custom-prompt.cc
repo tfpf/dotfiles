@@ -626,17 +626,20 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  * Show the primary prompt.
  *
  * @param shlvl Current shell level.
- * @param git_repository_information Current Git repository information.
+ * @param git_repository_information_future Git information provider.
+ * @param venv Python virtual environment.
  */
-void display_primary_prompt(int shlvl, std::string const& git_repository_information)
+void display_primary_prompt(int shlvl, std::future<std::string> const& git_repository_information_future, char const *venv)
 {
-    LOG_DEBUG("Current Git repository information is '%s'.", git_repository_information.data());
-    char const* venv = std::getenv("VIRTUAL_ENV_PROMPT");
-    LOG_DEBUG("Current Python virtual environment is '%s'.", venv);
     std::cout << "\n" HOST_ICON " " BBI_YELLOW HOST RESET "  " BB_CYAN DIRECTORY RESET;
+    if(git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready){
+        std::cout << "  " << B_GREY "unavailable" RESET;
+    }else{
+        std::string git_repository_information = git_repository_information_future.get();
     if (!git_repository_information.empty())
     {
         std::cout << "  " << git_repository_information;
+    }
     }
     if (venv != nullptr)
     {
@@ -708,10 +711,8 @@ int main_internal(int const argc, char const* argv[])
     set_terminal_title(pwd);
 
     int shlvl = std::stoi(argv[7]);
-    display_primary_prompt(shlvl,
-        git_repository_information_future.wait_for(std::chrono::milliseconds(150)) == std::future_status::ready
-            ? git_repository_information_future.get()
-            : B_GREY "unavailable" RESET);
+    char const *venv = getenv("VIRTUAL_ENV_PROMPT");
+    display_primary_prompt(shlvl, git_repository_information_future, venv);
 
     return EXIT_SUCCESS;
 }
