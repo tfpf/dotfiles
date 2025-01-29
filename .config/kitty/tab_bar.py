@@ -1,7 +1,6 @@
 import platform
 
-from kitty.fast_data_types import Screen
-from kitty.tab_bar import DrawData, ExtraData, TabBarData, draw_tab_with_powerline
+from kitty.tab_bar import DrawData, draw_tab_with_powerline
 
 _modifier_key = "⌘" if platform.system() == "Darwin" else "⎇"
 _title_template = (
@@ -9,23 +8,7 @@ _title_template = (
 )
 
 
-def draw_tab(
-    draw_data: DrawData,
-    screen: Screen,
-    tab: TabBarData,
-    before: int,
-    max_title_length: int,
-    index: int,
-    is_last: bool,
-    extra_data: ExtraData,
-) -> int:
-    return draw_tab_with_powerline(
-        draw_data._replace(title_template=_title_template),
-        screen,
-        tab,
-        before,
-        max_title_length,
-        index,
-        is_last,
-        extra_data,
-    )
+def draw_tab(draw_data: DrawData, *args) -> int:
+    # The private-looking method I call here is documented, so I assume it is
+    # not actually private.
+    return draw_tab_with_powerline(draw_data._replace(title_template=_title_template), *args)
