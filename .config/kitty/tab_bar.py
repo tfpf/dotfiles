@@ -9,6 +9,6 @@ _title_template = (
 
 
 def draw_tab(draw_data: DrawData, *args) -> int:
-    # The private-looking method I call here is documented, so I assume it is
-    # not actually private.
+    # The private-looking method of a named tuple I call here is documented, so
+    # I assume it is not actually private.
     return draw_tab_with_powerline(draw_data._replace(title_template=_title_template), *args)
