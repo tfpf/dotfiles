@@ -12,6 +12,15 @@ foreground                     = "#FFFFFF"
 gtk-adwaita                    = false
 gtk-titlebar                   = true
 initial-window                 = true
+keybind                        = alt+]=goto_split:next
+keybind                        = alt+[=goto_split:previous
+keybind                        = ctrl+enter=new_split:down
+keybind                        = f5=reload_config
+keybind                        = super+enter=new_split:down
+keybind                        = super+]=goto_split:next
+keybind                        = super+[=goto_split:previous
+keybind                        = super+shift+t=new_tab
+keybind                        = super+t=unbind
 macos-option-as-alt            = true
 maximize                       = true
 mouse-hide-while-typing        = false
