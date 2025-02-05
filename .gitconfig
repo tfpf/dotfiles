@@ -1,6 +1,7 @@
 [alias]
 	d = diff -w
-	l = log --graph
+	l = log --graph --oneline
+	ll = log --graph
 	s = show -w
 [blame]
 	coloring = repeatedLines
