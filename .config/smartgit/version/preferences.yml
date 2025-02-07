@@ -1,0 +1,131 @@
+showSetup: false
+actions:
+  cleanup: {gcIntervalDays: 0}
+  commit: {messageLineLimits: false}
+  compare:
+    fileComparators:
+    - filePattern: '*'
+      compareType: 0
+      externalFileCompare: {}
+    compareWithWorkingTree: false
+    showChooser: false
+  conflictSolver:
+    conflictSolvers:
+    - filePattern: '*'
+      useExternal: false
+      externalTool: {}
+  stash: {}
+  doubleClickStage: true
+logSettings:
+  filterConfiguration: {regularExpressions: false}
+  loadGravatars: false
+comparePreviewSettings: {}
+dateFormat: {datePattern: yyyy-MM-dd, timePattern: 'HH:mm:ss', showTimeForLastDays: false}
+defaultViewSettings:
+  compareSettings:
+    textSettings: {whitespaces: 0}
+    ignoreWhitespaces: true
+git:
+  maxCount: 3
+  alternatives: ['${smartgit.install}/git/bin/git', /bin/git, /usr/bin/git]
+  executable: /usr/bin/git
+ssh: {}
+deepGit2: {}
+globalTextComponentSettings:
+  font: {family: RecMonoCasual Nerd Font, size: 13}
+  actions: {focusNextChangeAfterTakingChange: false, tabToSpaces: false, homeEndToLineNotDocument: true,
+    smartHome: true, cursorLeftRightLimitToLine: true, smartEnterAutoIndent: true,
+    smartEnterIgnoreEmptyLinesForIndentation: true, smartEnterDeleteWhitespace: true}
+  syntaxHighlightingSettings:
+    entries:
+    - {language: ANTLR4, pattern: '*.g4'}
+    - {language: ASM (x86), pattern: '*.asm'}
+    - {language: Basic, pattern: '*.basic, *.cbm, *.vb, *.vbs'}
+    - {language: C#, pattern: '*.cs'}
+    - {language: C(++), pattern: '*.c, *.cc, *.cpp, *.cxx, *.cyc, *.h, *.ino'}
+    - {language: CMake, pattern: '*.cmake'}
+    - {language: CSS, pattern: '*.css, *.css-kw, *.css-str'}
+    - {language: Clojure, pattern: '*.clj'}
+    - {language: Cmd, pattern: '*.bat, *.cmd'}
+    - {language: Crystal, pattern: '*.cr'}
+    - {language: Dart, pattern: '*.dart'}
+    - {language: Embedded Ruby Template, pattern: '*.erb'}
+    - {language: Forth, pattern: '*.forth, *.fs'}
+    - {language: Gettext, pattern: '*.po, *.pot'}
+    - {language: Go, pattern: '*.go'}
+    - {language: Groovy, pattern: '*.gradle, *.groovy'}
+    - {language: HTML, pattern: '*.htm, *.html, *.xhtml'}
+    - {language: InnoSetup, pattern: '*.iss'}
+    - {language: JSON, pattern: '*.json'}
+    - {language: Java, pattern: '*.java'}
+    - {language: JavaScript/TypeScript, pattern: '*.javascript, *.js, *.ts, *.tsx'}
+    - {language: Kotlin, pattern: '*.kt, *.kts'}
+    - {language: Lua/Nelua, pattern: '*.lua'}
+    - {language: Markdown, pattern: '*.md'}
+    - {language: Mumps, pattern: '*.mumps'}
+    - {language: Nim, pattern: '*.nim'}
+    - {language: Objective-C, pattern: '*.m'}
+    - {language: Odin, pattern: '*.odin'}
+    - {language: PHP, pattern: '*.php, *.php3, *.php4, *.php5, *.phps, *.phtml'}
+    - {language: Pascal, pattern: '*.pas, *.pascal'}
+    - {language: Perl, pattern: '*.perl, *.pl, *.pm'}
+    - {language: Properties, pattern: '*.properties'}
+    - {language: Python, pattern: '*.cv, *.py, *.python, *.pyw'}
+    - {language: Ruby, pattern: '*.rb, *.ruby'}
+    - {language: Rust, pattern: '*.rc, *.rs, *.rust'}
+    - {language: SQL, pattern: '*.sql'}
+    - {language: Scala, pattern: '*.scala'}
+    - {language: Shell Script, pattern: '*.bash, *.bsh, *.csh, *.sh'}
+    - {language: Swift, pattern: '*.swift'}
+    - {language: TOML, pattern: '*.toml'}
+    - {language: V, pattern: '*.vlang'}
+    - {language: VHDL '93, pattern: '*.vhd, *.vhdl'}
+    - {language: Verilog, pattern: '*.sv, *.v, *.vh'}
+    - {language: XML, pattern: '*.csproj, *.fsproj, *.mxml, *.plist, *.storyboard,
+        *.svg, *.targets, *.thyme, *.vbproj, *.vcxproj, *.xib, *.xml'}
+    - {language: Yaml, pattern: '*.yaml, *.yml'}
+    - {language: Zig, pattern: '*.zig'}
+  colors.light: {color-comment: 8421504, color-keyword: 32768, color-string: 12583104,
+    color-identifier: 3158064, color-literal: 255, color-punctuation: 14755880, color-invalid: 16727871,
+    color-type: 4227200, color-annotation: 11564032, color-escape: 18048, color-interpolation: 128,
+    color-pragma: 8547840, color-parameter: 25728, color-variable: 4718847, color-tag: 128,
+    color-attrib-name: 255, color-attrib-value: 32768, color-plain-text: 2105376,
+    color-title: 33023, color-styled: 12583104, color-code: 32896, color-list: 16711790,
+    color-link: 32838, color-special: 14708736, foregroundText: 0, foregroundGutter: 9868950,
+    foregroundWhitespace: 12632256, foregroundTrailingWhitespace: 12624064, foregroundCompactSeparator: 10526880,
+    backgroundEditable: 16777215, backgroundReadOnly: 16185078, backgroundGutter: 16316661,
+    backgroundCurrentLine: 16316661, backgroundModified: 16777113, backgroundModifiedLight: 16777198,
+    backgroundAdded: 11202218, backgroundAddedLight: 14548957, backgroundRemoved: 15641258,
+    backgroundRemovedLight: 16768477, backgroundConflict: 16755370, backgroundConflictLight: 16770019,
+    backgroundCompactSeparator: 15132390, backgroundComment: 16182243, backgroundModifiedCS: 16763080,
+    backgroundAddedCS: 12513470, backgroundRemovedCS: 13158655, highlightCurrentLine: false}
+  colors.dark: {color-comment: 9079434, color-keyword: 10733475, color-string: 14002901,
+    color-identifier: 12632256, color-literal: 11184853, color-punctuation: 15777984,
+    color-invalid: 16744319, color-type: 11513807, color-annotation: 13092749, color-escape: 9291719,
+    color-interpolation: 9211135, color-pragma: 13876905, color-parameter: 8441087,
+    color-variable: 11184895, color-tag: 10274701, color-attrib-name: 9291719, color-attrib-value: 12558303,
+    color-plain-text: 12566463, color-title: 6996223, color-styled: 16777184, color-code: 10543328,
+    color-list: 16744640, color-link: 12644544, color-special: 11184895, foregroundText: 12632256,
+    foregroundGutter: 12632256, foregroundWhitespace: 8421504, foregroundTrailingWhitespace: 12624064,
+    foregroundCompactSeparator: 7895160, backgroundEditable: 2236962, backgroundReadOnly: 2236962,
+    backgroundGutter: 4802111, backgroundCurrentLine: 4802111, backgroundModified: 5921280,
+    backgroundModifiedLight: 3355426, backgroundAdded: 3368499, backgroundAddedLight: 3359795,
+    backgroundRemoved: 6697779, backgroundRemovedLight: 4469555, backgroundConflict: 8400896,
+    backgroundConflictLight: 4468512, backgroundCompactSeparator: 3947580, backgroundComment: 7299927,
+    backgroundModifiedCS: 10047311, backgroundAddedCS: 5216610, backgroundRemovedCS: 5207193,
+    highlightCurrentLine: false}
+  colors.useDark: false
+project: {showWelcomeDialog: false}
+uiSettings: {theme: auto, themeChanged: true, fileSearchPatternType: 1}
+vcsRecords: {lastGitUsage: 1738935064925}
+updateCheck: {prevCheckTime: 1738932990285, checkedBuild: 21125, mode: report, upgradeInstallation: false}
+updateCheckDg: {}
+proxy: {enabled: false, autoDetect: true}
+spellCheck:
+  dictionaries: []
+  deleted: true
+lastUsedVersion: '24.1'
+firstUsedTime: 1738932924444
+warnForMissingMasterPassword: false
+sendStacktraces2: false
+sendUsageStats: false
