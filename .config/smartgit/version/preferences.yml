@@ -93,9 +93,9 @@ globalTextComponentSettings:
     color-link: 32838, color-special: 14708736, foregroundText: 0, foregroundGutter: 9868950,
     foregroundWhitespace: 12632256, foregroundTrailingWhitespace: 12624064, foregroundCompactSeparator: 10526880,
     backgroundEditable: 16777215, backgroundReadOnly: 16185078, backgroundGutter: 16316661,
-    backgroundCurrentLine: 16185004, backgroundModified: 16763080, backgroundModifiedLight: 16772589,
-    backgroundAdded: 12513470, backgroundAddedLight: 15399658, backgroundRemoved: 13158655,
-    backgroundRemovedLight: 15592959, backgroundConflict: 16755370, backgroundConflictLight: 16770019,
+    backgroundCurrentLine: 16316661, backgroundModified: 16777113, backgroundModifiedLight: 16777198,
+    backgroundAdded: 11202218, backgroundAddedLight: 14548957, backgroundRemoved: 15641258,
+    backgroundRemovedLight: 16768477, backgroundConflict: 16755370, backgroundConflictLight: 16770019,
     backgroundCompactSeparator: 15132390, backgroundComment: 16182243, backgroundModifiedCS: 16763080,
     backgroundAddedCS: 12513470, backgroundRemovedCS: 13158655, highlightCurrentLine: false}
   colors.dark: {color-comment: 9079434, color-keyword: 10733475, color-string: 14002901,
