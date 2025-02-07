@@ -28,6 +28,8 @@
 	untracked = brightred
 [column]
 	ui = auto,column,nodense
+[commit]
+	gpgSign = false
 [core]
 	commentChar = "#"
 	compression = 9
@@ -57,6 +59,7 @@
 [gui]
 	fontdiff = -family \"RecMonoCasual Nerd Font\" -size 11
 	fontui = -family Signika -size 11
+	pruneduringfetch = true
 [init]
 	defaultBranch = main
 [interactive]
@@ -70,6 +73,12 @@
 	log = less -iRFX
 [pull]
 	rebase = false
+[push]
+	recurseSubmodules = no
+[smartgit "submodule"]
+	fetchalways = false
+	initializenew = true
+	update = true
 [user]
 	email = 19171016+tfpf@users.noreply.github.com
 	name = Vishal Pankaj Chandratreya
