@@ -15,6 +15,7 @@ actions:
       useExternal: false
       externalTool: {}
   stash: {}
+  doubleClickStage: true
 logSettings:
   filterConfiguration: {regularExpressions: false}
   loadGravatars: false
@@ -108,7 +109,7 @@ globalTextComponentSettings:
     foregroundGutter: 12632256, foregroundWhitespace: 8421504, foregroundTrailingWhitespace: 12624064,
     foregroundCompactSeparator: 7895160, backgroundEditable: 3157803, backgroundReadOnly: 3157803,
     backgroundGutter: 4802111, backgroundCurrentLine: 7566169, backgroundModified: 6694952,
-    backgroundModifiedLight: 3878442, backgroundAdded: 2647608, backgroundAddedLight: 3029550,
+    backgroundModifiedLight: 3878442, backgroundAdded: 3368499, backgroundAddedLight: 3359795,
     backgroundRemoved: 2639718, backgroundRemovedLight: 3028023, backgroundConflict: 8400896,
     backgroundConflictLight: 4468512, backgroundCompactSeparator: 3947580, backgroundComment: 7299927,
     backgroundModifiedCS: 10047311, backgroundAddedCS: 5216610, backgroundRemovedCS: 5207193,
