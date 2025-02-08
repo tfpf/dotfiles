@@ -37,9 +37,9 @@ then
     alias cat='bat'
 fi
 
-alias p='python3 -B'
-alias pip='python3 -m pip'
-alias timeit='python3 -m timeit'
+alias p='python -B'
+alias pip='python -m pip'
+alias timeit='python -m timeit'
 
 alias L="$HOME/.bash_hacks.py L"
 alias P="$HOME/.bash_hacks.py P"
@@ -161,12 +161,12 @@ import()
 
 json.tool()
 {
-    python3 -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p
+    python -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p
 }
 
 json.toolog()
 {
-    python3 -c '
+    python -c '
 import json
 import sys
 
