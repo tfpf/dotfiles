@@ -106,7 +106,7 @@ command grep -Fiq microsoft /proc/version && . $HOME/.bash_aliases_wsl.bash
 _before_command()
 {
     [ -n "${__begin_window+.}" ] && return
-    __begin_window=$(custom-bash-prompt)
+    __begin_window=$(custom-bash-prompt "$PWD" "")
 }
 
 # Post-command for command timing. It will be called just before the prompt is

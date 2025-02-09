@@ -13,7 +13,7 @@ _after_command()
 _before_command()
 {
     [ -n "${__begin_window+.}" ] && return
-    __begin_window=$(custom-zsh-prompt)
+    __begin_window=$(custom-zsh-prompt $PWD "$1")
 }
 
 cfs()
@@ -208,7 +208,7 @@ autoload -Uz add-zsh-hook bashcompinit compinit select-word-style
 # because they help set the primary prompt.
 add-zsh-hook precmd _after_command
 add-zsh-hook preexec _before_command
-_before_command && _after_command
+_before_command "" && _after_command
 
 # Must be called before the Bash equivalent, according the manual.
 compinit

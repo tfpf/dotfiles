@@ -663,12 +663,19 @@ void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_
  * This should also automatically update the title of the current terminal tab.
  *
  * @param pwd Current directory.
+ * @param cmd Command about to be executed.
  */
-void set_terminal_title(std::string_view& pwd)
+void set_terminal_title(std::string_view& pwd, std::string_view& cmd)
 {
     LOG_DEBUG("Current directory path is '%s'.", pwd.data());
+    LOG_DEBUG("Command about to be executed is '%s'.", cmd.data());
     pwd.remove_prefix(pwd.rfind('/') + 1);
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/';
+    if(!cmd.empty())
+    {
+        std::clog << " ▶ " << cmd.substr(0, cmd.find(' '));
+    }
+    std::clog << ESCAPE BACKSLASH;
 }
 
 /**
@@ -683,9 +690,12 @@ void set_terminal_title(std::string_view& pwd)
 int main_internal(int const argc, char const* argv[])
 {
     long long unsigned ts = get_timestamp();
-    if (argc <= 1)
+    if (2 < argc && argc <= 7)
     {
         std::cout << ts << ' ' << get_active_wid() << '\n';
+        std::string_view pwd(argv[1]);
+        std::string_view cmd(argv[2]);
+        set_terminal_title(pwd, cmd);
         return EXIT_SUCCESS;
     }
 
@@ -711,7 +721,8 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     std::string_view pwd(argv[6]);
-    set_terminal_title(pwd);
+    std::string_view cmd;
+    set_terminal_title(pwd, cmd);
 
     int shlvl = std::stoi(argv[7]);
     char const* venv = getenv("VIRTUAL_ENV_PROMPT");
@@ -729,7 +740,7 @@ int main(int const argc, char const* argv[])
     // For testing. Simulate dummy arguments so that the longer code path is
     // taken. Honour the standard requirement that the argument list be
     // null-terminated.
-    if (argc == 2)
+    if (argc <= 2)
     {
         char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
         int constexpr argc = sizeof argv / sizeof *argv - 1;
