@@ -1,5 +1,6 @@
 [alias]
 	d = diff -w
+	dt = difftool --dir-diff
 	l = log --graph --pretty='%C(yellow)%h%C(reset) %C(brightblack)%cd%C(reset) %C(cyan)%>|(64,trunc)%an%C(reset) %C(auto)%(decorate:pointer= ≡ ,tag=)%C(reset) %<|(-1,trunc)%s'
 	ll = log --graph
 	s = show -w
@@ -52,7 +53,7 @@
 [difftool]
 	prompt = false
 [difftool "diffgen.py"]
-	cmd = diffgen.py $LOCAL $REMOTE
+	cmd = diffgen.py "$LOCAL" "$REMOTE"
 [fetch]
 	prune = true
 	pruneTags = true
