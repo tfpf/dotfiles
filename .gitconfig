@@ -46,11 +46,13 @@
 	syntax-theme = none
 [diff]
 	algorithm = minimal
-	tool = vimdiff
+	tool = diffgen.py
 [diff "utf16toutf8"]
 	textconv = iconv -f utf-16 -t utf-8
 [difftool]
 	prompt = false
+[difftool "diffgen.py"]
+	cmd = diffgen.py $LOCAL $REMOTE
 [fetch]
 	prune = true
 	pruneTags = true
