@@ -671,7 +671,7 @@ void set_terminal_title(std::string_view& pwd, std::string_view& cmd)
     LOG_DEBUG("Command about to be executed is '%s'.", cmd.data());
     pwd.remove_prefix(pwd.rfind('/') + 1);
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/';
-    if(!cmd.empty())
+    if (!cmd.empty())
     {
         std::clog << " ▶ " << cmd.substr(0, cmd.find(' '));
     }
