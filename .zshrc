@@ -55,7 +55,7 @@ import()
 
 json.tool()
 {
-    python -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p --theme=auto
+    python -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p --theme=TwoDark
 }
 
 json.toolog()
@@ -69,7 +69,7 @@ for line in sys.stdin:
         print(json.dumps(json.loads(line), ensure_ascii=False, indent=2, sort_keys=True), flush=True)
     except json.decoder.JSONDecodeError:
         print(line.rstrip(), flush=True)
-    ' | bat -l json -pp --theme=auto
+    ' | bat -l json -pp --theme=TwoDark
 }
 
 o()
