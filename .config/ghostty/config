@@ -1,14 +1,14 @@
-auto-update                    = "off"
-background                     = "#000000"
+auto-update                    = off
+background                     = #000000
 background-blur-radius         = 16
 background-opacity             = 0.8
 bold-is-bright                 = true
-cursor-style                   = "bar"
+cursor-style                   = bar
 cursor-style-blink             = false
 focus-follows-mouse            = true
-font-family                    = "RecMonoCasual Nerd Font"
+font-family                    = RecMonoCasual Nerd Font
 font-size                      = 13
-foreground                     = "#FFFFFF"
+foreground                     = #FFFFFF
 gtk-adwaita                    = false
 gtk-titlebar                   = true
 initial-window                 = true
@@ -42,8 +42,9 @@ palette                        = 14=#34e2e2
 palette                        = 15=#eeeeec
 quit-after-last-window-closed  = true
 selection-invert-fg-bg         = true
-shell-integration              = "detect"
+shell-integration              = detect
 shell-integration-features     = false
-unfocused-split-fill           = "#27B4A6"
+unfocused-split-fill           = #27B4A6
 unfocused-split-opacity        = 0.8
-window-theme                   = "system"
+window-decoration              = server
+window-theme                   = system
