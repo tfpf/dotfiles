@@ -55,20 +55,16 @@ import()
 
 json.tool()
 {
-    python -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p --theme=OneHalfDark
-}
-
-json.toolog()
-{
-    python -c '
+    python -u -c '
 import json
 import sys
 
 for line in sys.stdin:
     try:
-        print(json.dumps(json.loads(line), ensure_ascii=False, indent=2, sort_keys=True), flush=True)
+        json.dump(json.loads(line), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
+        print()
     except json.decoder.JSONDecodeError:
-        print(line.rstrip(), flush=True)
+        print(line.rstrip(), file=sys.stderr)
     ' | bat -l json -pp --theme=OneHalfDark
 }
 
