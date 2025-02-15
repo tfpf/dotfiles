@@ -65,7 +65,7 @@ for line in sys.stdin:
         print()
     except json.decoder.JSONDecodeError:
         print(line.rstrip(), file=sys.stderr)
-    ' | bat -l json -pp --theme=OneHalfDark
+    ' | bat -l json -pp --theme=TwoDark
 }
 
 o()
