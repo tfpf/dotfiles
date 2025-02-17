@@ -59,13 +59,19 @@ json.tool()
 import json
 import sys
 
-for line in sys.stdin:
+def fmt(data: str):
     try:
-        json.dump(json.loads(line), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
+        json.dump(json.loads(data), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
         print()
     except json.decoder.JSONDecodeError:
-        print(line.rstrip(), file=sys.stderr)
-    ' | bat -l json -pp --theme=TwoDark
+        print(data.rstrip(), file=sys.stderr)
+
+if len(sys.argv) > 1 and sys.argv[1] == "-a":
+    fmt(sys.stdin.read())
+else:
+    for line in sys.stdin:
+        fmt(line)
+    ' "$@" | bat -l json -pp --theme=TwoDark
 }
 
 o()
