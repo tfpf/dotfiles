@@ -56,6 +56,7 @@
 	pruneTags = true
 [gc]
 	auto = 256
+	autoDetach = false
 [gui]
 	fontdiff = -family \"RecMonoCasual Nerd Font\" -size 11
 	fontui = -family Signika -size 11
