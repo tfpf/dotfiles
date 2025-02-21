@@ -165,17 +165,17 @@ json.tool()
 import json
 import sys
 
-def fmt(data: str):
+def fmt(loader, source):
     try:
-        json.dump(json.loads(data), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
+        json.dump(loader(source), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
         print()
-    except json.decoder.JSONDecodeError:
-        print(data.rstrip(), file=sys.stderr)
+    except json.decoder.JSONDecodeError as e:
+        print(e.doc.rstrip(), file=sys.stderr)
 
 if len(sys.argv) > 1 and sys.argv[1] == "-a":
-    fmt(sys.stdin.read())
-else:
-    for line in sys.stdin:
-        fmt(line)
+    fmt(json.load, sys.stdin)
+    raise SystemExit
+for line in sys.stdin:
+    fmt(json.loads, line)
     ' "$@" | bat -l json -pp --theme=TwoDark
 }
