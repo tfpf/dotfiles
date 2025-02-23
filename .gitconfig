@@ -1,6 +1,6 @@
 [alias]
 	d = diff -w
-	dt = difftool --dir-diff
+	dt = difftool
 	l = log --graph --pretty='%C(yellow)%h%C(reset) %C(brightblack)%cd%C(reset) %C(cyan)%>|(64,trunc)%an%C(reset) %C(auto)%(decorate:pointer= ≡ ,tag=)%C(reset) %<|(-1,trunc)%s'
 	ll = log --graph
 	s = show -w
@@ -47,13 +47,13 @@
 	syntax-theme = none
 [diff]
 	algorithm = minimal
-	tool = diffgen.py
+	tool = diff.py
 [diff "utf16toutf8"]
 	textconv = iconv -f utf-16 -t utf-8
 [difftool]
 	prompt = false
-[difftool "diffgen.py"]
-	cmd = diffgen.py "$LOCAL" "$REMOTE"
+[difftool "diff.py"]
+	cmd = diff.py "$LOCAL" "$REMOTE"
 [fetch]
 	prune = true
 	pruneTags = true
