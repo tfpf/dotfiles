@@ -18,7 +18,7 @@ actions:
   doubleClickStage: true
 logSettings:
   filterConfiguration: {regularExpressions: false}
-  loadGravatars: false
+  loadGravatars: true
 comparePreviewSettings: {}
 dateFormat: {datePattern: yyyy-MM-dd, timePattern: 'HH:mm:ss', showTimeForLastDays: false}
 defaultViewSettings:
@@ -99,22 +99,22 @@ globalTextComponentSettings:
     backgroundRemovedLight: 16768477, backgroundConflict: 16755370, backgroundConflictLight: 16770019,
     backgroundCompactSeparator: 15132390, backgroundComment: 16182243, backgroundModifiedCS: 16763080,
     backgroundAddedCS: 12513470, backgroundRemovedCS: 13158655, highlightCurrentLine: false}
-  colors.dark: {color-comment: 9079434, color-keyword: 10733475, color-string: 14002901,
-    color-identifier: 12632256, color-literal: 11184853, color-punctuation: 15777984,
-    color-invalid: 16744319, color-type: 11513807, color-annotation: 13092749, color-escape: 9291719,
-    color-interpolation: 9211135, color-pragma: 13876905, color-parameter: 8441087,
+  colors.dark: {color-comment: 8421504, color-keyword: 5676246, color-string: 13537656,
+    color-identifier: 13948116, color-literal: 11914920, color-punctuation: 13948116,
+    color-invalid: 16744319, color-type: 5163440, color-annotation: 13092749, color-escape: 13537656,
+    color-interpolation: 13537656, color-pragma: 14114695, color-parameter: 8441087,
     color-variable: 11184895, color-tag: 10274701, color-attrib-name: 9291719, color-attrib-value: 12558303,
     color-plain-text: 12566463, color-title: 6996223, color-styled: 16777184, color-code: 10543328,
     color-list: 16744640, color-link: 12644544, color-special: 11184895, foregroundText: 12632256,
     foregroundGutter: 12632256, foregroundWhitespace: 8421504, foregroundTrailingWhitespace: 12624064,
-    foregroundCompactSeparator: 7895160, backgroundEditable: 2236962, backgroundReadOnly: 2236962,
-    backgroundGutter: 4802111, backgroundCurrentLine: 4802111, backgroundModified: 5921280,
-    backgroundModifiedLight: 3355426, backgroundAdded: 3368499, backgroundAddedLight: 3359795,
-    backgroundRemoved: 6697779, backgroundRemovedLight: 4469555, backgroundConflict: 8400896,
+    foregroundCompactSeparator: 7895160, backgroundEditable: 1973790, backgroundReadOnly: 1973790,
+    backgroundGutter: 4802111, backgroundCurrentLine: 4802111, backgroundModified: 5917210,
+    backgroundModifiedLight: 3090713, backgroundAdded: 1923630, backgroundAddedLight: 1717025,
+    backgroundRemoved: 7285033, backgroundRemovedLight: 3809055, backgroundConflict: 8400896,
     backgroundConflictLight: 4468512, backgroundCompactSeparator: 3947580, backgroundComment: 7299927,
-    backgroundModifiedCS: 10047311, backgroundAddedCS: 5216610, backgroundRemovedCS: 5207193,
+    backgroundModifiedCS: 13421568, backgroundAddedCS: 52224, backgroundRemovedCS: 13369344,
     highlightCurrentLine: false}
-  colors.useDark: false
+  colors.useDark: true
 project: {showWelcomeDialog: false}
 uiSettings: {theme: auto, themeChanged: true, fileSearchPatternType: 1}
 vcsRecords: {lastGitUsage: 1738935064925}

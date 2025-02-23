@@ -55,21 +55,23 @@ import()
 
 json.tool()
 {
-    python -m json.tool --indent=2 --no-ensure-ascii --sort-keys | bat -l json -p
-}
-
-json.toolog()
-{
-    python -c '
+    python -u -c '
 import json
 import sys
 
-for line in sys.stdin:
+def fmt(loader, source):
     try:
-        print(json.dumps(json.loads(line), ensure_ascii=False, indent=2, sort_keys=True), flush=True)
-    except json.decoder.JSONDecodeError:
-        print(line.rstrip(), flush=True)
-    ' | bat -l json -pp
+        json.dump(loader(source), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
+        print()
+    except json.decoder.JSONDecodeError as e:
+        print(e.doc.rstrip(), file=sys.stderr)
+
+if len(sys.argv) > 1 and sys.argv[1] == "-a":
+    fmt(json.load, sys.stdin)
+    raise SystemExit
+for line in sys.stdin:
+    fmt(json.loads, line)
+    ' "$@" | bat -l json -pp --theme=TwoDark
 }
 
 o()

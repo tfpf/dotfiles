@@ -1,8 +1,12 @@
+import base64
 import cmath
 import datetime
 import decimal
+import difflib
+import dis
 import fractions
 import hashlib
+import http
 import importlib
 import io
 import itertools
