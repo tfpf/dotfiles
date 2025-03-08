@@ -1,0 +1,6 @@
+se hlsearch
+se incsearch
+se scrolloff=5
+se showcmd
+
+Plug 'machakann/vim-highlightedyank'
