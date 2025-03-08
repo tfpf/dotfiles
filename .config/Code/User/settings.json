@@ -24,12 +24,12 @@
     "editor.tokenColorCustomizations": {
         "textMateRules": [
             {
+                "scope": "comment",
                 "settings": {
                     "fontStyle": "italic",
                     "foreground": "#667777"
-                },
-                "scope": "comment"
-            },
+                }
+            }
         ]
     },
     "files.eol": "\n",
@@ -44,6 +44,7 @@
     "vim.hlsearch": true,
     "vim.ignorecase": false,
     "vim.report": 1,
+    "window.titleBarStyle": "native",
     "workbench.colorCustomizations": {
         "editor.findMatchBackground": "#B4A6278D",
         "editor.findMatchHighlightBackground": "#27B4A68D",
