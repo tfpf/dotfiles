@@ -10,7 +10,7 @@ def report(directory_comparison: filecmp.dircmp, path_prefix: str = ""):
     Write an HTML snippet summarising the differences recorded between two
     directories. Then recurse on their subdirectories.
     :param directory_comparison: Directory comparison object.
-    :param path_prefix: Common part of the path_prefix to the directories.
+    :param path_prefix: Common part of the path to the directories.
     """
     print(path_prefix, directory_comparison.left_only, directory_comparison.right_only,
           directory_comparison.diff_files)
