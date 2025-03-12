@@ -67,7 +67,7 @@ class Diff:
     def __init__(self, a: str, b: str, writer):
         self._directory_comparison = filecmp.dircmp(a, b, shallow=False)
         self._writer = writer
-        self._html_diff = difflib.HtmlDiff()
+        self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
     def _read_lines(source: str) -> list[str]:
