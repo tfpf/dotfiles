@@ -3,6 +3,9 @@
 import filecmp
 import os
 import sys
+import tempfile
+import typing
+import webbrowser
 
 
 class Diff:
@@ -10,8 +13,9 @@ class Diff:
     Compare two directories recursively. Don't attempt to detect renames.
     """
 
-    def __init__(self, a: str, b: str):
+    def __init__(self, a: str, b: str, writer: typing.IO):
         self._directory_comparison = filecmp.dircmp(a, b, shallow=False)
+        self._writer = writer
 
     def _report(self, from_file: str | None, to_file: str | None):
         print(from_file, to_file)
@@ -35,9 +39,10 @@ class Diff:
 
 
 def main():
-    diff = Diff(sys.argv[1], sys.argv[2])
-    diff.report()
-    input()
+    with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
+        diff = Diff(sys.argv[1], sys.argv[2], writer)
+        diff.report()
+    webbrowser.open(writer.name)
 
 
 if __name__ == "__main__":
