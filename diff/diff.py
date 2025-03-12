@@ -44,17 +44,17 @@ class Diff:
         """
         directory_comparison = directory_comparison or self._directory_comparison
         for deleted_file in directory_comparison.left_only:
-            deleted_file_path= os.path.join(directory_comparison.left, deleted_file)
+            deleted_file_path = os.path.join(directory_comparison.left, deleted_file)
             deleted_lines = self._read_lines(deleted_file_path)
             self._report(deleted_lines, [], deleted_file_path, "")
         for added_file in directory_comparison.right_only:
-            added_file_path= os.path.join(directory_comparison.right, added_file)
+            added_file_path = os.path.join(directory_comparison.right, added_file)
             added_lines = self._read_lines(added_file_path)
             self._report([], added_lines, "", added_file_path)
         for changed_file in directory_comparison.diff_files:
-            deleted_file_path= os.path.join(directory_comparison.left, changed_file)
+            deleted_file_path = os.path.join(directory_comparison.left, changed_file)
             deleted_lines = self._read_lines(deleted_file_path)
-            added_file_path= os.path.join(directory_comparison.right, changed_file)
+            added_file_path = os.path.join(directory_comparison.right, changed_file)
             added_lines = self._read_lines(added_file_path)
             self._report(deleted_lines, added_lines, deleted_file_path, added_file_path)
         for subdirectory_comparison in directory_comparison.subdirs.values():
