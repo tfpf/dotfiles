@@ -53,7 +53,7 @@
 [difftool]
 	prompt = false
 [difftool "custom"]
-	cmd = diff.py $LOCAL $REMOTE
+	cmd = diff.py "$LOCAL" "$REMOTE"
 [fetch]
 	prune = true
 	pruneTags = true
