@@ -7,7 +7,7 @@ import sys
 
 class Diff:
     """
-    Compare two directories recursively.
+    Compare two directories recursively. Don't attempt to detect renames.
     """
 
     def __init__(self, a: str, b: str):
