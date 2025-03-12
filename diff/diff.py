@@ -25,11 +25,17 @@ html_begin = b"""
         .diff_add {background-color:#aaffaa}
         .diff_chg {background-color:#ffff77}
         .diff_sub {background-color:#ffaaaa}
+        .separator {margin:2cm}
     </style>
 </head>
 
 <body>
 """
+
+html_separator = b"""
+    <p class="separator"></p>
+"""
+
 html_end = b"""
     <table class="diff" summary="Legends">
         <tr><th colspan="2">Legends</th></tr>
@@ -80,6 +86,7 @@ class Diff:
             return
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(html_code.encode())
+        self._writer.write(html_separator)
 
     def report(self, directory_comparison: filecmp.dircmp | None = None):
         """
