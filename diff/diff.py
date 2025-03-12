@@ -8,6 +8,49 @@ import sys
 import tempfile
 import webbrowser
 
+html_begin = b"""
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Diff</title>
+    <style type="text/css">
+        table.diff {font-family:Monospace; border:medium;}
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right}
+        .diff_next {background-color:#c0c0c0}
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+    </style>
+</head>
+
+<body>
+"""
+html_end = b"""
+    <table class="diff" summary="Legends">
+        <tr><th colspan="2">Legends</th></tr>
+        <tr><td><table border="" summary="Colours">
+            <tr><th>Colours</th></tr>
+            <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr>
+            <tr><td class="diff_chg">Changed</td></tr>
+            <tr><td class="diff_sub">Deleted</td></tr>
+        </table></td>
+        <td><table border="" summary="Links">
+            <tr><th colspan="2">Links</th></tr>
+            <tr><td>(f)irst change</td></tr>
+            <tr><td>(n)ext change</td></tr>
+            <tr><td>(t)op</td></tr>
+        </table></td></tr>
+    </table>
+</body>
+
+</html>
+"""
+
 
 class Diff:
     """
@@ -20,7 +63,8 @@ class Diff:
         self._writer = writer
         self._html_diff = difflib.HtmlDiff()
 
-    def _read_lines(self, source: str) -> list[str]:
+    @staticmethod
+    def _read_lines(source: str) -> list[str]:
         """
         Read the lines in the given file.
         :param source: File name.
@@ -34,7 +78,8 @@ class Diff:
     def _report(self, from_lines: list[str], to_lines: list[str], from_desc: str, to_desc: str):
         if not from_lines and not to_lines:
             return
-        self._writer.write(self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True).encode())
+        html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
+        self._writer.write(html_code.encode())
 
     def report(self, directory_comparison: filecmp.dircmp | None = None):
         """
@@ -63,8 +108,10 @@ class Diff:
 
 def main():
     with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
+        writer.write(html_begin)
         diff = Diff(sys.argv[1], sys.argv[2], writer)
         diff.report()
+        writer.write(html_end)
     webbrowser.open(writer.name)
 
 
