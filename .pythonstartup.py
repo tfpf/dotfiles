@@ -7,6 +7,7 @@ import decimal
 import difflib
 import dis
 import filecmp
+import fileinput
 import fractions
 import functools
 import gc
