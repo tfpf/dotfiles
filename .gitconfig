@@ -4,6 +4,7 @@
 	l = log --graph --pretty='%C(yellow)%h%C(reset) %C(brightblack)%cd%C(reset) %C(cyan)%>|(64,trunc)%an%C(reset) %C(auto)%(decorate:pointer= ,prefix=,separator= ,suffix= ,tag=)%C(reset)%<|(-1,trunc)%s'
 	ll = l --all
 	s = show -w
+	st = status
 [blame]
 	coloring = repeatedLines
 	date = iso
