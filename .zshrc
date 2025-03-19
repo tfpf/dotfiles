@@ -188,10 +188,6 @@ envarmunge PATH ~/.cargo/bin
 export IPELATEXDIR=~/.ipe/latexrun
 export IPELATEXPATH=~/.ipe/latexrun
 
-envarmunge INFOPATH /usr/local/texlive/2024/texmf-dist/doc/info
-envarmunge MANPATH /usr/local/texlive/2024/texmf-dist/doc/man
-envarmunge PATH /usr/local/texlive/2024/bin/x86_64-linux
-
 . <(dircolors -b ~/.dircolors)
 
 command -v lesspipe &>/dev/null && . <(SHELL=/bin/sh lesspipe)

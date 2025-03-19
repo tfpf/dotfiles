@@ -46,11 +46,6 @@ envarmunge PATH /opt/gurobi*/linux64/bin
 envarmunge IPELATEXDIR $HOME/.ipe/latexrun
 envarmunge IPELATEXPATH $HOME/.ipe/latexrun
 
-# TeX Live.
-envarmunge INFOPATH /usr/local/texlive/*/texmf-dist/doc/info
-envarmunge MANPATH /usr/local/texlive/*/texmf-dist/doc/man
-envarmunge PATH /usr/local/texlive/*/bin/x86_64-linux
-
 export BASH_COMPLETION_USER_DIR=$HOME/.local/share/bash-completion
 export BAT_PAGER='less -iRF'
 export EDITOR=vim
