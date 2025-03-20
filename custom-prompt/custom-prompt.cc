@@ -201,6 +201,7 @@ private:
     void establish_state(void);
     void establish_state_rebasing(void);
     void establish_dirty_staged_untracked(void);
+    void establish_ahead_behind(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
     static int update_tag(char const*, C::git_oid*, void*);
@@ -228,6 +229,7 @@ GitRepository::GitRepository(void) :
     this->establish_tag();
     this->establish_state();
     this->establish_dirty_staged_untracked();
+    this->establish_ahead_behind();
 }
 
 /**
@@ -433,6 +435,17 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
         ++self->untracked;
     }
     return 0;
+}
+
+void GitRepository::establish_ahead_behind(void){
+    if(this->oid == nullptr){return;}
+    C::git_reference *upstream_ref;
+    if(C::git_branch_upstream(&upstream_ref, this->ref) != 0){return;}
+    C::git_oid const*upstream_oid = git_reference_target(upstream_ref);
+    if(upstream_oid == nullptr){return;}
+    std::size_t ahead, behind;
+    if(C::git_graph_ahead_behind(&ahead, &behind, this->repo, this->oid, upstream_oid) != 0){return;}
+    LOG_DEBUG("ahead=%zu, behind=%zu\n", ahead, behind);
 }
 
 /**
