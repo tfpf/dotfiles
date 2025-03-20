@@ -472,7 +472,7 @@ std::string GitRepository::get_information(void)
     {
         information_stream << B_GREEN "  "<< this->staged <<  RESET;
     }
-    if (this->untracked)
+    if (this->untracked > 0)
     {
         information_stream << B_RED "  " << this->untracked <<RESET;
     }
