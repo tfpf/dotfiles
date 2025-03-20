@@ -416,16 +416,23 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
 int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
-    self->dirty |= status_flags
+    if (status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
-            | C::GIT_STATUS_WT_TYPECHANGE);
-    self->staged |= status_flags
+            | C::GIT_STATUS_WT_TYPECHANGE))
+    {
+        ++self->dirty;
+    }
+    if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
-            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE);
-    self->untracked |= status_flags & C::GIT_STATUS_WT_NEW;
-
-    // Stop iterating if all possible statuses were found.
-    return self->dirty && self->staged && self->untracked;
+            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
+    {
+        ++self->staged;
+    }
+    if (status_flags & C::GIT_STATUS_WT_NEW)
+    {
+        ++self->untracked;
+    }
+    return false;
 }
 
 /**
@@ -457,21 +464,17 @@ std::string GitRepository::get_information(void)
     {
         information_stream << " 󰓼 " << this->tag;
     }
-    if (this->dirty || this->staged || this->untracked)
+    if (this->dirty > 0)
     {
-        information_stream << ' ';
+        information_stream << B_YELLOW "  " << this->dirty << RESET;
     }
-    if (this->dirty)
+    if (this->staged > 0)
     {
-        information_stream << B_YELLOW "*" RESET;
+        information_stream << B_GREEN "  " << this->staged << RESET;
     }
-    if (this->staged)
+    if (this->untracked > 0)
     {
-        information_stream << B_GREEN "+" RESET;
-    }
-    if (this->untracked)
-    {
-        information_stream << B_RED "!" RESET;
+        information_stream << B_RED "  " << this->untracked << RESET;
     }
     if (!this->state.empty())
     {
