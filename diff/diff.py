@@ -81,9 +81,27 @@ class Diff:
         except IsADirectoryError:
             return []
 
+    @staticmethod
+    def _remove_temporary_directory_prefix(file_path: str):
+        file_path_len = len(file_path)
+        try:
+            index_of_after_left = file_path.index("/left/") + 6
+        except ValueError:
+            index_of_after_left = file_path_len
+        try:
+            index_of_after_right = file_path.index("/right/") + 7
+        except ValueError:
+            index_of_after_right = file_path_len
+        index_of_after_left_or_right = min(index_of_after_left, index_of_after_right)
+        if index_of_after_left_or_right != file_path_len:
+            return file_path[index_of_after_left_or_right:]
+        return file_path
+
     def _report(self, from_lines: list[str], to_lines: list[str], from_desc: str, to_desc: str):
         if not from_lines and not to_lines:
             return
+        from_desc = self._remove_temporary_directory_prefix(from_desc)
+        to_desc = self._remove_temporary_directory_prefix(to_desc)
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(html_code.encode())
         self._writer.write(html_separator)
