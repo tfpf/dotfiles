@@ -85,6 +85,7 @@ namespace C
 #define B_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "93m" END_INVISIBLE
 
 // Dark.
+#define D_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "36m" END_INVISIBLE
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
 #define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
 #define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
@@ -509,7 +510,7 @@ std::string GitRepository::get_information(void)
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
-        information_stream << " Δ +" << this->ahead << ",−" << this->behind;
+        information_stream << D_CYAN "  +" << this->ahead << ",−" << this->behind << RESET;
     }
     if (!this->state.empty())
     {
