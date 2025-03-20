@@ -2,6 +2,7 @@
 #include <chrono>
 #include <csignal>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
@@ -214,7 +215,7 @@ private:
  */
 GitRepository::GitRepository(void) :
     repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0),
-    ahead(-1), behind(-1)
+    ahead(SIZE_MAX), behind(SIZE_MAX)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -506,7 +507,7 @@ std::string GitRepository::get_information(void)
     {
         information_stream << B_RED "  " << this->untracked << RESET;
     }
-    if (this->ahead != -1 && this->behind != -1)
+    if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
         information_stream << " Δ +" << this->ahead << ",−" << this->behind;
     }
