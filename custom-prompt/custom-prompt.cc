@@ -432,6 +432,7 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     {
         ++self->untracked;
     }
+    return false;
 }
 
 /**
@@ -463,21 +464,17 @@ std::string GitRepository::get_information(void)
     {
         information_stream << " 󰓼 " << this->tag;
     }
-    if (this->dirty || this->staged || this->untracked)
+    if (this->dirty > 0)
     {
-        information_stream << ' ';
+        information_stream << B_YELLOW "  " << this->dirty << RESET;
     }
-    if (this->dirty)
+    if (this->staged > 0)
     {
-        information_stream << B_YELLOW "*" RESET;
-    }
-    if (this->staged)
-    {
-        information_stream << B_GREEN "+" RESET;
+        information_stream << B_GREEN "  "<< this->staged <<  RESET;
     }
     if (this->untracked)
     {
-        information_stream << B_RED "!" RESET;
+        information_stream << B_RED "  " << this->untracked <<RESET;
     }
     if (!this->state.empty())
     {
