@@ -17,14 +17,14 @@ Git repository and the current Python virtual environment, and report the runnin
 typically look like
 
 ```console
- Alpine  ~/Documents/projects/dotfiles  main
+ Alpine  ~/Documents/projects/dotfiles  main  1  +0,−1
 % pipenv shell
 
- Alpine  ~/Documents/projects/dotfiles  main !  dotfiles
+ Alpine  ~/Documents/projects/dotfiles  main  1  1  +1,−1  dotfiles
 ▶% exit
                                    pipenv shell  00:43.735
 
- Alpine  ~/Documents/projects/dotfiles  main !
+ Alpine  ~/Documents/projects/dotfiles  main  1  1  +1,−1
 %
 ```
 

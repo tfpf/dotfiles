@@ -2,6 +2,7 @@
 #include <chrono>
 #include <csignal>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
@@ -84,6 +85,7 @@ namespace C
 #define B_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "93m" END_INVISIBLE
 
 // Dark.
+#define D_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "36m" END_INVISIBLE
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
 #define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
 #define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
@@ -190,6 +192,7 @@ private:
     std::string description, tag;
     std::string state;
     unsigned dirty, staged, untracked;
+    std::size_t ahead, behind;
 
 public:
     GitRepository(void);
@@ -201,6 +204,7 @@ private:
     void establish_state(void);
     void establish_state_rebasing(void);
     void establish_dirty_staged_untracked(void);
+    void establish_ahead_behind(void);
     // These are static methods because otherwise, their signatures do not
     // match the required signatures for use as callback functions.
     static int update_tag(char const*, C::git_oid*, void*);
@@ -211,7 +215,8 @@ private:
  * Read the current Git repository.
  */
 GitRepository::GitRepository(void) :
-    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0)
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0),
+    ahead(SIZE_MAX), behind(SIZE_MAX)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -228,6 +233,7 @@ GitRepository::GitRepository(void) :
     this->establish_tag();
     this->establish_state();
     this->establish_dirty_staged_untracked();
+    this->establish_ahead_behind();
 }
 
 /**
@@ -436,6 +442,32 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
 }
 
 /**
+ * Obtain the number of commits the current branch and the tracked branch
+ * differ by.
+ */
+void GitRepository::establish_ahead_behind(void)
+{
+    if (this->oid == nullptr)
+    {
+        return;
+    }
+    C::git_reference* upstream_ref;
+    if (C::git_branch_upstream(&upstream_ref, this->ref) != 0)
+    {
+        return;
+    }
+    // As mentioned previously, though the documentation says this doesn't work
+    // on symbolic references, I have observed that it does. Still, guard
+    // against the possibility that it doesn't.
+    C::git_oid const* upstream_oid = git_reference_target(upstream_ref);
+    if (upstream_oid == nullptr)
+    {
+        return;
+    }
+    C::git_graph_ahead_behind(&this->ahead, &this->behind, this->repo, this->oid, upstream_oid);
+}
+
+/**
  * Provide information about the current Git repository in a manner suitable to
  * display in the shell prompt.
  *
@@ -475,6 +507,10 @@ std::string GitRepository::get_information(void)
     if (this->untracked > 0)
     {
         information_stream << B_RED "  " << this->untracked << RESET;
+    }
+    if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
+    {
+        information_stream << D_CYAN "  +" << this->ahead << ",−" << this->behind << RESET;
     }
     if (!this->state.empty())
     {
