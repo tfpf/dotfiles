@@ -416,16 +416,11 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
 int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
-    self->dirty |= status_flags
-        & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
-            | C::GIT_STATUS_WT_TYPECHANGE);
-    self->staged |= status_flags
-        & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
-            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE);
-    self->untracked |= status_flags & C::GIT_STATUS_WT_NEW;
-
-    // Stop iterating if all possible statuses were found.
-    return self->dirty && self->staged && self->untracked;
+    if(status_flags& (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED| C::GIT_STATUS_WT_TYPECHANGE)){
+    ++self->dirty;
+    }
+    if(status_flags& (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW| C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE)){++self->staged;}
+    if(status_flags & C::GIT_STATUS_WT_NEW){++self->untracked;}
 }
 
 /**
