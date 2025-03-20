@@ -190,6 +190,7 @@ private:
     std::string description, tag;
     std::string state;
     unsigned dirty, staged, untracked;
+    std::size_t ahead, behind;
 
 public:
     GitRepository(void);
@@ -212,7 +213,8 @@ private:
  * Read the current Git repository.
  */
 GitRepository::GitRepository(void) :
-    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0)
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0),
+    ahead(-1), behind(-1)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -437,6 +439,10 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     return 0;
 }
 
+/**
+ * Obtain the number of commits the current branch and the tracked branch
+ * differ by.
+ */
 void GitRepository::establish_ahead_behind(void)
 {
     if (this->oid == nullptr)
@@ -448,17 +454,15 @@ void GitRepository::establish_ahead_behind(void)
     {
         return;
     }
+    // As mentioned previously, though the documentation says this doesn't work
+    // on symbolic references, I have observed that it does. Still, guard
+    // against the possibility that it doesn't.
     C::git_oid const* upstream_oid = git_reference_target(upstream_ref);
     if (upstream_oid == nullptr)
     {
         return;
     }
-    std::size_t ahead, behind;
-    if (C::git_graph_ahead_behind(&ahead, &behind, this->repo, this->oid, upstream_oid) != 0)
-    {
-        return;
-    }
-    LOG_DEBUG("ahead=%zu, behind=%zu\n", ahead, behind);
+    C::git_graph_ahead_behind(&this->ahead, &this->behind, this->repo, this->oid, upstream_oid);
 }
 
 /**
@@ -501,6 +505,10 @@ std::string GitRepository::get_information(void)
     if (this->untracked > 0)
     {
         information_stream << B_RED "  " << this->untracked << RESET;
+    }
+    if (this->ahead != -1 && this->behind != -1)
+    {
+        information_stream << " Δ +" << this->ahead << ",−" << this->behind;
     }
     if (!this->state.empty())
     {
