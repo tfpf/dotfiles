@@ -437,14 +437,27 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     return 0;
 }
 
-void GitRepository::establish_ahead_behind(void){
-    if(this->oid == nullptr){return;}
-    C::git_reference *upstream_ref;
-    if(C::git_branch_upstream(&upstream_ref, this->ref) != 0){return;}
-    C::git_oid const*upstream_oid = git_reference_target(upstream_ref);
-    if(upstream_oid == nullptr){return;}
+void GitRepository::establish_ahead_behind(void)
+{
+    if (this->oid == nullptr)
+    {
+        return;
+    }
+    C::git_reference* upstream_ref;
+    if (C::git_branch_upstream(&upstream_ref, this->ref) != 0)
+    {
+        return;
+    }
+    C::git_oid const* upstream_oid = git_reference_target(upstream_ref);
+    if (upstream_oid == nullptr)
+    {
+        return;
+    }
     std::size_t ahead, behind;
-    if(C::git_graph_ahead_behind(&ahead, &behind, this->repo, this->oid, upstream_oid) != 0){return;}
+    if (C::git_graph_ahead_behind(&ahead, &behind, this->repo, this->oid, upstream_oid) != 0)
+    {
+        return;
+    }
     LOG_DEBUG("ahead=%zu, behind=%zu\n", ahead, behind);
 }
 
