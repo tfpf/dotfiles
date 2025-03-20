@@ -411,7 +411,7 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
  * @param status_flags Flags indicating the status of the file.
  * @param self_ `GitRepository` instance whose members should be updated.
  *
- * @return 1 if all statuses are recorded, 0 otherwise.
+ * @return 0.
  */
 int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
 {
@@ -432,7 +432,7 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     {
         ++self->untracked;
     }
-    return false;
+    return 0;
 }
 
 /**
