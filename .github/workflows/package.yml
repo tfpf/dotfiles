@@ -14,6 +14,8 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+        CMAKE_INSTALL_PREFIX: C:/ProgramData/libgit2
     steps:
       - uses: msys2/setup-msys2@v2
         with:
@@ -21,9 +23,14 @@ jobs:
           install: git make
           pacboy: cmake gcc pkgconf
       - uses: actions/checkout@v4
-      - run: .github/workflows/build_windows.bash
-        env:
-          CMAKE_INSTALL_PREFIX: C:/ProgramData/libgit2
+      - run: .github/workflows/build_libgit2.bash
+        name: Build libgit2 for static linking
+      # MSYS2 sets the environment variable used below, overriding what we
+      # specify. Hence, define it from within MSYS2 just before it is needed.
+      - run: |
+          export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
+          make LDFLAGS="-flto -O2 -static" LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)" -j release
+        working-directory: custom-prompt
         name: Build statically-linked Windows binaries
       - uses: actions/upload-artifact@v4
         with:
@@ -38,8 +45,9 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
       - uses: actions/checkout@v4
-      - run: brew install libgit2
-      - run: make -j release
+      - run: sudo .github/workflows/build_libgit2.bash
+        name: Build libgit2 for static linking
+      - run: make LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2) -framework Cocoa -framework CoreGraphics" -j release
         working-directory: custom-prompt
         name: Build dynamically-linked macOS binaries
       - uses: actions/upload-artifact@v4
@@ -88,7 +96,7 @@ jobs:
           done
         name: Create compressed archives of binaries
       - run: |
-          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n "Linux binaries require libnotify and libgit2, and macOS, just libgit2. Windows binaries are statically linked." --generate-notes
+          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n "Linux binaries require libnotify and libgit2. macOS and Windows binaries should 'just work' without requiring the installation of any dependencies." --generate-notes
           gh release upload ${{ github.ref_name }} */*.tgz
         name: Publish release
         env:
