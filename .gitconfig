@@ -1,3 +1,9 @@
+[advice]
+	addEmptyPathspec = false
+	addIgnoredFile = false
+	detachedHead = false
+	statusHints = false
+	statusUoption = false
 [alias]
 	d = diff -w
 	dd = difftool -d
