@@ -45,7 +45,7 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
       - uses: actions/checkout@v4
-      - run: .github/workflows/build_libgit2.bash
+      - run: sudo .github/workflows/build_libgit2.bash
         name: Build libgit2 for static linking
       - run: make LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2)" -j release
         working-directory: custom-prompt
