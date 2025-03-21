@@ -96,7 +96,7 @@ jobs:
           done
         name: Create compressed archives of binaries
       - run: |
-          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n "Linux binaries require libnotify and libgit2, and macOS, just libgit2. Windows binaries are statically linked." --generate-notes
+          gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -n "Linux binaries require libnotify and libgit2. macOS and Windows binaries should 'just work' without requiring the installation of any dependencies." --generate-notes
           gh release upload ${{ github.ref_name }} */*.tgz
         name: Publish release
         env:
