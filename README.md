@@ -24,19 +24,19 @@ All symbols seen in the screenshot above may not be rendered correctly in the ta
 rectangles (or other substitute characters), you may want to install a patched font from
 [Nerd Fonts](https://www.nerdfonts.com).
 
-|Component|Meaning|
-|---|---|
-|` workstation-a39b0e49`|Host name|
-|` ~/Documents/projects/dotfiles`|Current working directory|
-|` main`|Git branch currently checked out|
-|` 0c5803a2a496 󰓼 v1.8.3`|Commit currently checked out and associated tag (if any)|
-|` 1`|1 file modified|
-|` 1`|1 file staged for the next commit|
-|` 1`|1 file not tracked|
-|` +1,−4`|Local 1 commit ahead of and 4 commits behind remote|
-|` dotfiles`|Current Python virtual environment|
-|`%`|Default prompt symbol|
-|`▶%`|Prompt symbol in subshell|
+|Component                        |Meaning                                                 |
+|---------------------------------|--------------------------------------------------------|
+|` workstation-a39b0e49`         |Host name                                               |
+|` ~/Documents/projects/dotfiles`|Current working directory                               |
+|` main`                         |Git branch currently checked out                        |
+|` 0c5803a2a496 󰓼 v1.8.3`        |Commit currently checked out and associated tag (if any)|
+|` 1`                            |1 file modified                                         |
+|` 1`                            |1 file staged for the next commit                       |
+|` 1`                            |1 file not tracked                                      |
+|` +1,−4`                        |Local 1 commit ahead of and 4 commits behind remote     |
+|` dotfiles`                     |Current Python virtual environment                      |
+|`%`                              |Default prompt symbol                                   |
+|`▶%`                             |Prompt symbol in subshell                               |
 
 If the terminal is not the active window when a long command terminates, a desktop notification will also be sent; this
 is done using OSC 777 on macOS and Windows, and libnotify on Linux. (Needless to say, on Linux, X11 is assumed, since
