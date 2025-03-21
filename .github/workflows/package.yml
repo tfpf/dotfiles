@@ -45,8 +45,9 @@ jobs:
         os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
     steps:
       - uses: actions/checkout@v4
-      - run: brew install libgit2
-      - run: make -j release
+      - run: .github/workflows/build_libgit2.bash
+        name: Build libgit2 for static linking
+      - run: make LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2)" -j release
         working-directory: custom-prompt
         name: Build dynamically-linked macOS binaries
       - uses: actions/upload-artifact@v4
