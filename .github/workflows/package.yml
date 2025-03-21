@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: sudo .github/workflows/build_libgit2.bash
         name: Build libgit2 for static linking
-      - run: make LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2) -framework Cocoa -framework CoreGraphics" -j release && otool -L bin/*
+      - run: make LDLIBS="-lstdc++ $(pkg-config --libs --static libgit2) -framework Cocoa -framework CoreGraphics" -j release
         working-directory: custom-prompt
         name: Build dynamically-linked macOS binaries
       - uses: actions/upload-artifact@v4
