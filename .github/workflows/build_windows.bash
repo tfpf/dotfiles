@@ -9,6 +9,8 @@ mkdir libgit2/build
     cmake --build . --target install --parallel 4
 )
 
+# MSYS2 sets this environment variable, overriding what is specified in the
+# workflow file. Hence, define it here.
 export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
 cd custom-prompt
 make LDFLAGS="-flto -O2 -static" LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)" -j release
