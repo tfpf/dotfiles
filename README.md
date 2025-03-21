@@ -16,6 +16,10 @@ These are the configuration files I use on Linux, macOS and Windows to set up a 
 Git repository and the current Python virtual environment, and report the running time of long commands. A session may
 typically look like
 
+$$
+\tt\textcolor{red}{asd}
+$$
+
 ```console
  Alpine  ~/Documents/projects/dotfiles  main  1  +0,−1
 % pipenv shell
