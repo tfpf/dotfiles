@@ -31,7 +31,7 @@ rectangles (or other substitute characters), you may want to install a patched f
 |` main`                         |Git branch currently checked out                        |
 |` 0c5803a2a496 󰓼 v1.8.3`        |Commit currently checked out and associated tag (if any)|
 |` 1`                            |1 file modified                                         |
-|` 1`                            |1 file staged for the next commit                       |
+|` 1`                            |1 file staged for next commit                           |
 |` 1`                            |1 file not tracked                                      |
 |` +1,−4`                        |Local 1 commit ahead of and 4 commits behind remote     |
 |` dotfiles`                     |Current Python virtual environment                      |
