@@ -20,10 +20,26 @@ typically look like this.
   <img src="https://github.com/user-attachments/assets/1aaa3066-48be-4643-8d92-6295c723e44c" />
 </p>
 
-(The number of right-pointing triangles just before the prompt symbol is one less than the current
-shell level.) If the terminal is not the active window when a long command terminates, a desktop notification will also
-be sent; this is done using OSC 777 on macOS and Windows, and libnotify on Linux. (Needless to say, on Linux, X11 is
-assumed, since there is no server to query the active window on Wayland.)
+All symbols seen in the screenshot above may not be rendered correctly in the table below. If you see vertical hollow
+rectangles (or other substitute characters), you may want to install a patched font from
+[Nerd Fonts](https://www.nerdfonts.com).
+
+|Component|Meaning|
+|---|---|
+|` workstation-a39b0e49`|Host name|
+|` ~/Documents/projects/dotfiles`|Current working directory|
+|` main`|Current Git branch name|
+|` 1`|1 file modified|
+|` 1`|1 file staged for the next commit|
+|` 1`|1 file not tracked|
+|` +1,−4`|Local 1 commit ahead of and 4 commits behind remote|
+|` dotfiles`|Current Python virtual environment|
+|`%`|Default prompt symbol|
+|`▶%`|Prompt symbol in subshell|
+
+If the terminal is not the active window when a long command terminates, a desktop notification will also be sent; this
+is done using OSC 777 on macOS and Windows, and libnotify on Linux. (Needless to say, on Linux, X11 is assumed, since
+there is no server to query the active window on Wayland.)
 
 All symbols may not be rendered correctly above. If you see vertical hollow rectangles (or other substitute
 characters), you may want to install a patched font from [Nerd Fonts](https://www.nerdfonts.com).
