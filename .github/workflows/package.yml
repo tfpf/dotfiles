@@ -14,6 +14,8 @@ jobs:
     defaults:
       run:
         shell: msys2 {0}
+    env:
+        CMAKE_INSTALL_PREFIX: C:/ProgramData/libgit2
     steps:
       - uses: msys2/setup-msys2@v2
         with:
@@ -21,9 +23,14 @@ jobs:
           install: git make
           pacboy: cmake gcc pkgconf
       - uses: actions/checkout@v4
-      - run: .github/workflows/build_windows.bash
-        env:
-          CMAKE_INSTALL_PREFIX: C:/ProgramData/libgit2
+      - run: .github/workflows/build_libgit2.bash
+        name: Build libgit2 for static linking
+      # MSYS2 sets the environment variable used below, overriding what we
+      # specify. Hence, define it from within MSYS2 just before it is needed.
+      - run: |
+          export PKG_CONFIG_PATH="$CMAKE_INSTALL_PREFIX/lib/pkgconfig"
+          make LDFLAGS="-flto -O2 -static" LDLIBS="-lstdc++ -lwinhttp $(pkg-config --libs --static libgit2)" -j release
+        working-directory: custom-prompt
         name: Build statically-linked Windows binaries
       - uses: actions/upload-artifact@v4
         with:
