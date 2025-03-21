@@ -22,7 +22,7 @@ typically look like
 
  Alpine  ~/Documents/projects/dotfiles  main  1  1  +1,−1  dotfiles
 ▶% exit
-                                   pipenv shell  00:43.735
+                                                 pipenv shell  00:43.735
 
  Alpine  ~/Documents/projects/dotfiles  main  1  1  +1,−1
 %
