@@ -16,21 +16,22 @@ These are the configuration files I use on Linux, macOS and Windows to set up a 
 Git repository and the current Python virtual environment, and report the running time of long commands. A session may
 typically look like
 
-$$
-\tt\textcolor{red}{asd}
-$$
-
-```console
- Alpine  ~/Documents/projects/dotfiles  main  1  +0,−1
+<pre> <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#FCE94F">  1</font><font color="#06989A">  +0,−1</font>
 % pipenv shell
 
- Alpine  ~/Documents/projects/dotfiles  main  1  1  +1,−1  dotfiles
-▶% exit
-                                                 pipenv shell  00:43.735
+ <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#FCE94F">  1</font><font color="#EF2929">  1</font><font color="#06989A">  +0,−1</font>  <font color="#739FCF">dotfiles</font>
+▶% git add Pipfile
 
- Alpine  ~/Documents/projects/dotfiles  main  1  1  +1,−1
+ <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#FCE94F">  1</font><font color="#8AE234">  1</font><font color="#06989A">  +0,−1</font>  <font color="#739FCF">dotfiles</font>
+▶% exit
+                                                <font color="#06989A"></font> pipenv shell <font color="#4E9A06"></font> 00:39.934
+
+ <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#06989A">  +0,−1</font>
+% git reset --hard origin/main
+
+ <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#06989A">  +0,−0</font>
 %
-```
+</pre>
 
 but with colours. (The number of right-pointing triangles just before the prompt symbol is one less than the current
 shell level.) If the terminal is not the active window when a long command terminates, a desktop notification will also
