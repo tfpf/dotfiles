@@ -14,26 +14,13 @@ These are the configuration files I use on Linux, macOS and Windows to set up a 
 
 [`custom-prompt`](custom-prompt) contains code to create a prompt for Bash or Zsh with information about the current
 Git repository and the current Python virtual environment, and report the running time of long commands. A session may
-typically look like
+typically look like this.
 
-<pre> <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#FCE94F">  1</font><font color="#06989A">  +0,−1</font>
-% pipenv shell
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1aaa3066-48be-4643-8d92-6295c723e44c" />
+</p>
 
- <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#FCE94F">  1</font><font color="#EF2929">  1</font><font color="#06989A">  +0,−1</font>  <font color="#739FCF">dotfiles</font>
-▶% git add Pipfile
-
- <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#FCE94F">  1</font><font color="#8AE234">  1</font><font color="#06989A">  +0,−1</font>  <font color="#739FCF">dotfiles</font>
-▶% exit
-                                                <font color="#06989A"></font> pipenv shell <font color="#4E9A06"></font> 00:39.934
-
- <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#06989A">  +0,−1</font>
-% git reset --hard origin/main
-
- <font color="#FCE94F"><i><b>Alpine</b></i></font>  <font color="#34E2E2"><b>~/Documents/projects/dotfiles</b></font>  <font color="#4E9A06">main</font><font color="#06989A">  +0,−0</font>
-%
-</pre>
-
-but with colours. (The number of right-pointing triangles just before the prompt symbol is one less than the current
+(The number of right-pointing triangles just before the prompt symbol is one less than the current
 shell level.) If the terminal is not the active window when a long command terminates, a desktop notification will also
 be sent; this is done using OSC 777 on macOS and Windows, and libnotify on Linux. (Needless to say, on Linux, X11 is
 assumed, since there is no server to query the active window on Wayland.)
