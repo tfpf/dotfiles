@@ -137,7 +137,7 @@ def main():
         diff = Diff(sys.argv[1], sys.argv[2], writer)
         diff.report()
         writer.write(html_end)
-    webbrowser.open(writer.name)
+    webbrowser.open("file://" + writer.name)
 
 
 if __name__ == "__main__":
