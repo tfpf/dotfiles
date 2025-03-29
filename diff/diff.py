@@ -103,7 +103,9 @@ class Diff:
         from_desc = self._remove_temporary_directory_prefix(from_desc)
         to_desc = self._remove_temporary_directory_prefix(to_desc)
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
+        self._writer.write(f"<details open><summary><code>{from_desc} | {to_desc}</code></summary>\n".encode())
         self._writer.write(html_code.encode())
+        self._writer.write(b"</details>\n")
         self._writer.write(html_separator)
 
     def report(self, directory_comparison: filecmp.dircmp | None = None):
