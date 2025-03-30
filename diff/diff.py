@@ -79,7 +79,7 @@ class Diff:
         """
         Recursively list the relative paths of all files in the given
         directory.
-        :param directory: Directory path.
+        :param directory: Absolute directory path.
         :return: Files in the tree rooted at the given directory.
         """
         files = set()
@@ -99,8 +99,6 @@ class Diff:
         return [*fileinput.input(source)]
 
     def _report(self, from_lines: list[str], to_lines: list[str], from_desc: str, to_desc: str):
-        if not from_lines and not to_lines:
-            return
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(f"<details open><summary><code>{from_desc} | {to_desc}</code></summary>\n".encode())
         self._writer.write(html_code.encode())
@@ -109,7 +107,7 @@ class Diff:
 
     def report(self):
         """
-        Write an HTML table summarising the recursive differences between two
+        Write HTML tables summarising the recursive differences between two
         directories.
         """
         common_files = self._left_directory_files.intersection(self._right_directory_files)
@@ -132,24 +130,42 @@ class Diff:
                     right_directory_file_matches[right_directory_file].append((similarity_ratio, left_directory_file))
         for v in left_directory_file_matches.values():
             v.sort()
-        left_directory_file_matches = dict(
-            sorted(left_directory_file_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0)
-        )
         for v in right_directory_file_matches.values():
             v.sort()
 
+        # Ensure that the order in which we iterate over the files in the left
+        # directory is such that the one having the greatest similarity ratio
+        # with respect to any file in the right directory comes first.
+        left_directory_file_matches = dict(
+            sorted(left_directory_file_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0)
+        )
+
+        # Detect renames by mapping a file in the left directory to one in the
+        # right.
         left_right_file_mapping = {}
         for left_directory_file, v in left_directory_file_matches.items():
             if not v or left_directory_file in left_right_file_mapping:
                 continue
+
+            # Find the file in the right directory which is most similar to
+            # this file in the left directory.
             for _, similar_right_directory_file in reversed(v):
                 if similar_right_directory_file not in right_directory_file_matches:
                     continue
+
+                # Find the file in the left directory which is most similar to
+                # this file in the right directory. It may or may not be the
+                # same as the file we started with, but is guaranteed to be the
+                # correct match, because the outer loop iterates over the files
+                # in the left directory in descending order of greatest
+                # similarity ratio.
                 _, similar_left_directory_file = right_directory_file_matches[similar_right_directory_file][-1]
                 left_right_file_mapping[similar_left_directory_file] = similar_right_directory_file
                 del right_directory_file_matches[similar_right_directory_file]
                 self._left_directory_files.remove(similar_left_directory_file)
                 self._right_directory_files.remove(similar_right_directory_file)
+
+        # Files which were changed without renaming.
         for common_file in common_files:
             left_right_file_mapping[common_file] = common_file
 
