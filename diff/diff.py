@@ -166,9 +166,14 @@ class Diff:
                 self._right_directory_files.remove(similar_right_directory_file)
         for common_file in common_files:
             left_right_file_mapping[common_file] = common_file
-        for item in left_right_file_mapping.items(): print("=", item)
-        for item in self._left_directory_files: print("D", item)
-        for item in self._right_directory_files: print("A", item)
+
+        for file in sorted([*common_files, *self._left_directory_files, *self._right_directory_files]):
+            if file in self._left_directory_files:
+                self._report(self._read_lines(os.path.join(self._left_directory, file)), [], file, "[deleted]")
+            elif file in self._right_directory_files:
+                self._report([], self._read_lines(os.path.join(self._right_directory, file)), "[added]", file)
+            else:
+                self._report(self._read_lines(os.path.join(self._left_directory, file)), self._read_lines(os.path.join(self._right_directory, file)), file, file)
 
 
 def main():
