@@ -78,7 +78,8 @@ class Diff:
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
-    def _files_in(self, directory: str) -> set[str]:
+    @staticmethod
+    def _files_in(directory: str) -> set[str]:
         """
         Recursively list the relative paths of all files in the given
         directory.
@@ -154,18 +155,23 @@ class Diff:
                 self._right_directory_files.remove(similar_right_directory_file)
                 break
 
-        for file in sorted([*self._left_directory_files, *self._right_directory_files, *left_right_file_mapping]):
-            if file in self._left_directory_files:
-                self._report(self._read_lines(os.path.join(self._left_directory, file)), [], file, "[deleted]")
-            elif file in self._right_directory_files:
-                self._report([], self._read_lines(os.path.join(self._right_directory, file)), "[added]", file)
+        for left_directory_file, right_directory_file in sorted(
+            itertools.chain(
+                ((file, "/deleted") for file in self._left_directory_files),
+                left_right_file_mapping.items(),
+                (("/added", file) for file in self._right_directory_files),
+            ),
+            key=lambda lr: lr[0] if not lr[0].startswith("/") else lr[1],
+        ):
+            if left_directory_file == "/added":
+                from_lines = []
             else:
-                self._report(
-                    self._read_lines(os.path.join(self._left_directory, file)),
-                    self._read_lines(os.path.join(self._right_directory, left_right_file_mapping[file])),
-                    file,
-                    left_right_file_mapping[file],
-                )
+                from_lines = self._read_lines(os.path.join(self._left_directory, left_directory_file))
+            if right_directory_file == "/deleted":
+                to_lines = []
+            else:
+                to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
+            self._report(from_lines, to_lines, left_directory_file, right_directory_file)
 
 
 def main():
