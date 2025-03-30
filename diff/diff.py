@@ -70,15 +70,9 @@ class Diff:
         self._right_directory_files = self._files_in(self._right_directory)
         self._writer = writer
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
-        print(self._left_directory)
-        for file in self._left_directory_files:
-            print(file)
-        print(self._right_directory)
-        for file in self._right_directory_files:
-            print(file)
-        raise SystemExit
 
-    def _files_in(self, directory: str) -> list[str]:
+
+    def _files_in(self, directory: str) -> set[str]:
         """
         Recursively list the relative paths of all files in the given
         directory.
@@ -90,7 +84,7 @@ class Diff:
             for file_name in file_names:
                 file = os.path.join(root, file_name).removeprefix(directory)
                 files.append(file)
-        return sorted(files)
+        return {*files}
 
     @staticmethod
     def _read_lines(source: str) -> list[str]:
