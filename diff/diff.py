@@ -164,7 +164,7 @@ class Diff:
                     self._read_lines(os.path.join(self._left_directory, file)),
                     self._read_lines(os.path.join(self._right_directory, left_right_file_mapping[file])),
                     file,
-                    file,
+                    left_right_file_mapping[file],
                 )
 
 
