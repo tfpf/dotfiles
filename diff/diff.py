@@ -61,8 +61,7 @@ html_end = b"""
 
 class Diff:
     """
-    Compare two directories recursively. Does not handle renames and additions
-    or deletions of directories correctly.
+    Compare two directories recursively.
     """
 
     def __init__(self, left: str, right: str, writer):
@@ -149,14 +148,13 @@ class Diff:
                     right_directory_file_matches[right_directory_file].append((similarity_ratio, left_directory_file))
         for v in left_directory_file_matches.values():
             v.sort()
+        left_directory_file_matches = dict(sorted(left_directory_file_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0))
         for v in right_directory_file_matches.values():
             v.sort()
-        print(left_directory_file_matches)
-        print(right_directory_file_matches)
 
         left_right_file_mapping = {}
         for left_directory_file, v in left_directory_file_matches.items():
-            if left_directory_file in left_right_file_mapping or not v:
+            if not v or left_directory_file in left_right_file_mapping:
                 continue
             for _, similar_right_directory_file in reversed(v):
                 if similar_right_directory_file not in right_directory_file_matches:
@@ -164,9 +162,13 @@ class Diff:
                 _, similar_left_directory_file = right_directory_file_matches[similar_right_directory_file][-1]
                 left_right_file_mapping[similar_left_directory_file] = similar_right_directory_file
                 del right_directory_file_matches[similar_right_directory_file]
+                self._left_directory_files.remove(similar_left_directory_file)
+                self._right_directory_files.remove(similar_right_directory_file)
         for common_file in common_files:
             left_right_file_mapping[common_file] = common_file
-        for item in left_right_file_mapping.items(): print(item)
+        for item in left_right_file_mapping.items(): print("=", item)
+        for item in self._left_directory_files: print("D", item)
+        for item in self._right_directory_files: print("A", item)
 
 
 def main():
@@ -180,3 +182,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
