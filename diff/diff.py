@@ -63,10 +63,34 @@ class Diff:
     or deletions of directories correctly.
     """
 
-    def __init__(self, a: str, b: str, writer):
-        self._directory_comparison = filecmp.dircmp(a, b, shallow=False)
+    def __init__(self, left: str, right: str, writer):
+        self._left_directory = left
+        self._left_directory_files = self._files_in(self._left_directory)
+        self._right_directory = right
+        self._right_directory_files = self._files_in(self._right_directory)
         self._writer = writer
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
+        print(self._left_directory)
+        for file in self._left_directory_files:
+            print(file)
+        print(self._right_directory)
+        for file in self._right_directory_files:
+            print(file)
+        raise SystemExit
+
+    def _files_in(self, directory: str) -> list[str]:
+        """
+        Recursively list the relative paths of all files in the given
+        directory.
+        :param directory: Directory path.
+        :return: Files in the tree rooted at the given directory.
+        """
+        files = []
+        for root, _, file_names in os.walk(directory):
+            for file_name in file_names:
+                file = os.path.join(root, file_name).removeprefix(directory)
+                files.append(file)
+        return sorted(files)
 
     @staticmethod
     def _read_lines(source: str) -> list[str]:
@@ -107,7 +131,7 @@ class Diff:
         self._writer.write(b"</details>\n")
         self._writer.write(html_separator)
 
-    def report(self, directory_comparison: filecmp.dircmp | None = None):
+    def report(self, directory_comparison = None):
         """
         Write an HTML table summarising the differences recorded between two
         directories. Then recurse on their subdirectories.
