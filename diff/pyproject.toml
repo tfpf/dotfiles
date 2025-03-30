@@ -18,4 +18,5 @@ classifiers = [
 [tool.ruff]
 line-length = 119
 
-[tool.ruff.lint.per-file-ignores]
+[tool.ruff.lint]
+ignore = []
