@@ -85,12 +85,11 @@ class Diff:
         :param directory: Absolute directory path.
         :return: Files in the tree rooted at the given directory.
         """
-        files = set()
-        for root, _, file_names in os.walk(directory):
-            for file_name in file_names:
-                file = os.path.join(root, file_name).removeprefix(directory)
-                files.add(file)
-        return files
+        return {
+            os.path.join(root, file_name).removeprefix(directory)
+            for root, _, file_names in os.walk(directory)
+            for file_name in file_names
+        }
 
     @staticmethod
     def _read_lines(source: str) -> list[str]:
@@ -151,7 +150,7 @@ class Diff:
                 if similar_right_directory_file not in self._right_directory_files:
                     continue
                 left_right_file_mapping[left_directory_file] = similar_right_directory_file
-                self._left_directory_files.remove(similar_left_directory_file)
+                self._left_directory_files.remove(left_directory_file)
                 self._right_directory_files.remove(similar_right_directory_file)
                 break
 
