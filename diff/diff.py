@@ -71,6 +71,9 @@ class Diff:
         self._left_directory_files = self._files_in(self._left_directory)
         self._right_directory = right
         self._right_directory_files = self._files_in(self._right_directory)
+        self._common_files = self._left_directory_files.intersection(self._right_directory_files)
+        self._left_directory_files -= self._common_files
+        self._right_directory_files -= self._common_files
         self._writer = writer
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
@@ -110,9 +113,6 @@ class Diff:
         Write HTML tables summarising the recursive differences between two
         directories.
         """
-        common_files = self._left_directory_files.intersection(self._right_directory_files)
-        self._left_directory_files -= common_files
-        self._right_directory_files -= common_files
         left_directory_file_matches = collections.defaultdict(list)
         for left_directory_file, right_directory_file in itertools.product(
             self._left_directory_files, self._right_directory_files
@@ -137,7 +137,7 @@ class Diff:
         )
 
         # Files which were changed without renaming.
-        left_right_file_mapping = {common_file: common_file for common_file in common_files}
+        left_right_file_mapping = {common_file: common_file for common_file in self._common_files}
 
         # Detect renames by mapping a file in the left directory to one in the
         # right.
