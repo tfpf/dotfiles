@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import difflib
-import filecmp
 import fileinput
 import os
 import sys
