@@ -1,13 +1,15 @@
 #! /usr/bin/env python
 
-import difflib
 import collections
-import itertools
+import difflib
 import fileinput
+import itertools
 import os
 import sys
 import tempfile
 import webbrowser
+
+rename_detect_threshold = 0.5
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -73,7 +75,6 @@ class Diff:
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
-
     def _files_in(self, directory: str) -> set[str]:
         """
         Recursively list the relative paths of all files in the given
@@ -93,62 +94,47 @@ class Diff:
         """
         Read the lines in the given file.
         :param source: File name.
-        :return: Lines in the file. Empty if it is a directory.
+        :return: Lines in the file.
         """
-        try:
-            return [*fileinput.input(source)]
-        except IsADirectoryError:
-            return []
-
-    @staticmethod
-    def _remove_temporary_directory_prefix(file_path: str):
-        file_path_len = len(file_path)
-        try:
-            index_of_after_left = file_path.index("/left/") + 6
-        except ValueError:
-            index_of_after_left = file_path_len
-        try:
-            index_of_after_right = file_path.index("/right/") + 7
-        except ValueError:
-            index_of_after_right = file_path_len
-        index_of_after_left_or_right = min(index_of_after_left, index_of_after_right)
-        if index_of_after_left_or_right != file_path_len:
-            return file_path[index_of_after_left_or_right:]
-        return file_path
+        return [*fileinput.input(source)]
 
     def _report(self, from_lines: list[str], to_lines: list[str], from_desc: str, to_desc: str):
         if not from_lines and not to_lines:
             return
-        from_desc = self._remove_temporary_directory_prefix(from_desc)
-        to_desc = self._remove_temporary_directory_prefix(to_desc)
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(f"<details open><summary><code>{from_desc} | {to_desc}</code></summary>\n".encode())
         self._writer.write(html_code.encode())
         self._writer.write(b"</details>\n")
         self._writer.write(html_separator)
 
-    def report(self, directory_comparison = None):
+    def report(self):
         """
-        Write an HTML table summarising the differences recorded between two
-        directories. Then recurse on their subdirectories.
-        :param directory_comparison: Directory comparison object.
+        Write an HTML table summarising the recursive differences between two
+        directories.
         """
         common_files = self._left_directory_files.intersection(self._right_directory_files)
         self._left_directory_files -= common_files
         self._right_directory_files -= common_files
         left_directory_file_matches = collections.defaultdict(list)
         right_directory_file_matches = collections.defaultdict(list)
-        for left_directory_file, right_directory_file in itertools.product(self._left_directory_files, self._right_directory_files):
-            with open(os.path.join(self._left_directory, left_directory_file)) as left_directory_file_reader, open(os.path.join(self._right_directory, right_directory_file)) as right_directory_file_reader:
+        for left_directory_file, right_directory_file in itertools.product(
+            self._left_directory_files, self._right_directory_files
+        ):
+            with (
+                open(os.path.join(self._left_directory, left_directory_file)) as left_directory_file_reader,
+                open(os.path.join(self._right_directory, right_directory_file)) as right_directory_file_reader,
+            ):
                 left_directory_file_contents = left_directory_file_reader.read()
                 right_directory_file_contents = right_directory_file_reader.read()
                 self._matcher.set_seqs(left_directory_file_contents, right_directory_file_contents)
-                if (similarity_ratio := self._matcher.ratio()) > 0.5:
+                if (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold:
                     left_directory_file_matches[left_directory_file].append((similarity_ratio, right_directory_file))
                     right_directory_file_matches[right_directory_file].append((similarity_ratio, left_directory_file))
         for v in left_directory_file_matches.values():
             v.sort()
-        left_directory_file_matches = dict(sorted(left_directory_file_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0))
+        left_directory_file_matches = dict(
+            sorted(left_directory_file_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0)
+        )
         for v in right_directory_file_matches.values():
             v.sort()
 
@@ -173,7 +159,12 @@ class Diff:
             elif file in self._right_directory_files:
                 self._report([], self._read_lines(os.path.join(self._right_directory, file)), "[added]", file)
             else:
-                self._report(self._read_lines(os.path.join(self._left_directory, file)), self._read_lines(os.path.join(self._right_directory, left_right_file_mapping[file])), file, file)
+                self._report(
+                    self._read_lines(os.path.join(self._left_directory, file)),
+                    self._read_lines(os.path.join(self._right_directory, left_right_file_mapping[file])),
+                    file,
+                    file,
+                )
 
 
 def main():
@@ -187,4 +178,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
