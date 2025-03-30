@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
 import difflib
+import collections
+import itertools
 import fileinput
 import os
 import sys
@@ -69,6 +71,7 @@ class Diff:
         self._right_directory = right
         self._right_directory_files = self._files_in(self._right_directory)
         self._writer = writer
+        self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
 
@@ -131,27 +134,39 @@ class Diff:
         directories. Then recurse on their subdirectories.
         :param directory_comparison: Directory comparison object.
         """
-        self._common_files = self._left_directory_files.intersection(self._right_directory_files)
-        self._left_directory_files -= self._common_files
-        self._right_directory_files -= self._common_files
+        common_files = self._left_directory_files.intersection(self._right_directory_files)
+        self._left_directory_files -= common_files
+        self._right_directory_files -= common_files
+        left_directory_file_matches = collections.defaultdict(list)
+        right_directory_file_matches = collections.defaultdict(list)
+        for left_directory_file, right_directory_file in itertools.product(self._left_directory_files, self._right_directory_files):
+            with open(os.path.join(self._left_directory, left_directory_file)) as left_directory_file_reader, open(os.path.join(self._right_directory, right_directory_file)) as right_directory_file_reader:
+                left_directory_file_contents = left_directory_file_reader.read()
+                right_directory_file_contents = right_directory_file_reader.read()
+                self._matcher.set_seqs(left_directory_file_contents, right_directory_file_contents)
+                if (similarity_ratio := self._matcher.ratio()) > 0.5:
+                    left_directory_file_matches[left_directory_file].append((similarity_ratio, right_directory_file))
+                    right_directory_file_matches[right_directory_file].append((similarity_ratio, left_directory_file))
+        for v in left_directory_file_matches.values():
+            v.sort()
+        for v in right_directory_file_matches.values():
+            v.sort()
+        print(left_directory_file_matches)
+        print(right_directory_file_matches)
 
-        directory_comparison = directory_comparison or self._directory_comparison
-        for deleted_file in directory_comparison.left_only:
-            deleted_file_path = os.path.join(directory_comparison.left, deleted_file)
-            deleted_lines = self._read_lines(deleted_file_path)
-            self._report(deleted_lines, [], deleted_file_path, "[file deleted]")
-        for added_file in directory_comparison.right_only:
-            added_file_path = os.path.join(directory_comparison.right, added_file)
-            added_lines = self._read_lines(added_file_path)
-            self._report([], added_lines, "[file added]", added_file_path)
-        for changed_file in directory_comparison.diff_files:
-            deleted_file_path = os.path.join(directory_comparison.left, changed_file)
-            deleted_lines = self._read_lines(deleted_file_path)
-            added_file_path = os.path.join(directory_comparison.right, changed_file)
-            added_lines = self._read_lines(added_file_path)
-            self._report(deleted_lines, added_lines, deleted_file_path, added_file_path)
-        for subdirectory_comparison in directory_comparison.subdirs.values():
-            self.report(subdirectory_comparison)
+        left_right_file_mapping = {}
+        for left_directory_file, v in left_directory_file_matches.items():
+            if left_directory_file in left_right_file_mapping or not v:
+                continue
+            for _, similar_right_directory_file in reversed(v):
+                if similar_right_directory_file not in right_directory_file_matches:
+                    continue
+                _, similar_left_directory_file = right_directory_file_matches[similar_right_directory_file][-1]
+                left_right_file_mapping[similar_left_directory_file] = similar_right_directory_file
+                del right_directory_file_matches[similar_right_directory_file]
+        for common_file in common_files:
+            left_right_file_mapping[common_file] = common_file
+        for item in left_right_file_mapping.items(): print(item)
 
 
 def main():
