@@ -131,6 +131,10 @@ class Diff:
         directories. Then recurse on their subdirectories.
         :param directory_comparison: Directory comparison object.
         """
+        self._common_files = self._left_directory_files.intersection(self._right_directory_files)
+        self._left_directory_files -= self._common_files
+        self._right_directory_files -= self._common_files
+
         directory_comparison = directory_comparison or self._directory_comparison
         for deleted_file in directory_comparison.left_only:
             deleted_file_path = os.path.join(directory_comparison.left, deleted_file)
