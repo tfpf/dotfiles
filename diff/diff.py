@@ -167,13 +167,13 @@ class Diff:
         for common_file in common_files:
             left_right_file_mapping[common_file] = common_file
 
-        for file in sorted([*common_files, *self._left_directory_files, *self._right_directory_files]):
+        for file in sorted([*self._left_directory_files, *self._right_directory_files, *left_right_file_mapping]):
             if file in self._left_directory_files:
                 self._report(self._read_lines(os.path.join(self._left_directory, file)), [], file, "[deleted]")
             elif file in self._right_directory_files:
                 self._report([], self._read_lines(os.path.join(self._right_directory, file)), "[added]", file)
             else:
-                self._report(self._read_lines(os.path.join(self._left_directory, file)), self._read_lines(os.path.join(self._right_directory, file)), file, file)
+                self._report(self._read_lines(os.path.join(self._left_directory, file)), self._read_lines(os.path.join(self._right_directory, left_right_file_mapping[file])), file, file)
 
 
 def main():
