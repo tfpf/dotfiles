@@ -79,12 +79,12 @@ class Diff:
         :param directory: Directory path.
         :return: Files in the tree rooted at the given directory.
         """
-        files = []
+        files = set()
         for root, _, file_names in os.walk(directory):
             for file_name in file_names:
                 file = os.path.join(root, file_name).removeprefix(directory)
-                files.append(file)
-        return {*files}
+                files.add(file)
+        return files
 
     @staticmethod
     def _read_lines(source: str) -> list[str]:
