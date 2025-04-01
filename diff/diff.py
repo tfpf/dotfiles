@@ -8,6 +8,7 @@ import os
 import sys
 import tempfile
 import webbrowser
+from collections.abc import Iterable
 
 rename_detect_threshold = 0.5
 
@@ -93,15 +94,15 @@ class Diff:
         }
 
     @staticmethod
-    def _read_lines(source: str) -> list[str]:
+    def _read_lines(source: str) -> Iterable[str]:
         """
         Read the lines in the given file.
         :param source: File name.
         :return: Lines in the file.
         """
-        return [*fileinput.input(source)]
+        return fileinput.input(source)
 
-    def _report(self, from_lines: list[str], to_lines: list[str], from_desc: str, to_desc: str):
+    def _report(self, from_lines: Iterable[str], to_lines: Iterable[str], from_desc: str, to_desc: str):
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(f"<details open><summary><code>{from_desc} | {to_desc}</code></summary>\n".encode())
         self._writer.write(html_code.encode())
