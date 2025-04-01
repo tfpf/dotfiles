@@ -104,10 +104,7 @@ class Diff:
 
     def _report(self, from_lines: Iterable[str], to_lines: Iterable[str], from_desc: str, to_desc: str):
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
-        self._writer.write(f"<details open><summary><code>{from_desc} | {to_desc}</code></summary>\n".encode())
         self._writer.write(html_code.encode())
-        self._writer.write(b"</details>\n")
-        self._writer.write(html_separator)
 
     def report(self):
         """
@@ -156,14 +153,16 @@ class Diff:
                 self._right_directory_files.remove(similar_right_directory_file)
                 break
 
-        for left_directory_file, right_directory_file in sorted(
+        left_right_directory_files = sorted(
             itertools.chain(
                 ((file, "/deleted") for file in self._left_directory_files),
                 left_right_file_mapping.items(),
                 (("/added", file) for file in self._right_directory_files),
             ),
             key=lambda lr: lr[0] if not lr[0].startswith("/") else lr[1],
-        ):
+        )
+        left_right_directory_files_len = len(left_right_directory_files)
+        for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
             if left_directory_file == "/added":
                 from_lines = []
             else:
@@ -172,7 +171,14 @@ class Diff:
                 to_lines = []
             else:
                 to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
+            self._writer.write(b"<details open><summary><code>")
+            self._writer.write(
+                f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
+            )
+            self._writer.write(b"</code></summary>\n")
             self._report(from_lines, to_lines, left_directory_file, right_directory_file)
+            self._writer.write(b"</details>\n")
+            self._writer.write(html_separator)
 
 
 def main():
