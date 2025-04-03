@@ -108,7 +108,7 @@ class Diff:
         """
         Read the lines in the given file.
         :param source: File name.
-        :return: Lines in the file.
+        :return: File contents.
         """
         return fileinput.input(source)
 
