@@ -94,7 +94,7 @@ class Diff:
         }
 
     @staticmethod
-    def _read_bytes(source: str) -> bytes:
+    def _read_raw(source: str) -> bytes:
         """
         Read the given file raw.
         :param source: File name.
@@ -124,12 +124,19 @@ class Diff:
         """
         return {common_file: common_file for common_file in self._common_files}
 
-    def _renamed_not_changed_mapping(self) -> dict[str, str]:
+    def _renamed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, map the file in the right directory
-        having the same contents, if it exists.
+        having the same or similar contents, if it exists.
         :return: Mapping between left and right directory files.
         """
+        left_directory_lookup = collections.defaultdict(list)
+        for left_directory_file in self._left_directory_files:
+            left_directory_file_contents = self._read_raw(os.path.join(self._left_directory, left_directory_file))
+            left_directory_lookup[hash(left_directory_file_contents)].append(left_directory_file)
+        for right_directory_file in self._right_directory_files:
+            right_directory_file_contents = self._read_raw(os.path.join(self._right_directory, right_directory_file))
+
 
     def report(self):
         """
