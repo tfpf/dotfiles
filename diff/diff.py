@@ -116,7 +116,7 @@ class Diff:
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(html_code.encode())
 
-    def _changed_not_renamed_map(self) -> dict[str, str]:
+    def _changed_not_renamed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, trivially map the file in the right
         directory having the same path, if it exists.
@@ -124,7 +124,7 @@ class Diff:
         """
         return {common_file: common_file for common_file in self._common_files}
 
-    def _renamed_not_changed(self) -> dict[str, str]:
+    def _renamed_not_changed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, map the file in the right directory
         having the same contents, if it exists.
