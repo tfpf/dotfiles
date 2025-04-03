@@ -72,7 +72,7 @@ class Diff:
         self._left_directory_files = self._files_in(self._left_directory)
         self._right_directory = right
         self._right_directory_files = self._files_in(self._right_directory)
-        self._common_files = self._left_directory_files.intersection(self._right_directory_files)
+        self._common_files = self._left_directory_files & self._right_directory_files
         self._left_directory_files -= self._common_files
         self._right_directory_files -= self._common_files
         self._writer = writer
@@ -94,6 +94,16 @@ class Diff:
         }
 
     @staticmethod
+    def _read_bytes(source: str) -> bytes:
+        """
+        Read the given file raw.
+        :param source: File name.
+        :return: File contents.
+        """
+        with open(source, "rb") as source_reader:
+            return source_reader.read()
+
+    @staticmethod
     def _read_lines(source: str) -> Iterable[str]:
         """
         Read the lines in the given file.
@@ -105,6 +115,21 @@ class Diff:
     def _report(self, from_lines: Iterable[str], to_lines: Iterable[str], from_desc: str, to_desc: str):
         html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
         self._writer.write(html_code.encode())
+
+    def _changed_not_renamed_map(self) -> dict[str, str]:
+        """
+        To each file in the left directory, trivially map the file in the right
+        directory having the same path, if it exists.
+        :return: Mapping between left and right directory files.
+        """
+        return {common_file: common_file for common_file in self._common_files}
+
+    def _renamed_not_changed(self) -> dict[str, str]:
+        """
+        To each file in the left directory, map the file in the right directory
+        having the same contents, if it exists.
+        :return: Mapping between left and right directory files.
+        """
 
     def report(self):
         """
