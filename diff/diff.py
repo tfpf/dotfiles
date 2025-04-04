@@ -173,7 +173,9 @@ class Diff:
             # here.
             self._matcher.set_seq2(left_directory_file_contents)
             for right_directory_file in self._right_directory_files:
-                right_directory_file_contents = self._read_text(os.path.join(self._right_directory, right_directory_file))
+                right_directory_file_contents = self._read_text(
+                    os.path.join(self._right_directory, right_directory_file)
+                )
                 self._matcher.set_seq1(right_directory_file_contents)
                 if (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold:
                     left_directory_matches[left_directory_file].append((similarity_ratio, right_directory_file))
@@ -183,7 +185,9 @@ class Diff:
         # Ensure that the order in which we iterate over the files in the left
         # directory is such that the one having the greatest similarity ratio
         # with respect to any file in the right directory comes first.
-        left_directory_matches = dict(sorted(left_directory_matches.items(), key=lambda kv: kv[1][-1][0], reverse=True))
+        left_directory_matches = dict(
+            sorted(left_directory_matches.items(), key=lambda kv: kv[1][-1][0], reverse=True)
+        )
 
         left_right_file_mapping = {}
         for left_directory_file, v in left_directory_matches.items():
@@ -199,13 +203,16 @@ class Diff:
 
         return left_right_file_mapping
 
-
     def report(self):
         """
         Write HTML tables summarising the recursive differences between two
         directories.
         """
-        left_right_file_mapping = self._changed_not_renamed_mapping() | self._renamed_not_changed_mapping() | self._renamed_and_changed_mapping()
+        left_right_file_mapping = (
+            self._changed_not_renamed_mapping()
+            | self._renamed_not_changed_mapping()
+            | self._renamed_and_changed_mapping()
+        )
         left_right_directory_files = sorted(
             itertools.chain(
                 ((file, "/deleted") for file in self._left_directory_files),
