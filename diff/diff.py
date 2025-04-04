@@ -151,13 +151,11 @@ class Diff:
             right_directory_file_contents = self._read_raw(os.path.join(self._right_directory, right_directory_file))
             if not (identical_left_directory_files := left_directory_lookup.get(hash(right_directory_file_contents))):
                 continue
-            for identical_left_directory_file in identical_left_directory_files:
-                if identical_left_directory_file not in self._left_directory_files:
-                    continue
-                left_right_file_mapping[identical_left_directory_file] = right_directory_file
-                self._left_directory_files.remove(identical_left_directory_file)
-                self._right_directory_files.remove(right_directory_file)
-                break
+            # Arbitrarily pick the last of the identical files.
+            identical_left_directory_file = identical_left_directory_files.pop()
+            left_right_file_mapping[identical_left_directory_file] = right_directory_file
+            self._left_directory_files.remove(identical_left_directory_file)
+            self._right_directory_files.remove(right_directory_file)
 
         return left_right_file_mapping
 
@@ -185,13 +183,10 @@ class Diff:
         # Ensure that the order in which we iterate over the files in the left
         # directory is such that the one having the greatest similarity ratio
         # with respect to any file in the right directory comes first.
-        left_directory_matches = dict(sorted(left_directory_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0))
+        left_directory_matches = dict(sorted(left_directory_matches.items(), key=lambda kv: kv[1][-1][0], reverse=True))
 
         left_right_file_mapping = {}
         for left_directory_file, v in left_directory_matches.items():
-            if not v or left_directory_file not in self._left_directory_files:
-                continue
-
             # Find the file in the right directory which is most similar to
             # this file in the left directory.
             for _, similar_right_directory_file in reversed(v):
