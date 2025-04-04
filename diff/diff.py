@@ -104,6 +104,16 @@ class Diff:
             return source_reader.read()
 
     @staticmethod
+    def _read_text(source: str) -> str:
+        """
+        Read the given file in text mode.
+        :param source: File name.
+        :return: File contents.
+        """
+        with open(source) as source_reader:
+            return source_reader.read()
+
+    @staticmethod
     def _read_lines(source: str) -> Iterable[str]:
         """
         Read the lines in the given file.
@@ -124,54 +134,61 @@ class Diff:
         """
         return {common_file: common_file for common_file in self._common_files}
 
-    def _renamed_mapping(self) -> dict[str, str]:
+    def _renamed_not_changed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, map the file in the right directory
-        having the same or similar contents, if it exists.
+        having the same contents, if it exists.
         :return: Mapping between left and right directory files.
         """
         left_directory_lookup = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
             left_directory_file_contents = self._read_raw(os.path.join(self._left_directory, left_directory_file))
+            # Just assume there are no collisions.
             left_directory_lookup[hash(left_directory_file_contents)].append(left_directory_file)
-        for right_directory_file in self._right_directory_files:
+
+        left_right_file_mapping = {}
+        for right_directory_file in self._right_directory_files.copy():
             right_directory_file_contents = self._read_raw(os.path.join(self._right_directory, right_directory_file))
+            if not (identical_left_directory_files := left_directory_lookup.get(hash(right_directory_file_contents))):
+                continue
+            for identical_left_directory_file in identical_left_directory_files:
+                if identical_left_directory_file not in self._left_directory_files:
+                    continue
+                left_right_file_mapping[identical_left_directory_file] = right_directory_file
+                self._left_directory_files.remove(identical_left_directory_file)
+                self._right_directory_files.remove(right_directory_file)
+                break
 
+        return left_right_file_mapping
 
-    def report(self):
+    def _renamed_and_changed_mapping(self) -> dict[str, str]:
         """
-        Write HTML tables summarising the recursive differences between two
-        directories.
+        To each file in the left directory, map the file in the right directory
+        having similar contents, if it exists.
+        :return: Mapping between left and right directory files.
         """
-        left_directory_file_matches = collections.defaultdict(list)
-        for left_directory_file, right_directory_file in itertools.product(
-            self._left_directory_files, self._right_directory_files
-        ):
-            with (
-                open(os.path.join(self._left_directory, left_directory_file)) as left_directory_file_reader,
-                open(os.path.join(self._right_directory, right_directory_file)) as right_directory_file_reader,
-            ):
-                left_directory_file_contents = left_directory_file_reader.read()
-                right_directory_file_contents = right_directory_file_reader.read()
-                self._matcher.set_seqs(left_directory_file_contents, right_directory_file_contents)
+        left_directory_matches = collections.defaultdict(list)
+        for left_directory_file in self._left_directory_files:
+            left_directory_file_contents = self._read_text(os.path.join(self._left_directory, left_directory_file))
+            # The second sequence undergoes preprocessing, which can be reused
+            # when the first sequence changes. Hence, set the second sequence
+            # here.
+            self._matcher.set_seq2(left_directory_file_contents)
+            for right_directory_file in self._right_directory_files:
+                right_directory_file_contents = self._read_text(os.path.join(self._right_directory, right_directory_file))
+                self._matcher.set_seq1(right_directory_file_contents)
                 if (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold:
-                    left_directory_file_matches[left_directory_file].append((similarity_ratio, right_directory_file))
-        for v in left_directory_file_matches.values():
+                    left_directory_matches[left_directory_file].append((similarity_ratio, right_directory_file))
+        for v in left_directory_matches.values():
             v.sort()
 
         # Ensure that the order in which we iterate over the files in the left
         # directory is such that the one having the greatest similarity ratio
         # with respect to any file in the right directory comes first.
-        left_directory_file_matches = dict(
-            sorted(left_directory_file_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0)
-        )
+        left_directory_matches = dict(sorted(left_directory_matches.items(), key=lambda kv: kv[1][-1][0] if kv[1] else 0))
 
-        # Files which were changed without renaming.
-        left_right_file_mapping = {common_file: common_file for common_file in self._common_files}
-
-        # Detect renames by mapping a file in the left directory to one in the
-        # right.
-        for left_directory_file, v in left_directory_file_matches.items():
+        left_right_file_mapping = {}
+        for left_directory_file, v in left_directory_matches.items():
             if not v or left_directory_file not in self._left_directory_files:
                 continue
 
@@ -185,6 +202,15 @@ class Diff:
                 self._right_directory_files.remove(similar_right_directory_file)
                 break
 
+        return left_right_file_mapping
+
+
+    def report(self):
+        """
+        Write HTML tables summarising the recursive differences between two
+        directories.
+        """
+        left_right_file_mapping = self._changed_not_renamed_mapping() | self._renamed_not_changed_mapping() | self._renamed_and_changed_mapping()
         left_right_directory_files = sorted(
             itertools.chain(
                 ((file, "/deleted") for file in self._left_directory_files),
