@@ -132,8 +132,8 @@ class Diff:
 
     def _renamed_and_changed_mapping(self) -> dict[str, str]:
         """
-        To each file in the left directory, map the file in the right directory
-        having similar contents, if it exists.
+        To each text file in the left directory, map the text file in the right
+        directory having similar contents, if it exists.
         :return: Mapping between left and right directory files.
         """
         left_directory_matches = collections.defaultdict(list)
