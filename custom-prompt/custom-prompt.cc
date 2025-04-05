@@ -176,7 +176,7 @@ void Interval::print_long(std::ostream& ostream) const
  * @return Active window ID. On Linux, if there is no X display running, 0 is
  * returned. Likewise, on macOS, if no topmost window is found, 0 is returned.
  */
-extern "C" long long unsigned get_active_wid(void);
+long long unsigned get_active_wid(void);
 
 /**
  * Store information about the current Git repository.
