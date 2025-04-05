@@ -182,8 +182,8 @@ class Diff:
                 # suffice, thereby making the common case fast at the cost of
                 # making the rare case slow.
                 if (
-                    self._matcher.real_quick_ratio() > rename_detect_threshold and
-                    self._matcher.quick_ratio() > rename_detect_threshold
+                    self._matcher.real_quick_ratio() > rename_detect_threshold
+                    and self._matcher.quick_ratio() > rename_detect_threshold
                     and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
                 ):
                     left_directory_matches[left_directory_file].append((similarity_ratio, right_directory_file))
