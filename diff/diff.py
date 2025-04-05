@@ -83,7 +83,7 @@ class Diff:
         :return: Files in the tree rooted at the given directory.
         """
         return {
-            (root / file_name).relative_to(directory)
+            str((root / file_name).relative_to(directory))
             for root, _, file_names in directory.walk()
             for file_name in file_names
         }
