@@ -182,7 +182,7 @@ extern "C"
      * returned.
      */
     long long unsigned get_active_wid(void);
-#ifndef __APPLE__
+#ifdef __APPLE__
 }
 #endif
 
