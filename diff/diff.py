@@ -29,15 +29,11 @@ html_begin = b"""
         .diff_add {background-color:#aaffaa;}
         .diff_chg {background-color:#ffff77;}
         .diff_sub {background-color:#ffaaaa;}
-        .separator {margin:1cm;}
+        .separator {margin-bottom:1cm;}
     </style>
 </head>
 
 <body>
-"""
-
-html_separator = b"""
-    <div class="separator"></div>
 """
 
 html_end = b"""
@@ -182,8 +178,8 @@ class Diff:
                 # suffice, thereby making the common case fast at the cost of
                 # making the rare case slow.
                 if (
-                    self._matcher.real_quick_ratio() > rename_detect_threshold and
-                    self._matcher.quick_ratio() > rename_detect_threshold
+                    self._matcher.real_quick_ratio() > rename_detect_threshold
+                    and self._matcher.quick_ratio() > rename_detect_threshold
                     and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
                 ):
                     left_directory_matches[left_directory_file].append((similarity_ratio, right_directory_file))
@@ -239,14 +235,13 @@ class Diff:
                 to_lines = []
             else:
                 to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
-            self._writer.write(b"<details open><summary><code>")
+            self._writer.write(b'<details open class="separator"><summary><code>')
             self._writer.write(
                 f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
             )
             self._writer.write(b"</code></summary>\n")
             self._report(from_lines, to_lines, left_directory_file, right_directory_file)
             self._writer.write(b"</details>\n")
-            self._writer.write(html_separator)
 
 
 def main():
