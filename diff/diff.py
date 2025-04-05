@@ -89,26 +89,6 @@ class Diff:
         }
 
     @staticmethod
-    def _read_raw(source: Path) -> bytes:
-        """
-        Read the given file raw.
-        :param source: File to read.
-        :return: File contents.
-        """
-        with open(source, "rb") as source_reader:
-            return source_reader.read()
-
-    @staticmethod
-    def _read_text(source: Path) -> str:
-        """
-        Read the given file in text mode.
-        :param source: File to read.
-        :return: File contents.
-        """
-        with open(source) as source_reader:
-            return source_reader.read()
-
-    @staticmethod
     def _read_lines(source: Path) -> Iterable[str]:
         """
         Read the lines in the given file.
@@ -133,13 +113,13 @@ class Diff:
         """
         left_directory_lookup = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
-            left_directory_file_contents = self._read_raw(self._left_directory / left_directory_file)
+            left_directory_file_contents = (self._left_directory / left_directory_file).read_bytes()
             # Assume there are no collisions.
             left_directory_lookup[hash(left_directory_file_contents)].append(left_directory_file)
 
         left_right_file_mapping = {}
         for right_directory_file in self._right_directory_files.copy():
-            right_directory_file_contents = self._read_raw(self._right_directory / right_directory_file)
+            right_directory_file_contents = (self._right_directory / right_directory_file).read_bytes()
             if not (identical_left_directory_files := left_directory_lookup.get(hash(right_directory_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
@@ -158,13 +138,13 @@ class Diff:
         """
         left_directory_matches = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
-            left_directory_file_contents = self._read_text(self._left_directory / left_directory_file)
+            left_directory_file_contents = (self._left_directory / left_directory_file).read_text()
             # The second sequence undergoes preprocessing, which can be reused
             # when the first sequence changes. Hence, set the second sequence
             # here.
             self._matcher.set_seq2(left_directory_file_contents)
             for right_directory_file in self._right_directory_files:
-                right_directory_file_contents = self._read_text(self._right_directory / right_directory_file)
+                right_directory_file_contents = (self._right_directory / right_directory_file).read_text()
                 self._matcher.set_seq1(right_directory_file_contents)
                 # Most code commits don't rename and change the same files.
                 # Hence, a similarity ratio obtained cursorily will usually
