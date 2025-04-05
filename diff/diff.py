@@ -180,7 +180,7 @@ class Diff:
 
         return left_right_file_mapping
 
-    def report(self) -> str:
+    def report(self) -> Path:
         """
         Write HTML tables summarising the recursive differences between two
         directories.
@@ -203,7 +203,7 @@ class Diff:
             writer.write(html_begin)
             self._report(left_right_directory_files, writer)
             writer.write(html_end)
-        return writer.name
+        return Path(writer.name)
 
     def _report(self, left_right_directory_files: Iterable[tuple[str, str]], writer):
         left_right_directory_files_len = len(left_right_directory_files)
@@ -232,7 +232,7 @@ class Diff:
 def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
-    webbrowser.open("file://" + html_file)
+    webbrowser.open(html_file.as_uri())
 
 
 if __name__ == "__main__":
