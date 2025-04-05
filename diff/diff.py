@@ -227,11 +227,11 @@ class Diff:
                 f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
             )
             try:
-                html_code = self._html_diff.make_table(
+                html_table = self._html_diff.make_table(
                     from_lines, to_lines, left_directory_file, right_directory_file, context=True
                 )
                 writer.write(b"</code></summary>\n")
-                writer.write(html_code.encode())
+                writer.write(html_table.encode())
             except UnicodeDecodeError:
                 writer.write(b" ■ binary</code></summary>\n")
             writer.write(b"\n  </details>\n")
