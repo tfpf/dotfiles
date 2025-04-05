@@ -239,10 +239,15 @@ class Diff:
             else:
                 to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
             writer.write(b'<details open class="separator"><summary><code>')
-            writer.write(f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode())
+            writer.write(
+                f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
+            )
             writer.write(b"</code></summary>\n")
-            html_code = self._html_diff.make_table(from_lines, to_lines, left_directory_file, right_directory_file, context=True)
-            writer.write(html_code.encode())
+            writer.write(
+                self._html_diff.make_table(
+                    from_lines, to_lines, left_directory_file, right_directory_file, context=True
+                ).encode()
+            )
             writer.write(b"</details>\n")
 
 
