@@ -238,7 +238,7 @@ class Diff:
                 to_lines = []
             else:
                 to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
-            writer.write(b'<details open class="separator"><summary><code>')
+            writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(
                 f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
             )
@@ -248,7 +248,7 @@ class Diff:
                     from_lines, to_lines, left_directory_file, right_directory_file, context=True
                 ).encode()
             )
-            writer.write(b"</details>\n")
+            writer.write(b"\n  </details>\n")
 
 
 def main():
