@@ -79,7 +79,7 @@ class Diff:
         """
         Recursively list the relative paths of all files in the given
         directory.
-        :param directory: Absolute directory path.
+        :param directory: Directory to traverse.
         :return: Files in the tree rooted at the given directory.
         """
         return {
