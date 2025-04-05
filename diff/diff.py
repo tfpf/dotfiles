@@ -97,7 +97,7 @@ class Diff:
         :param source: File to read.
         :return: File contents.
         """
-        return fileinput.FileInput(source)
+        return fileinput.FileInput(source, encoding="utf-8")
 
     def _changed_not_renamed_mapping(self) -> dict[str, str]:
         """
