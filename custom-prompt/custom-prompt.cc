@@ -170,7 +170,7 @@ void Interval::print_long(std::ostream& ostream) const
     ostream << this->seconds << " s " << this->milliseconds << " ms";
 }
 
-#ifndef __APPLE__
+#ifdef __APPLE__
 extern "C"
 {
 #endif
