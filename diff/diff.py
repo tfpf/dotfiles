@@ -95,7 +95,7 @@ class Diff:
         :param source: File to read.
         :return: File contents.
         """
-        return fileinput.input(source)
+        return fileinput.FileInput(source)
 
     def _changed_not_renamed_mapping(self) -> dict[str, str]:
         """
@@ -138,13 +138,19 @@ class Diff:
         """
         left_directory_matches = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
-            left_directory_file_contents = (self._left_directory / left_directory_file).read_text()
+            try:
+                left_directory_file_contents = (self._left_directory / left_directory_file).read_text()
+            except UnicodeDecodeError:
+                continue
             # The second sequence undergoes preprocessing, which can be reused
             # when the first sequence changes. Hence, set the second sequence
             # here.
             self._matcher.set_seq2(left_directory_file_contents)
             for right_directory_file in self._right_directory_files:
-                right_directory_file_contents = (self._right_directory / right_directory_file).read_text()
+                try:
+                    right_directory_file_contents = (self._right_directory / right_directory_file).read_text()
+                except UnicodeDecodeError:
+                    continue
                 self._matcher.set_seq1(right_directory_file_contents)
                 # Most code commits don't rename and change the same files.
                 # Hence, a similarity ratio obtained cursorily will usually
@@ -220,12 +226,15 @@ class Diff:
             writer.write(
                 f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
             )
-            writer.write(b"</code></summary>\n")
-            writer.write(
-                self._html_diff.make_table(
+            try:
+                html_code = self._html_diff.make_table(
                     from_lines, to_lines, left_directory_file, right_directory_file, context=True
-                ).encode()
-            )
+                )
+            except UnicodeDecodeError:
+                writer.write(b" ■ binary</code></summary>\n")
+            else:
+                writer.write(b"</code></summary>\n")
+                writer.write(html_code.encode())
             writer.write(b"\n  </details>\n")
 
 
