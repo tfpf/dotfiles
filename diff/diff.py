@@ -11,6 +11,8 @@ from collections.abc import Iterable
 from pathlib import Path
 
 rename_detect_threshold = 0.5
+added_header = "/+ added"
+deleted_header = "/− deleted"
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -199,11 +201,11 @@ class Diff:
         )
         left_right_directory_files = sorted(
             itertools.chain(
-                ((file, "/deleted") for file in self._left_directory_files),
+                ((file, deleted_header) for file in self._left_directory_files),
                 left_right_file_mapping.items(),
-                (("/added", file) for file in self._right_directory_files),
+                ((added_header, file) for file in self._right_directory_files),
             ),
-            key=lambda lr: lr[0] if not lr[0].startswith("/") else lr[1],
+            key=lambda lr: lr[1] if lr[1] != deleted_header else lr[0],
         )
         with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
             writer.write(html_begin)
@@ -214,11 +216,11 @@ class Diff:
     def _report(self, left_right_directory_files: Iterable[tuple[str, str]], writer):
         left_right_directory_files_len = len(left_right_directory_files)
         for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
-            if left_directory_file == "/added":
+            if left_directory_file == added_header:
                 from_lines = []
             else:
                 from_lines = self._read_lines(self._left_directory / left_directory_file)
-            if right_directory_file == "/deleted":
+            if right_directory_file == deleted_header:
                 to_lines = []
             else:
                 to_lines = self._read_lines(self._right_directory / right_directory_file)
@@ -228,7 +230,11 @@ class Diff:
             )
             try:
                 html_table = self._html_diff.make_table(
-                    from_lines, to_lines, left_directory_file, right_directory_file, context=True
+                    from_lines,
+                    to_lines,
+                    left_directory_file.center(64, " "),
+                    right_directory_file.center(64, " "),
+                    context=True,
                 )
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
