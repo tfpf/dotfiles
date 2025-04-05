@@ -177,7 +177,15 @@ class Diff:
                     os.path.join(self._right_directory, right_directory_file)
                 )
                 self._matcher.set_seq1(right_directory_file_contents)
-                if (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold:
+                # Most code commits don't rename and change the same files.
+                # Hence, a similarity ratio obtained cursorily will usually
+                # suffice, thereby making the common case fast at the cost of
+                # making the rare case slow.
+                if (
+                    self._matcher.real_quick_ratio() > rename_detect_threshold and
+                    self._matcher.quick_ratio() > rename_detect_threshold
+                    and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
+                ):
                     left_directory_matches[left_directory_file].append((similarity_ratio, right_directory_file))
         for v in left_directory_matches.values():
             v.sort()
