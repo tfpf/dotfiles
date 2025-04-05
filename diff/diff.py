@@ -221,32 +221,29 @@ class Diff:
             ),
             key=lambda lr: lr[0] if not lr[0].startswith("/") else lr[1],
         )
-        return self._report(left_right_directory_files)
-
-    def _report(self, left_right_directory_files: Iterable[tuple[str, str]]) -> str:
         with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
             writer.write(html_begin)
-            left_right_directory_files_len = len(left_right_directory_files)
-            for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
-                if left_directory_file == "/added":
-                    from_lines = []
-                else:
-                    from_lines = self._read_lines(os.path.join(self._left_directory, left_directory_file))
-                if right_directory_file == "/deleted":
-                    to_lines = []
-                else:
-                    to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
-                writer.write(b'<details open class="separator"><summary><code>')
-                writer.write(
-                    f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
-                )
-                writer.write(b"</code></summary>\n")
-                html_code = self._html_diff.make_table(
-                    from_lines, to_lines, left_directory_file, right_directory_file, context=True
-                )
-                writer.write(html_code.encode())
-                writer.write(b"</details>\n")
+            self._report(left_right_directory_files, writer)
+            writer.write(html_end)
         return writer.name
+
+    def _report(self, left_right_directory_files: Iterable[tuple[str, str]], writer):
+        left_right_directory_files_len = len(left_right_directory_files)
+        for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
+            if left_directory_file == "/added":
+                from_lines = []
+            else:
+                from_lines = self._read_lines(os.path.join(self._left_directory, left_directory_file))
+            if right_directory_file == "/deleted":
+                to_lines = []
+            else:
+                to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
+            writer.write(b'<details open class="separator"><summary><code>')
+            writer.write(f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode())
+            writer.write(b"</code></summary>\n")
+            html_code = self._html_diff.make_table(from_lines, to_lines, left_directory_file, right_directory_file, context=True)
+            writer.write(html_code.encode())
+            writer.write(b"</details>\n")
 
 
 def main():
