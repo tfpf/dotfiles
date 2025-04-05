@@ -4,11 +4,11 @@ import collections
 import difflib
 import fileinput
 import itertools
-import os
 import sys
 import tempfile
 import webbrowser
 from collections.abc import Iterable
+from pathlib import Path
 
 rename_detect_threshold = 0.5
 
@@ -64,9 +64,9 @@ class Diff:
     """
 
     def __init__(self, left: str, right: str):
-        self._left_directory = left
+        self._left_directory = Path(left)
         self._left_directory_files = self._files_in(self._left_directory)
-        self._right_directory = right
+        self._right_directory = Path(right)
         self._right_directory_files = self._files_in(self._right_directory)
         self._common_files = self._left_directory_files & self._right_directory_files
         self._left_directory_files -= self._common_files
@@ -75,7 +75,7 @@ class Diff:
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
-    def _files_in(directory: str) -> set[str]:
+    def _files_in(directory: Path) -> set[str]:
         """
         Recursively list the relative paths of all files in the given
         directory.
@@ -83,36 +83,36 @@ class Diff:
         :return: Files in the tree rooted at the given directory.
         """
         return {
-            os.path.join(root, file_name).removeprefix(directory)
-            for root, _, file_names in os.walk(directory)
+            (root / file_name).relative_to(directory)
+            for root, _, file_names in directory.walk()
             for file_name in file_names
         }
 
     @staticmethod
-    def _read_raw(source: str) -> bytes:
+    def _read_raw(source: Path) -> bytes:
         """
         Read the given file raw.
-        :param source: File name.
+        :param source: File to read.
         :return: File contents.
         """
         with open(source, "rb") as source_reader:
             return source_reader.read()
 
     @staticmethod
-    def _read_text(source: str) -> str:
+    def _read_text(source: Path) -> str:
         """
         Read the given file in text mode.
-        :param source: File name.
+        :param source: File to read.
         :return: File contents.
         """
         with open(source) as source_reader:
             return source_reader.read()
 
     @staticmethod
-    def _read_lines(source: str) -> Iterable[str]:
+    def _read_lines(source: Path) -> Iterable[str]:
         """
         Read the lines in the given file.
-        :param source: File name.
+        :param source: File to read.
         :return: File contents.
         """
         return fileinput.input(source)
@@ -133,13 +133,13 @@ class Diff:
         """
         left_directory_lookup = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
-            left_directory_file_contents = self._read_raw(os.path.join(self._left_directory, left_directory_file))
+            left_directory_file_contents = self._read_raw(self._left_directory / left_directory_file)
             # Assume there are no collisions.
             left_directory_lookup[hash(left_directory_file_contents)].append(left_directory_file)
 
         left_right_file_mapping = {}
         for right_directory_file in self._right_directory_files.copy():
-            right_directory_file_contents = self._read_raw(os.path.join(self._right_directory, right_directory_file))
+            right_directory_file_contents = self._read_raw(self._right_directory / right_directory_file)
             if not (identical_left_directory_files := left_directory_lookup.get(hash(right_directory_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
@@ -158,15 +158,13 @@ class Diff:
         """
         left_directory_matches = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
-            left_directory_file_contents = self._read_text(os.path.join(self._left_directory, left_directory_file))
+            left_directory_file_contents = self._read_text(self._left_directory / left_directory_file)
             # The second sequence undergoes preprocessing, which can be reused
             # when the first sequence changes. Hence, set the second sequence
             # here.
             self._matcher.set_seq2(left_directory_file_contents)
             for right_directory_file in self._right_directory_files:
-                right_directory_file_contents = self._read_text(
-                    os.path.join(self._right_directory, right_directory_file)
-                )
+                right_directory_file_contents = self._read_text(self._right_directory / right_directory_file)
                 self._matcher.set_seq1(right_directory_file_contents)
                 # Most code commits don't rename and change the same files.
                 # Hence, a similarity ratio obtained cursorily will usually
@@ -233,11 +231,11 @@ class Diff:
             if left_directory_file == "/added":
                 from_lines = []
             else:
-                from_lines = self._read_lines(os.path.join(self._left_directory, left_directory_file))
+                from_lines = self._read_lines(self._left_directory / left_directory_file)
             if right_directory_file == "/deleted":
                 to_lines = []
             else:
-                to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
+                to_lines = self._read_lines(self._right_directory / right_directory_file)
             writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(
                 f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
