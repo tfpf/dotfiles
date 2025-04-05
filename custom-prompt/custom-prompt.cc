@@ -170,13 +170,21 @@ void Interval::print_long(std::ostream& ostream) const
     ostream << this->seconds << " s " << this->milliseconds << " ms";
 }
 
-/**
- * Get the ID of the currently-focused window.
- *
- * @return Active window ID. On Linux, if there is no X display running, 0 is
- * returned. Likewise, on macOS, if no topmost window is found, 0 is returned.
- */
-extern "C" long long unsigned get_active_wid(void);
+#ifdef __APPLE__
+extern "C"
+{
+#endif
+    /**
+     * Get the ID of the currently-focused window.
+     *
+     * @return Active window ID. On Linux, if there is no X display running, 0
+     * is returned. Likewise, on macOS, if no topmost window is found, 0 is
+     * returned.
+     */
+    long long unsigned get_active_wid(void);
+#ifdef __APPLE__
+}
+#endif
 
 /**
  * Store information about the current Git repository.
