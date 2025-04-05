@@ -22,14 +22,14 @@ html_begin = b"""
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
     <style type="text/css">
-        table.diff {font-family:Monospace; border:medium;}
-        .diff_header {background-color:#e0e0e0}
-        td.diff_header {text-align:right}
-        .diff_next {background-color:#c0c0c0}
-        .diff_add {background-color:#aaffaa}
-        .diff_chg {background-color:#ffff77}
-        .diff_sub {background-color:#ffaaaa}
-        .separator {margin:2cm}
+        table.diff {font-family:monospace; border:medium;}
+        .diff_header {background-color:#e0e0e0;}
+        td.diff_header {text-align:right;}
+        .diff_next {background-color:#c0c0c0;}
+        .diff_add {background-color:#aaffaa;}
+        .diff_chg {background-color:#ffff77;}
+        .diff_sub {background-color:#ffaaaa;}
+        .separator {margin:1cm;}
     </style>
 </head>
 
@@ -37,7 +37,7 @@ html_begin = b"""
 """
 
 html_separator = b"""
-    <p class="separator"></p>
+    <div class="separator"></div>
 """
 
 html_end = b"""
@@ -143,7 +143,7 @@ class Diff:
         left_directory_lookup = collections.defaultdict(list)
         for left_directory_file in self._left_directory_files:
             left_directory_file_contents = self._read_raw(os.path.join(self._left_directory, left_directory_file))
-            # Just assume there are no collisions.
+            # Assume there are no collisions.
             left_directory_lookup[hash(left_directory_file_contents)].append(left_directory_file)
 
         left_right_file_mapping = {}
