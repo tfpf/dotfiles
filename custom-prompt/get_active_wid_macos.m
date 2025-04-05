@@ -2,7 +2,7 @@
 #include <Cocoa/Cocoa.h>
 #include <CoreGraphics/CGWindow.h>
 
-long long unsigned get_active_wid(void)
+extern "C++" long long unsigned get_active_wid(void)
 {
     NSArray *windows = (NSArray *)CGWindowListCopyWindowInfo(
         kCGWindowListExcludeDesktopElements | kCGWindowListOptionOnScreenOnly, kCGNullWindowID);
