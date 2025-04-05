@@ -233,7 +233,7 @@ class Diff:
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
             except UnicodeDecodeError:
-                writer.write(b" ■ binary</code></summary>\n")
+                writer.write(" ■ binary</code></summary>\n".encode())
             writer.write(b"\n  </details>\n")
 
 
