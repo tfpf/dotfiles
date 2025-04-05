@@ -63,7 +63,7 @@ class Diff:
     Compare two directories recursively.
     """
 
-    def __init__(self, left: str, right: str, writer):
+    def __init__(self, left: str, right: str):
         self._left_directory = left
         self._left_directory_files = self._files_in(self._left_directory)
         self._right_directory = right
@@ -71,7 +71,6 @@ class Diff:
         self._common_files = self._left_directory_files & self._right_directory_files
         self._left_directory_files -= self._common_files
         self._right_directory_files -= self._common_files
-        self._writer = writer
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
@@ -117,10 +116,6 @@ class Diff:
         :return: File contents.
         """
         return fileinput.input(source)
-
-    def _report(self, from_lines: Iterable[str], to_lines: Iterable[str], from_desc: str, to_desc: str):
-        html_code = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
-        self._writer.write(html_code.encode())
 
     def _changed_not_renamed_mapping(self) -> dict[str, str]:
         """
@@ -207,10 +202,11 @@ class Diff:
 
         return left_right_file_mapping
 
-    def report(self):
+    def report(self) -> str:
         """
         Write HTML tables summarising the recursive differences between two
         directories.
+        :return: File to which tables were written.
         """
         left_right_file_mapping = (
             self._changed_not_renamed_mapping()
@@ -225,32 +221,38 @@ class Diff:
             ),
             key=lambda lr: lr[0] if not lr[0].startswith("/") else lr[1],
         )
-        left_right_directory_files_len = len(left_right_directory_files)
-        for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
-            if left_directory_file == "/added":
-                from_lines = []
-            else:
-                from_lines = self._read_lines(os.path.join(self._left_directory, left_directory_file))
-            if right_directory_file == "/deleted":
-                to_lines = []
-            else:
-                to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
-            self._writer.write(b'<details open class="separator"><summary><code>')
-            self._writer.write(
-                f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
-            )
-            self._writer.write(b"</code></summary>\n")
-            self._report(from_lines, to_lines, left_directory_file, right_directory_file)
-            self._writer.write(b"</details>\n")
+        return self._report(left_right_directory_files)
+
+    def _report(self, left_right_directory_files: Iterable[tuple[str, str]]) -> str:
+        with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
+            writer.write(html_begin)
+            left_right_directory_files_len = len(left_right_directory_files)
+            for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
+                if left_directory_file == "/added":
+                    from_lines = []
+                else:
+                    from_lines = self._read_lines(os.path.join(self._left_directory, left_directory_file))
+                if right_directory_file == "/deleted":
+                    to_lines = []
+                else:
+                    to_lines = self._read_lines(os.path.join(self._right_directory, right_directory_file))
+                writer.write(b'<details open class="separator"><summary><code>')
+                writer.write(
+                    f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
+                )
+                writer.write(b"</code></summary>\n")
+                html_code = self._html_diff.make_table(
+                    from_lines, to_lines, left_directory_file, right_directory_file, context=True
+                )
+                writer.write(html_code.encode())
+                writer.write(b"</details>\n")
+        return writer.name
 
 
 def main():
-    with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
-        writer.write(html_begin)
-        diff = Diff(sys.argv[1], sys.argv[2], writer)
-        diff.report()
-        writer.write(html_end)
-    webbrowser.open("file://" + writer.name)
+    diff = Diff(sys.argv[1], sys.argv[2])
+    html_file = diff.report()
+    webbrowser.open("file://" + html_file)
 
 
 if __name__ == "__main__":
