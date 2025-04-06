@@ -1,9 +1,9 @@
 #! /usr/bin/env python
 
-import functools
 import collections
 import difflib
 import fileinput
+import functools
 import itertools
 import sys
 import tempfile
@@ -199,9 +199,7 @@ class Diff:
         :return: File to which tables were written.
         """
         left_right_file_mapping = (
-            self._changed_not_renamed_mapping
-            | self._renamed_not_changed_mapping
-            | self._renamed_and_changed_mapping
+            self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
         left_right_directory_files = sorted(
             itertools.chain(
