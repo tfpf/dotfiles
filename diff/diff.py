@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 
-import collections
 import difflib
 import fileinput
+import functools
 import itertools
 import sys
 import tempfile
 import webbrowser
+from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -99,6 +100,7 @@ class Diff:
         """
         return fileinput.FileInput(source, encoding="utf-8")
 
+    @property
     def _changed_not_renamed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, trivially map the file in the right
@@ -107,13 +109,14 @@ class Diff:
         """
         return {common_file: common_file for common_file in self._common_files}
 
+    @functools.cached_property
     def _renamed_not_changed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, map the file in the right directory
         having the same contents, if it exists.
         :return: Mapping between left and right directory files.
         """
-        left_directory_lookup = collections.defaultdict(list)
+        left_directory_lookup = defaultdict(list)
         for left_directory_file in self._left_directory_files:
             left_directory_file_contents = (self._left_directory / left_directory_file).read_bytes()
             # Assume there are no collisions.
@@ -132,13 +135,14 @@ class Diff:
 
         return left_right_file_mapping
 
+    @property
     def _renamed_and_changed_mapping(self) -> dict[str, str]:
         """
         To each text file in the left directory, map the text file in the right
         directory having similar contents, if it exists.
         :return: Mapping between left and right directory files.
         """
-        left_directory_matches = collections.defaultdict(list)
+        left_directory_matches = defaultdict(list)
         for left_directory_file in self._left_directory_files:
             try:
                 left_directory_file_contents = (self._left_directory / left_directory_file).read_text()
@@ -195,9 +199,7 @@ class Diff:
         :return: File to which tables were written.
         """
         left_right_file_mapping = (
-            self._changed_not_renamed_mapping()
-            | self._renamed_not_changed_mapping()
-            | self._renamed_and_changed_mapping()
+            self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
         left_right_directory_files = sorted(
             itertools.chain(
@@ -215,7 +217,15 @@ class Diff:
 
     def _report(self, left_right_directory_files: Iterable[tuple[str, str]], writer):
         left_right_directory_files_len = len(left_right_directory_files)
+        renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
+            writer.write(b'  <details open class="separator"><summary><code>')
+            writer.write(
+                f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
+            )
+            if left_directory_file in renamed_not_changed_mapping:
+                writer.write(b"</code></summary>\n  </details>\n")
+                continue
             if left_directory_file == added_header:
                 from_lines = []
             else:
@@ -224,10 +234,6 @@ class Diff:
                 to_lines = []
             else:
                 to_lines = self._read_lines(self._right_directory / right_directory_file)
-            writer.write(b'  <details open class="separator"><summary><code>')
-            writer.write(
-                f"{pos}/{left_right_directory_files_len} ■ {left_directory_file} ■ {right_directory_file}".encode()
-            )
             try:
                 html_table = self._html_diff.make_table(
                     from_lines,
