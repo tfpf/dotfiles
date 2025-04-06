@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import collections
 import difflib
 import fileinput
 import functools
@@ -8,6 +7,7 @@ import itertools
 import sys
 import tempfile
 import webbrowser
+from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -116,7 +116,7 @@ class Diff:
         having the same contents, if it exists.
         :return: Mapping between left and right directory files.
         """
-        left_directory_lookup = collections.defaultdict(list)
+        left_directory_lookup = defaultdict(list)
         for left_directory_file in self._left_directory_files:
             left_directory_file_contents = (self._left_directory / left_directory_file).read_bytes()
             # Assume there are no collisions.
@@ -142,7 +142,7 @@ class Diff:
         directory having similar contents, if it exists.
         :return: Mapping between left and right directory files.
         """
-        left_directory_matches = collections.defaultdict(list)
+        left_directory_matches = defaultdict(list)
         for left_directory_file in self._left_directory_files:
             try:
                 left_directory_file_contents = (self._left_directory / left_directory_file).read_text()
