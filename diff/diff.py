@@ -75,18 +75,14 @@ class Diff:
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
-    def _files_in(directory: Path) -> set[str]:
+    def _files_in(directory: Path) -> set[Path]:
         """
         Recursively list the relative paths of all files in the given
         directory.
         :param directory: Directory to traverse.
         :return: Files in the tree rooted at the given directory.
         """
-        return {
-            str((root / file_name).relative_to(directory))
-            for root, _, file_names in directory.walk()
-            for file_name in file_names
-        }
+        return {root / file_name for root, _, file_names in directory.walk() for file_name in file_names}
 
     @staticmethod
     def _read_lines(source: Path) -> Iterable[str]:
