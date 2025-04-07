@@ -126,13 +126,13 @@ class Diff:
         """
         left_directory_lookup = defaultdict(list)
         for left_directory_file in self._left_directory_files:
-            left_directory_file_contents = (self._left_directory / left_directory_file).read_bytes()
+            left_directory_file_contents = left_directory_file.read_bytes()
             # Assume there are no collisions.
             left_directory_lookup[hash(left_directory_file_contents)].append(left_directory_file)
 
         left_right_file_mapping = {}
         for right_directory_file in self._right_directory_files.copy():
-            right_directory_file_contents = (self._right_directory / right_directory_file).read_bytes()
+            right_directory_file_contents = right_directory_file.read_bytes()
             if not (identical_left_directory_files := left_directory_lookup.get(hash(right_directory_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
@@ -153,7 +153,7 @@ class Diff:
         left_directory_matches = defaultdict(list)
         for left_directory_file in self._left_directory_files:
             try:
-                left_directory_file_contents = (self._left_directory / left_directory_file).read_text()
+                left_directory_file_contents = left_directory_file.read_text()
             except UnicodeDecodeError:
                 continue
             # The second sequence undergoes preprocessing, which can be reused
@@ -162,7 +162,7 @@ class Diff:
             self._matcher.set_seq2(left_directory_file_contents)
             for right_directory_file in self._right_directory_files:
                 try:
-                    right_directory_file_contents = (self._right_directory / right_directory_file).read_text()
+                    right_directory_file_contents = right_directory_file.read_text()
                 except UnicodeDecodeError:
                     continue
                 self._matcher.set_seq1(right_directory_file_contents)
@@ -223,7 +223,7 @@ class Diff:
             writer.write(html_end)
         return Path(writer.name)
 
-    def _report(self, left_right_directory_files: Iterable[tuple[str, str]], writer):
+    def _report(self, left_right_directory_files: Iterable[tuple[Path | str, Path | str]], writer):
         left_right_directory_files_len = len(left_right_directory_files)
         renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_directory_file, right_directory_file) in enumerate(left_right_directory_files, 1):
@@ -237,17 +237,17 @@ class Diff:
             if left_directory_file == added_header:
                 from_lines = []
             else:
-                from_lines = self._read_lines(self._left_directory / left_directory_file)
+                from_lines = self._read_lines(left_directory_file)
             if right_directory_file == deleted_header:
                 to_lines = []
             else:
-                to_lines = self._read_lines(self._right_directory / right_directory_file)
+                to_lines = self._read_lines(right_directory_file)
             try:
                 html_table = self._html_diff.make_table(
                     from_lines,
                     to_lines,
-                    left_directory_file.center(64, " "),
-                    right_directory_file.center(64, " "),
+                    str(left_directory_file.relative_to(self._left_directory)).center(64, " "),
+                    str(right_directory_file.relative_to(self._right_directory)).center(64, " "),
                     context=True,
                 )
                 writer.write(b"</code></summary>\n")
