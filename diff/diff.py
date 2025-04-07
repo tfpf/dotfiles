@@ -71,9 +71,6 @@ class Diff:
         self._left_directory_files = self._files_in(self._left_directory)
         self._right_directory = Path(right)
         self._right_directory_files = self._files_in(self._right_directory)
-        self._common_files = self._left_directory_files & self._right_directory_files
-        self._left_directory_files -= self._common_files
-        self._right_directory_files -= self._common_files
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
@@ -107,7 +104,10 @@ class Diff:
         directory having the same path, if it exists.
         :return: Mapping between left and right directory files.
         """
-        return {common_file: common_file for common_file in self._common_files}
+        common_files = self._left_directory_files & self._right_directory_files
+        self._left_directory_files -= common_files
+        self._right_directory_files -= common_files
+        return {common_file: common_file for common_file in common_files}
 
     @functools.cached_property
     def _renamed_not_changed_mapping(self) -> dict[str, str]:
