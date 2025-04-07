@@ -97,13 +97,25 @@ class Diff:
     def _changed_not_renamed_mapping(self) -> dict[str, str]:
         """
         To each file in the left directory, trivially map the file in the right
-        directory having the same path, if it exists.
+        directory having the same relative path, if it exists.
         :return: Mapping between left and right directory files.
         """
-        common_files = self._left_directory_files & self._right_directory_files
-        self._left_directory_files -= common_files
-        self._right_directory_files -= common_files
-        return {common_file: common_file for common_file in common_files}
+        left_directory_files_relative = {
+            left_directory_file.relative_to(self._left_directory): left_directory_file
+            for left_directory_file in self._left_directory_files
+        }
+        right_directory_files_relative = {
+            right_directory_file.relative_to(self._right_directory): right_directory_file
+            for right_directory_file in self._right_directory_files
+        }
+        common_files_relative = left_directory_files_relative.keys() & right_directory_files_relative.keys()
+        left_right_file_mapping = {
+            self._left_directory / common_file_relative: self._right_directory / common_file_relative
+            for common_file_relative in common_files_relative
+        }
+        self._left_directory_files.difference_update(left_right_file_mapping.keys())
+        self._right_directory_files.difference_update(left_right_file_mapping.values())
+        return left_right_file_mapping
 
     @functools.cached_property
     def _renamed_not_changed_mapping(self) -> dict[str, str]:
