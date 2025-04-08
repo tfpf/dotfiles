@@ -68,22 +68,21 @@ class Diff:
 
     def __init__(self, left: str, right: str):
         self._left_directory = Path(left)
-        self._left_directory_files = self._files_in(self._left_directory)
         self._right_directory = Path(right)
-        self._right_directory_files = self._files_in(self._right_directory)
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
+        self._left_right_file_mapping = self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
 
     @staticmethod
-    def _files_in(directory: Path) -> set[str]:
+    def _files_in(directory: Path) -> dict[str, Path]:
         """
-        Recursively list the relative paths of all files in the given
-        directory.
+        Recursively map the relative paths of all files in the given
+        directory to their absolute paths.
         :param directory: Directory to traverse.
         :return: Files in the tree rooted at the given directory.
         """
         return {
-            str((root / file_name).relative_to(directory))
+            str((file := root/file_name).relative_to(directory)):file
             for root, _, file_names in directory.walk()
             for file_name in file_names
         }
