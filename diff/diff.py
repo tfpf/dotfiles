@@ -71,7 +71,9 @@ class Diff:
         self._right_directory = Path(right)
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
-        self._left_right_file_mapping = self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
+        self._left_right_file_mapping = (
+            self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
+        )
 
     @staticmethod
     def _files_in(directory: Path) -> dict[str, Path]:
@@ -82,7 +84,7 @@ class Diff:
         :return: Files in the tree rooted at the given directory.
         """
         return {
-            str((file := root/file_name).relative_to(directory)):file
+            str((file := root / file_name).relative_to(directory)): file
             for root, _, file_names in directory.walk()
             for file_name in file_names
         }
