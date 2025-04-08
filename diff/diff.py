@@ -68,14 +68,15 @@ class Diff:
 
     def __init__(self, left: str, right: str):
         self._left_directory = Path(left)
-        self._left_directory_files = self._files_in(self._left_directory)
         self._right_directory = Path(right)
-        self._right_directory_files = self._files_in(self._right_directory)
+        self._left_right_file_mapping = (
+            self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
+        )
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
-    def _files_in(directory: Path) -> set[str]:
+    def _files_in(directory: Path) -> set[Path]:
         """
         Recursively list the relative paths of all files in the given
         directory.
@@ -83,7 +84,7 @@ class Diff:
         :return: Files in the tree rooted at the given directory.
         """
         return {
-            str((root / file_name).relative_to(directory))
+            (root / file_name).relative_to(directory)
             for root, _, file_names in directory.walk()
             for file_name in file_names
         }
@@ -198,13 +199,10 @@ class Diff:
         directories.
         :return: File to which tables were written.
         """
-        left_right_file_mapping = (
-            self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
-        )
         left_right_directory_files = sorted(
             itertools.chain(
                 ((file, deleted_header) for file in self._left_directory_files),
-                left_right_file_mapping.items(),
+                self._left_right_file_mapping.items(),
                 ((added_header, file) for file in self._right_directory_files),
             ),
             key=lambda lr: lr[1] if lr[1] != deleted_header else lr[0],
