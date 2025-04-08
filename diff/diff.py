@@ -105,10 +105,29 @@ class Diff:
         directory having the same path, if it exists.
         :return: Mapping between left and right directory files.
         """
-        common_files = self._left_directory_files & self._right_directory_files
-        self._left_directory_files -= common_files
-        self._right_directory_files -= common_files
-        return {common_file: common_file for common_file in common_files}
+        left_directory_files_relative = self._files_in(self._left_directory)
+        right_directory_files_relative = self._files_in(self._right_directory)
+        common_files_relative = left_directory_files_relative & right_directory_files_relative
+        left_directory_files_relative -= common_files_relative
+        right_directory_files_relative -= common_files_relative
+        left_right_file_mapping = {
+            self._left_directory / common_file_relative: self._right_directory / common_file_relative
+            for common_file_relative in common_files_relative
+        }
+
+        # Setting instance attributes outside the constructor is unusual, but
+        # I'll allow it because this method is only ever called from the
+        # constructor.
+        self._left_directory_files = {
+            self._left_directory / left_directory_file_relative
+            for left_directory_file_relative in left_directory_files_relative
+        }
+        self._right_directory_files = {
+            self._right_directory / right_directory_file_relative
+            for right_directory_file_relative in right_directory_files_relative
+        }
+
+        return left_right_file_mapping
 
     @functools.cached_property
     def _renamed_not_changed_mapping(self) -> dict[str, str]:
