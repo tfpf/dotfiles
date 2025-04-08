@@ -76,7 +76,7 @@ class Diff:
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
-    def _files_in(directory: Path) -> set[Path]:
+    def _files_relative_to(directory: Path) -> set[Path]:
         """
         Recursively list the relative paths of all files in the given
         directory.
@@ -105,26 +105,23 @@ class Diff:
         directory having the same path, if it exists.
         :return: Mapping between left and right directory files.
         """
-        left_directory_files_relative = self._files_in(self._left_directory)
-        right_directory_files_relative = self._files_in(self._right_directory)
-        common_files_relative = left_directory_files_relative & right_directory_files_relative
-        left_directory_files_relative -= common_files_relative
-        right_directory_files_relative -= common_files_relative
+        left_directory_files = self._files_relative_to(self._left_directory)
+        right_directory_files = self._files_relative_to(self._right_directory)
+        common_files = left_directory_files & right_directory_files
+        left_directory_files -= common_files
+        right_directory_files -= common_files
         left_right_file_mapping = {
-            self._left_directory / common_file_relative: self._right_directory / common_file_relative
-            for common_file_relative in common_files_relative
+            self._left_directory / common_file: self._right_directory / common_file for common_file in common_files
         }
 
         # Setting instance attributes outside the constructor is unusual, but
         # I'll allow it because this method is only ever called from the
         # constructor.
         self._left_directory_files = {
-            self._left_directory / left_directory_file_relative
-            for left_directory_file_relative in left_directory_files_relative
+            self._left_directory / left_directory_file for left_directory_file in left_directory_files
         }
         self._right_directory_files = {
-            self._right_directory / right_directory_file_relative
-            for right_directory_file_relative in right_directory_files_relative
+            self._right_directory / right_directory_file for right_directory_file in right_directory_files
         }
 
         return left_right_file_mapping
