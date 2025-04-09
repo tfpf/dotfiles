@@ -60,6 +60,8 @@ html_end = b"""
 </html>
 """
 
+Path.relative_to = functools.cache(Path.relative_to)
+
 
 class Diff:
     """
