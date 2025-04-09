@@ -208,11 +208,11 @@ class Diff:
         """
         left_right_files = sorted(
             itertools.chain(
-                ((left_file, deleted_header) for left_file in self._left_files),
+                ((left_file, None) for left_file in self._left_files),
                 self._left_right_file_mapping.items(),
-                ((added_header, right_file) for right_file in self._right_files),
+                ((None, right_file) for right_file in self._right_files),
             ),
-            key=lambda lr: lr[1] if lr[1] != deleted_header else lr[0],
+            key=lambda lr: lr[1] or lr[0],
         )
         with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
             writer.write(html_begin)
@@ -220,25 +220,29 @@ class Diff:
             writer.write(html_end)
         return Path(writer.name)
 
-    def _report(self, left_right_files: Iterable[tuple[Path | str, Path | str]], writer):
+    def _report(self, left_right_files: Iterable[tuple[Path | None, Path | None]], writer):
         left_right_files_len = len(left_right_files)
         renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
+            from_desc, to_desc = added_header, deleted_header
+            if left_file:
+                from_desc = str(left_file.relative_to(self._left_directory)).center(64, " ")
+            if right_file:
+                to_desc = str(right_file.relative_to(self._right_directory)).center(64, " ")
+
             writer.write(b'  <details open class="separator"><summary><code>')
-            writer.write(f"{pos}/{left_right_files_len} ■ {left_file} ■ {right_file}".encode())
+            writer.write(f"{pos}/{left_right_files_len} ■ {from_desc} ■ {to_desc}".encode())
             if left_file in renamed_not_changed_mapping:
                 writer.write(b"</code></summary>\n  </details>\n")
                 continue
-            from_lines = [] if left_file == added_header else self._read_lines(left_file)
-            to_lines = [] if right_file == deleted_header else self._read_lines(right_file)
+            if not left_file and right_file.stat().st_size == 0 or left_file.stat().st_size == 0 and not right_file:
+                writer.write(b" ■ empty</code></summary>\n  </details>\n")
+                continue
+
+            from_lines = self._read_lines(left_file) if left_file else []
+            to_lines = self._read_lines(right_file) if right_file else []
             try:
-                html_table = self._html_diff.make_table(
-                    from_lines,
-                    to_lines,
-                    str(left_file).center(64, " "),
-                    str(right_file).center(64, " "),
-                    context=True,
-                )
+                html_table = self._html_diff.make_table(from_lines,to_lines,from_desc,to_desc,context=True)
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
             except UnicodeDecodeError:
