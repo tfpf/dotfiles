@@ -233,7 +233,9 @@ class Diff:
             if left_file in renamed_not_changed_mapping:
                 writer.write(b"</code></summary>\n  </details>\n")
                 continue
-            if not left_file and right_file.stat().st_size == 0 or left_file.stat().st_size == 0 and not right_file:
+            if (not left_file and right_file and right_file.stat().st_size == 0) or (
+                left_file and left_file.stat().st_size == 0 and not right_file
+            ):
                 writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
                 continue
 
