@@ -214,7 +214,9 @@ class Diff:
                 self._left_right_file_mapping.items(),
                 ((None, right_file) for right_file in self._right_files),
             ),
-            key=lambda lr: lr[1] or lr[0],
+            key=lambda lr: lr[1].relative_to(self._right_directory)
+            if lr[1]
+            else lr[0].relative_to(self._left_directory),
         )
         with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
             writer.write(html_begin)
