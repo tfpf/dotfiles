@@ -224,12 +224,8 @@ class Diff:
         left_right_files_len = len(left_right_files)
         renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
-            from_desc, to_desc = added_header, deleted_header
-            if left_file:
-                from_desc = str(left_file.relative_to(self._left_directory)).center(64, " ")
-            if right_file:
-                to_desc = str(right_file.relative_to(self._right_directory)).center(64, " ")
-
+            from_desc = str(left_file.relative_to(self._left_directory)) if left_file else added_header
+            to_desc = str(right_file.relative_to(self._right_directory)) if right_file else deleted_header
             writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {from_desc} ■ {to_desc}".encode())
             if left_file in renamed_not_changed_mapping:
@@ -242,7 +238,9 @@ class Diff:
             from_lines = self._read_lines(left_file) if left_file else []
             to_lines = self._read_lines(right_file) if right_file else []
             try:
-                html_table = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
+                html_table = self._html_diff.make_table(
+                    from_lines, to_lines, from_desc.center(64, " "), to_desc.center(64, " "), context=True
+                )
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
             except UnicodeDecodeError:
