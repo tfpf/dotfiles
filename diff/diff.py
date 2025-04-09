@@ -139,7 +139,7 @@ class Diff:
             identical_left_file = identical_left_files.pop()
             left_right_file_mapping[identical_left_file] = right_file
             self._left_files.remove(identical_left_file)
-            self._right_directory_files.remove(right_file)
+            self._right_files.remove(right_file)
 
         return left_right_file_mapping
 
