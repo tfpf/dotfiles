@@ -107,7 +107,7 @@ class Diff:
         """
         left_files, right_files = self._files_in(self._left_directory), self._files_in(self._right_directory)
         common_files = left_files.keys() & right_files.keys()
-        left_right_file_mapping = {left_files[common_file]:right_files[common_file] for common_file in common_files}
+        left_right_file_mapping = {left_files[common_file]: right_files[common_file] for common_file in common_files}
 
         # Setting instance attributes outside the constructor is unusual, but
         # I'll allow it because this method is only ever called from the
@@ -208,7 +208,7 @@ class Diff:
         """
         left_right_files = sorted(
             itertools.chain(
-                ((left_file, deleted_header) for item in self._left_files),
+                ((left_file, deleted_header) for left_file in self._left_files),
                 self._left_right_file_mapping.items(),
                 ((added_header, right_file) for right_file in self._right_files),
             ),
@@ -220,25 +220,17 @@ class Diff:
             writer.write(html_end)
         return Path(writer.name)
 
-    def _report(self, left_right_files: Iterable[tuple[Path|str, Path|str]], writer):
+    def _report(self, left_right_files: Iterable[tuple[Path | str, Path | str]], writer):
         left_right_files_len = len(left_right_files)
         renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
             writer.write(b'  <details open class="separator"><summary><code>')
-            writer.write(
-                f"{pos}/{left_right_files_len} ■ {left_file} ■ {right_file}".encode()
-            )
+            writer.write(f"{pos}/{left_right_files_len} ■ {left_file} ■ {right_file}".encode())
             if left_file in renamed_not_changed_mapping:
                 writer.write(b"</code></summary>\n  </details>\n")
                 continue
-            if left_file == added_header:
-                from_lines = []
-            else:
-                from_lines = self._read_lines(left_file)
-            if right_file == deleted_header:
-                to_lines = []
-            else:
-                to_lines = self._read_lines(right_file)
+            from_lines = [] if left_file == added_header else self._read_lines(left_file)
+            to_lines = [] if right_file == deleted_header else self._read_lines(right_file)
             try:
                 html_table = self._html_diff.make_table(
                     from_lines,
