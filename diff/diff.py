@@ -236,13 +236,13 @@ class Diff:
                 writer.write(b"</code></summary>\n  </details>\n")
                 continue
             if not left_file and right_file.stat().st_size == 0 or left_file.stat().st_size == 0 and not right_file:
-                writer.write(b" ■ empty</code></summary>\n  </details>\n")
+                writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
                 continue
 
             from_lines = self._read_lines(left_file) if left_file else []
             to_lines = self._read_lines(right_file) if right_file else []
             try:
-                html_table = self._html_diff.make_table(from_lines,to_lines,from_desc,to_desc,context=True)
+                html_table = self._html_diff.make_table(from_lines, to_lines, from_desc, to_desc, context=True)
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
             except UnicodeDecodeError:
