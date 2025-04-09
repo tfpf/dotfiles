@@ -233,7 +233,7 @@ class Diff:
             writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {from_desc} ■ {to_desc}".encode())
             if left_file in renamed_not_changed_mapping:
-                writer.write(b"</code></summary>\n  </details>\n")
+                writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
                 continue
             if (not left_file and right_file and right_file.stat().st_size == 0) or (
                 left_file and left_file.stat().st_size == 0 and not right_file
