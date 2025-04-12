@@ -11,10 +11,6 @@ from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
-rename_detect_threshold = 0.5
-added_header = "/+ added"
-deleted_header = "/− deleted"
-
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -33,6 +29,8 @@ html_begin = b"""
         .diff_chg {background-color:#ffff77;}
         .diff_sub {background-color:#ffaaaa;}
         .separator {margin-bottom:1cm;}
+        .added_header {color:green;}
+        .deleted_header {color:red;}
     </style>
 </head>
 
@@ -60,6 +58,9 @@ html_end = b"""
 </html>
 """
 
+added_header = '/<span class="added_header">+++++</span>'
+deleted_header = '/<span class="deleted_header">−−−−−</span>'
+
 Path.relative_to = functools.cache(Path.relative_to)
 
 
@@ -67,6 +68,8 @@ class Diff:
     """
     Compare two directories recursively.
     """
+
+    rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
 
     def __init__(self, left: str, right: str):
         self._left_directory = Path(left)
@@ -173,9 +176,9 @@ class Diff:
                 # suffice, thereby making the common case fast at the cost of
                 # making the rare case slow.
                 if (
-                    self._matcher.real_quick_ratio() > rename_detect_threshold
-                    and self._matcher.quick_ratio() > rename_detect_threshold
-                    and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
+                    self._matcher.real_quick_ratio() > self.rename_detect_real_quick_threshold
+                    and self._matcher.quick_ratio() > self.rename_detect_quick_threshold
+                    and (similarity_ratio := self._matcher.ratio()) > self.rename_detect_threshold
                 ):
                     left_directory_matches[left_file].append((similarity_ratio, right_file))
         for v in left_directory_matches.values():
