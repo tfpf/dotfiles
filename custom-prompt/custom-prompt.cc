@@ -67,27 +67,19 @@ namespace C
 #define BACKSLASH "\x5C"
 #define RIGHT_SQUARE_BRACKET "\x5D"
 
-// Bold, bright and italic.
-#define BBI_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;3;93m" END_INVISIBLE
+#define ESCAPE_CODE_RAW(id) ESCAPE LEFT_SQUARE_BRACKET id "m"
+#define ESCAPE_CODE_COOKED(id) BEGIN_INVISIBLE ESCAPE_CODE_RAW(id) END_INVISIBLE
 
-// Bold and bright.
-#define BB_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;96m" END_INVISIBLE
-#define BB_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;92m" END_INVISIBLE
-
-// Bright.
-#define B_BLUE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "94m" END_INVISIBLE
-#define B_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "92m" END_INVISIBLE
-#define B_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "92m"
-#define B_GREY BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "90m" END_INVISIBLE
-#define B_GREY_RAW ESCAPE LEFT_SQUARE_BRACKET "90m"
-#define B_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "91m" END_INVISIBLE
-#define B_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "91m"
-#define B_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "93m" END_INVISIBLE
-
-// Dark.
-#define D_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "36m" END_INVISIBLE
+#define HOST_ESCAPE_CODE ESCAPE_CODE_COOKED("1;3;93")
+#define DIRECTORY_ESCAPE_CODE ESCAPE_CODE_COOKED("1;96")
+#define VIRTUAL_ENVIRONMENT_ESCAPE_CODE ESCAPE_CODE_COOKED("94")
+#define GIT_STAGED_ESCAPE_CODE ESCAPE_CODE_COOKED("92")
+#define GIT_STATUS_UNAVAILABLE_ESCAPE_CODE ESCAPE_CODE_COOKED("90")
+#define GIT_UNTRACKED_ESCAPE_CODE ESCAPE_CODE_COOKED("91")
+#define GIT_DIRTY_ESCAPE_CODE ESCAPE_CODE_COOKED("93")
+#define GIT_AHEAD_BEHIND_ESCAPE_CODE ESCAPE_CODE_COOKED("36")
 #define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
-#define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
+#define GIT_BRANCH_ESCAPE_CODE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
 #define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
 #define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
 #define D_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "31m"
@@ -498,7 +490,7 @@ std::string GitRepository::get_information(void)
     }
     else
     {
-        information_stream << D_GREEN << this->description << RESET;
+        information_stream << GIT_BRANCH_ESCAPE_CODE << this->description << RESET;
     }
     if (!this->tag.empty())
     {
@@ -506,19 +498,19 @@ std::string GitRepository::get_information(void)
     }
     if (this->dirty > 0)
     {
-        information_stream << B_YELLOW "  " << this->dirty << RESET;
+        information_stream << GIT_DIRTY_ESCAPE_CODE "  " << this->dirty << RESET;
     }
     if (this->staged > 0)
     {
-        information_stream << B_GREEN "  " << this->staged << RESET;
+        information_stream << GIT_STAGED_ESCAPE_CODE "  " << this->staged << RESET;
     }
     if (this->untracked > 0)
     {
-        information_stream << B_RED "  " << this->untracked << RESET;
+        information_stream << GIT_UNTRACKED_ESCAPE_CODE "  " << this->untracked << RESET;
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
-        information_stream << D_CYAN "  +" << this->ahead << ",−" << this->behind << RESET;
+        information_stream << GIT_AHEAD_BEHIND_ESCAPE_CODE "  +" << this->ahead << ",−" << this->behind << RESET;
     }
     if (!this->state.empty())
     {
@@ -678,10 +670,10 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  */
 void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
 {
-    std::cout << "\n" HOST_ICON " " BBI_YELLOW HOST RESET "  " BB_CYAN DIRECTORY RESET;
+    std::cout << "\n" HOST_ICON " " HOST_ESCAPE_CODE HOST RESET "  " DIRECTORY_ESCAPE_CODE DIRECTORY RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
     {
-        std::cout << "  " << B_GREY "unavailable" RESET;
+        std::cout << "  " << GIT_STATUS_UNAVAILABLE_ESCAPE_CODE "unavailable" RESET;
     }
     else
     {
@@ -693,7 +685,7 @@ void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_
     }
     if (venv != nullptr)
     {
-        std::cout << "  " B_BLUE << venv << RESET;
+        std::cout << "  " VIRTUAL_ENVIRONMENT_ESCAPE_CODE << venv << RESET;
     }
     std::cout << "\n";
     while (--shlvl > 0)
