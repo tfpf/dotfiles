@@ -10,7 +10,7 @@
 	l = log --graph --pretty='%C(yellow)%h%C(reset) %C(brightblack)%cd%C(reset) %C(cyan)%>|(64,trunc)%an%C(reset) %C(auto)%(decorate:pointer= ,prefix=,separator= ,suffix= ,tag=)%C(reset)%<|(-1,trunc)%s'
 	ll = l --all
 	s = show -w
-	ss = "!ss() { rev=${1:-HEAD} && right=$(git rev-parse \"$rev\") && left=\"$right^\" && git dd \"$left\" \"$right\"; }; ss"
+	ss = "!ss() { rev=${1:-HEAD} && right=$(git rev-parse \"$rev\") && left=$(git rev-parse \"$right^\" 2>/dev/null) || left=4b825dc642cb6eb9a060e54bf8d69288fbee4904 && git dd \"$left\" \"$right\"; }; ss"
 	st = status
 [blame]
 	coloring = repeatedLines
