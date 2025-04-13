@@ -136,11 +136,7 @@ class Diff:
         :return: Mapping between left and right directory files.
         """
         left_directory_lookup = defaultdict(list)
-        results = self._pool.map_async(
-            self._renamed_not_changed_mapping_worker,
-            self._left_files,
-            callback=lambda args: left_directory_lookup[args[1]].append(args[0]),
-        ).get()
+        results = self._pool.map_async(self._renamed_not_changed_mapping_worker, self._left_files).get()
         for left_file, left_file_hash in zip(self._left_files, results, strict=True):
             left_directory_lookup[left_file_hash].append(left_file)
 
