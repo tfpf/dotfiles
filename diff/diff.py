@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+import copy
 import difflib
 import fileinput
 import functools
@@ -62,6 +63,8 @@ html_end = b"""
 added_header = '/<span class="added_header">+++++</span>'
 deleted_header = '/<span class="deleted_header">−−−−−</span>'
 
+rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
+
 Path.relative_to = functools.cache(Path.relative_to)
 
 
@@ -70,12 +73,9 @@ class Diff:
     Compare two directories recursively.
     """
 
-    rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
-
     def __init__(self, left: str, right: str):
         self._left_directory = Path(left)
         self._right_directory = Path(right)
-        self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
         self._pool = Pool()
         self._left_right_file_mapping = (
@@ -153,6 +153,21 @@ class Diff:
 
         return left_right_file_mapping
 
+    @staticmethod
+    def _renamed_and_changed_mapping_worker(left_file: Path, right_file: Path) -> int:
+        try:
+            left_file_contents, right_file_contents = left_file.read_text(), right_file.read_text()
+        except UnicodeDecodeError:
+            return 0
+        matcher = difflib.SequenceMatcher(None, left_file_contents, right_file_contents, False)
+        if (
+            matcher.real_quick_ratio() > rename_detect_real_quick_threshold
+            and matcher.quick_ratio() > rename_detect_quick_threshold
+            and (similarity_ratio := matcher.ratio()) > rename_detect_threshold
+        ):
+            return similarity_ratio
+        return 0
+
     @property
     def _renamed_and_changed_mapping(self) -> dict[Path, Path]:
         """
@@ -161,31 +176,11 @@ class Diff:
         :return: Mapping between left and right directory files.
         """
         left_directory_matches = defaultdict(list)
-        for left_file in self._left_files:
-            try:
-                left_file_contents = left_file.read_text()
-            except UnicodeDecodeError:
-                continue
-            # The second sequence undergoes preprocessing, which can be reused
-            # when the first sequence changes. Hence, set the second sequence
-            # here.
-            self._matcher.set_seq2(left_file_contents)
-            for right_file in self._right_files:
-                try:
-                    right_file_contents = right_file.read_text()
-                except UnicodeDecodeError:
-                    continue
-                self._matcher.set_seq1(right_file_contents)
-                # Most code commits don't rename and change the same files.
-                # Hence, a similarity ratio obtained cursorily will usually
-                # suffice, thereby making the common case fast at the cost of
-                # making the rare case slow.
-                if (
-                    self._matcher.real_quick_ratio() > self.rename_detect_real_quick_threshold
-                    and self._matcher.quick_ratio() > self.rename_detect_quick_threshold
-                    and (similarity_ratio := self._matcher.ratio()) > self.rename_detect_threshold
-                ):
-                    left_directory_matches[left_file].append((similarity_ratio, right_file))
+        iterable = itertools.product(self._left_files, self._right_files)
+        results = self._pool.starmap_async(self._renamed_and_changed_mapping_worker, copy.copy(iterable)).get()
+        for left_file, right_file, similarity_ratio in zip(iterable, results, strict=True):
+            if similarity_ratio > 0:
+                left_directory_matches[left_file].append((similarity_ratio, right_file))
         for v in left_directory_matches.values():
             v.sort()
 
