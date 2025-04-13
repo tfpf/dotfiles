@@ -9,6 +9,7 @@ import tempfile
 import webbrowser
 from collections import defaultdict
 from collections.abc import Iterable
+from multiprocessing import Pool
 from pathlib import Path
 
 html_begin = b"""
@@ -76,6 +77,7 @@ class Diff:
         self._right_directory = Path(right)
         self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
+        self._pool = Pool()
         self._left_right_file_mapping = (
             self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
@@ -122,6 +124,10 @@ class Diff:
 
         return left_right_file_mapping
 
+    @staticmethod
+    def _renamed_not_changed_mapping_worker(file: Path) -> int:
+        return file, hash(file.read_bytes())
+
     @functools.cached_property
     def _renamed_not_changed_mapping(self) -> dict[Path, Path]:
         """
@@ -130,10 +136,11 @@ class Diff:
         :return: Mapping between left and right directory files.
         """
         left_directory_lookup = defaultdict(list)
-        for left_file in self._left_files:
-            left_file_contents = left_file.read_bytes()
-            # Assume there are no collisions.
-            left_directory_lookup[hash(left_file_contents)].append(left_file)
+        self._pool.map_async(
+            self._renamed_not_changed_mapping_worker,
+            self._left_files,
+            callback=lambda args: left_directory_lookup[args[1]].append(args[0]),
+        ).get()
 
         left_right_file_mapping = {}
         for right_file in self._right_files.copy():
