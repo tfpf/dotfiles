@@ -126,7 +126,7 @@ class Diff:
 
     @staticmethod
     def _renamed_not_changed_mapping_worker(file: Path) -> int:
-        return file, hash(file.read_bytes())
+        return hash(file.read_bytes())
 
     @functools.cached_property
     def _renamed_not_changed_mapping(self) -> dict[Path, Path]:
@@ -136,11 +136,13 @@ class Diff:
         :return: Mapping between left and right directory files.
         """
         left_directory_lookup = defaultdict(list)
-        self._pool.map_async(
+        results = self._pool.map_async(
             self._renamed_not_changed_mapping_worker,
             self._left_files,
             callback=lambda args: left_directory_lookup[args[1]].append(args[0]),
         ).get()
+        for left_file, left_file_hash in zip(self._left_files, results, strict=False):
+            left_directory_lookup[left_file_hash].append(left_file)
 
         left_right_file_mapping = {}
         for right_file in self._right_files.copy():
