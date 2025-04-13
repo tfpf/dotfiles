@@ -141,7 +141,7 @@ class Diff:
             self._left_files,
             callback=lambda args: left_directory_lookup[args[1]].append(args[0]),
         ).get()
-        for left_file, left_file_hash in zip(self._left_files, results, strict=False):
+        for left_file, left_file_hash in zip(self._left_files, results, strict=True):
             left_directory_lookup[left_file_hash].append(left_file)
 
         left_right_file_mapping = {}
