@@ -178,7 +178,7 @@ class Diff:
         left_directory_matches = defaultdict(list)
         iterable = itertools.product(self._left_files, self._right_files)
         results = self._pool.starmap_async(self._renamed_and_changed_mapping_worker, copy.copy(iterable)).get()
-        for left_file, right_file, similarity_ratio in zip(iterable, results, strict=True):
+        for (left_file, right_file), similarity_ratio in zip(iterable, results, strict=True):
             if similarity_ratio > 0:
                 left_directory_matches[left_file].append((similarity_ratio, right_file))
         for v in left_directory_matches.values():
