@@ -5,13 +5,13 @@ import difflib
 import fileinput
 import functools
 import itertools
+import pathlib
 import sys
 import tempfile
 import webbrowser
 from collections import defaultdict
 from collections.abc import Iterable
 from multiprocessing import Pool
-from pathlib import Path
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -65,7 +65,18 @@ deleted_header = '/<span class="deleted_header">−−−−−</span>'
 
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
 
-Path.relative_to = functools.cache(Path.relative_to)
+
+class Path(pathlib.Path):
+    def read_bytes(self) -> bytes:
+        return super().read_bytes()
+
+    read_bytes = functools.cache(read_bytes)
+
+    def read_text(self) -> str:
+        return self.read_bytes().decode()
+
+    def read_lines(self) -> list[str]:
+        return self.read_text().splitlines()
 
 
 class Diff:
