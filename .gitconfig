@@ -6,7 +6,7 @@
 	statusUoption = false
 [alias]
 	d = diff -w
-	dd = git difftool -d -t custom
+	dd = difftool -d -t custom
 	l = log --graph --pretty='%C(yellow)%h%C(reset) %C(brightblack)%cd%C(reset) %C(cyan)%>|(64,trunc)%an%C(reset) %C(auto)%(decorate:pointer= ,prefix=,separator= ,suffix= ,tag=)%C(reset)%<|(-1,trunc)%s'
 	ll = l --all
 	s = show -w
