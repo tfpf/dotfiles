@@ -134,6 +134,7 @@ class Diff:
         left_directory_lookup = defaultdict(list)
         for left_file in self._left_files:
             left_file_contents = left_file.read_bytes()
+            # Assume there are no collisions.
             left_directory_lookup[hash(left_file_contents)].append(left_file)
 
         left_right_file_mapping = {}
