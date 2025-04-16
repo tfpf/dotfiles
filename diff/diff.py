@@ -132,7 +132,6 @@ class Diff:
         """
         left_directory_lookup = defaultdict(list)
         for left_file in self._left_files:
-            # print(f"Requesting data from {left_file}")
             left_file_contents = left_file.read_bytes()
             # Assume there are no collisions.
             left_directory_lookup[hash(left_file_contents)].append(left_file)
@@ -140,7 +139,6 @@ class Diff:
         left_right_file_mapping = {}
         for right_file in self._right_files.copy():
             right_file_contents = right_file.read_bytes()
-            # print(f"Requesting data from {right_file}")
             if not (identical_left_files := left_directory_lookup.get(hash(right_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
@@ -154,7 +152,6 @@ class Diff:
     @staticmethod
     def _renamed_and_changed_mapping_worker(left_file: Path, right_file: Path) -> int:
         try:
-            # print(f"Requesting data from {left_file} and {right_file}")
             left_file_contents, right_file_contents = left_file.read_text(), right_file.read_text()
         except UnicodeDecodeError:
             return 0
