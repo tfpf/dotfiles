@@ -11,7 +11,7 @@ import tempfile
 import webbrowser
 from collections import defaultdict
 from collections.abc import Iterable
-from multiprocessing import Pool
+from multiprocessing import  Pool
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -67,16 +67,13 @@ rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect
 
 
 class Path(pathlib.Path):
+
+    @functools.cache
     def read_bytes(self) -> bytes:
         return super().read_bytes()
 
-    read_bytes = functools.cache(read_bytes)
-
-    def read_text(self) -> str:
-        return self.read_bytes().decode()
-
     def read_lines(self) -> list[str]:
-        return self.read_text().splitlines()
+        return self.read_bytes().decode().splitlines()
 
 
 class Diff:
@@ -107,15 +104,6 @@ class Diff:
             for file_name in file_names
         }
 
-    @staticmethod
-    def _read_lines(source: Path) -> Iterable[str]:
-        """
-        Read the lines in the given file.
-        :param source: File to read.
-        :return: File contents.
-        """
-        return fileinput.FileInput(source, encoding="utf-8")
-
     @property
     def _changed_not_renamed_mapping(self) -> dict[Path, Path]:
         """
@@ -144,6 +132,7 @@ class Diff:
         """
         left_directory_lookup = defaultdict(list)
         for left_file in self._left_files:
+            # print(f"Requesting data from {left_file}")
             left_file_contents = left_file.read_bytes()
             # Assume there are no collisions.
             left_directory_lookup[hash(left_file_contents)].append(left_file)
@@ -151,6 +140,7 @@ class Diff:
         left_right_file_mapping = {}
         for right_file in self._right_files.copy():
             right_file_contents = right_file.read_bytes()
+            # print(f"Requesting data from {right_file}")
             if not (identical_left_files := left_directory_lookup.get(hash(right_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
@@ -164,6 +154,7 @@ class Diff:
     @staticmethod
     def _renamed_and_changed_mapping_worker(left_file: Path, right_file: Path) -> int:
         try:
+            # print(f"Requesting data from {left_file} and {right_file}")
             left_file_contents, right_file_contents = left_file.read_text(), right_file.read_text()
         except UnicodeDecodeError:
             return 0
@@ -252,9 +243,9 @@ class Diff:
                 writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
                 continue
 
-            from_lines = self._read_lines(left_file) if left_file else []
-            to_lines = self._read_lines(right_file) if right_file else []
             try:
+                from_lines = left_file.read_lines() if left_file else []
+                to_lines = right_file.read_lines() if right_file else []
                 html_table = self._html_diff.make_table(
                     from_lines, to_lines, from_desc.center(64, " "), to_desc.center(64, " "), context=True
                 )
@@ -269,6 +260,7 @@ def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
     webbrowser.open(html_file.as_uri())
+    print(Path.read_bytes.cache_info())
 
 
 if __name__ == "__main__":
