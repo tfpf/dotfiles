@@ -63,7 +63,7 @@ html_end = b"""
 added_header = '/<span class="added_header">+++++</span>'
 deleted_header = '/<span class="deleted_header">−−−−−</span>'
 
-rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
+rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 Path.relative_to = functools.cache(Path.relative_to)
 
@@ -153,7 +153,7 @@ class Diff:
     @staticmethod
     def _renamed_and_changed_mapping_worker(left_file: Path, right_file: Path) -> int:
         try:
-            left_file_contents, right_file_contents = left_file.read_text(), right_file.read_text()
+            left_file_contents, right_file_contents = left_file.read_text().split(), right_file.read_text().split()
         except UnicodeDecodeError:
             return 0
         matcher = difflib.SequenceMatcher(None, left_file_contents, right_file_contents, False)
