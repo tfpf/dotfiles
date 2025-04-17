@@ -75,6 +75,7 @@ class Diff:
         self._left_directory = Path(left)
         self._right_directory = Path(right)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
+        self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
         self._left_right_file_mapping = (
             self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
@@ -157,19 +158,18 @@ class Diff:
         left_directory_matches = defaultdict(list)
         for left_file in self._left_files:
             try:
-                left_file_contents = left_file.read_text().split()
+                self._matcher.set_seq2(left_file.read_text().split())
             except UnicodeDecodeError:
                 continue
             for right_file in self._right_files:
                 try:
-                    right_file_contents = right_file.read_text().split()
+                    self._matcher.set_seq1(right_file.read_text().split())
                 except UnicodeDecodeError:
                     continue
-                matcher = difflib.SequenceMatcher(None, left_file_contents, right_file_contents, False)
                 if (
-                    matcher.real_quick_ratio() > rename_detect_real_quick_threshold
-                    and matcher.quick_ratio() > rename_detect_quick_threshold
-                    and (similarity_ratio := matcher.ratio()) > rename_detect_threshold
+                    self._matcher.real_quick_ratio() > rename_detect_real_quick_threshold
+                    and self._matcher.quick_ratio() > rename_detect_quick_threshold
+                    and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
                 ):
                     left_directory_matches[left_file].append((similarity_ratio, right_file))
         for v in left_directory_matches.values():
