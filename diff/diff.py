@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import copy
 import difflib
 import fileinput
 import functools
@@ -10,7 +9,6 @@ import tempfile
 import webbrowser
 from collections import defaultdict
 from collections.abc import Iterable
-from multiprocessing import Pool
 from pathlib import Path
 
 html_begin = b"""
@@ -63,7 +61,7 @@ html_end = b"""
 added_header = '/<span class="added_header">+++++</span>'
 deleted_header = '/<span class="deleted_header">−−−−−</span>'
 
-rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
+rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 Path.relative_to = functools.cache(Path.relative_to)
 
@@ -77,7 +75,7 @@ class Diff:
         self._left_directory = Path(left)
         self._right_directory = Path(right)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
-        self._pool = Pool()
+        self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
         self._left_right_file_mapping = (
             self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
@@ -150,21 +148,6 @@ class Diff:
 
         return left_right_file_mapping
 
-    @staticmethod
-    def _renamed_and_changed_mapping_worker(left_file: Path, right_file: Path) -> int:
-        try:
-            left_file_contents, right_file_contents = left_file.read_text(), right_file.read_text()
-        except UnicodeDecodeError:
-            return 0
-        matcher = difflib.SequenceMatcher(None, left_file_contents, right_file_contents, False)
-        if (
-            matcher.real_quick_ratio() > rename_detect_real_quick_threshold
-            and matcher.quick_ratio() > rename_detect_quick_threshold
-            and (similarity_ratio := matcher.ratio()) > rename_detect_threshold
-        ):
-            return similarity_ratio
-        return 0
-
     @property
     def _renamed_and_changed_mapping(self) -> dict[Path, Path]:
         """
@@ -173,11 +156,22 @@ class Diff:
         :return: Mapping between left and right directory files.
         """
         left_directory_matches = defaultdict(list)
-        iterable = itertools.product(self._left_files, self._right_files)
-        results = self._pool.starmap_async(self._renamed_and_changed_mapping_worker, copy.copy(iterable)).get()
-        for (left_file, right_file), similarity_ratio in zip(iterable, results, strict=True):
-            if similarity_ratio > 0:
-                left_directory_matches[left_file].append((similarity_ratio, right_file))
+        for left_file in self._left_files:
+            try:
+                self._matcher.set_seq2(left_file.read_text().split())
+            except UnicodeDecodeError:
+                continue
+            for right_file in self._right_files:
+                try:
+                    self._matcher.set_seq1(right_file.read_text().split())
+                except UnicodeDecodeError:
+                    continue
+                if (
+                    self._matcher.real_quick_ratio() > rename_detect_real_quick_threshold
+                    and self._matcher.quick_ratio() > rename_detect_quick_threshold
+                    and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
+                ):
+                    left_directory_matches[left_file].append((similarity_ratio, right_file))
         for v in left_directory_matches.values():
             v.sort()
 
