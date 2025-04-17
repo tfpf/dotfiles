@@ -63,6 +63,7 @@ deleted_header = '/<span class="deleted_header">−−−−−</span>'
 
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
+Path.relative_to = functools.cache(Path.relative_to)
 
 
 class Diff:
