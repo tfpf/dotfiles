@@ -4,10 +4,21 @@ on:
     paths:
       - '.github/workflows/style.yml'
       - 'custom-prompt/*'
+      - 'diff/*'
   workflow_dispatch:
 
 jobs:
-  check:
+  check-diff:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pipx install --global hatch
+          hatch fmt --check
+        working-directory: diff
+        name: Check if Python source is formatted correctly
+
+  check-custom-prompt:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +26,7 @@ jobs:
         working-directory: custom-prompt
         name: Check if C and C++ headers and sources are formatted correctly
 
-  format:
+  format-custom-prompt:
     if: github.ref_type != 'tag' && github.ref_name != github.event.repository.default_branch
     runs-on: ubuntu-22.04
     steps:
