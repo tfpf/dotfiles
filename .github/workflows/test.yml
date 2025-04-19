@@ -16,6 +16,7 @@ jobs:
           fetch-depth: 0
       - run: |
           cp .gitconfig ~
+          sudo cp diff/diff.py /usr/bin
           test $(sha256sum $(git ss a257771) | awk '{print $1}') = d09490e58a8c0be46a9a5aa702abf7f43f52b6527873e17f203328730bd5aeaf
       - run: |
           git clone https://github.com/tfpf/ScrollableContainers.git
