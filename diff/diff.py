@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import difflib
-import fileinput
 import functools
 import itertools
 import pathlib
@@ -67,14 +66,15 @@ rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect
 class Path(pathlib.Path):
     relative_to = functools.cache(pathlib.Path.relative_to)
 
-    def read_words(self) -> Iterable[str] | None:
+    def read_words(self) -> list[str] | None:
         try:
             return super().read_text().split()
         except UnicodeDecodeError:
             return None
 
-    def read_lines(self) -> Iterable[str]:
-        return fileinput.FileInput(self, encoding="utf-8")
+    def read_lines(self) -> list[str]:
+        with open(self) as self_reader:
+            return self_reader.readlines()
 
 
 class Diff:
