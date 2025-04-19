@@ -1,0 +1,26 @@
+name: test
+on:
+  push:
+    paths:
+      - '.github/workflows/test.yml'
+      - 'diff/*'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          cp .gitconfig ~
+          test $(sha256sum $(git ss a257771) | awk '{print $1}') = d09490e58a8c0be46a9a5aa702abf7f43f52b6527873e17f203328730bd5aeaf
+      - run: |
+          git clone https://github.com/tfpf/ScrollableContainers.git
+          test $(sha256sum $(git ss 589e77e) | awk '{print $1}') = fc75dd57fbec5cf8e73a547238433549db7fc9f0fd830d1ced69ab2635e20b46
+      - run: |
+          git clone https://github.com/tfpf/sieve-of-atkin.git
+          test $(sha256sum $(git ss 75f0fea) | awk '{print $1'}) = 8ab7bdf381417b6d27f13a4ffa96362cdadbe83185c6c2220841a59a940a7076
+      - run: |
+          git clone https://github.com/tfpf/hash-drbg.git
+          test $(sha256sum $(git ss 75f0fea) | awk '{print $1'}) = 6ec5370186e34ff0060fc58c189c79a7101f43d05ab08d36e36589e4c9fec235
