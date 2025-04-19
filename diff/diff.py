@@ -251,6 +251,7 @@ class Diff:
 def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
+    print(html_file)  # noqa
     webbrowser.open(html_file.as_uri())
 
 
