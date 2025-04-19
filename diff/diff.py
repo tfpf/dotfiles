@@ -87,6 +87,7 @@ class Diff:
         self._right_directory = Path(right)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
         self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
+        self._binary_files = set()
         self._left_right_file_mapping = (
             self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
@@ -160,10 +161,14 @@ class Diff:
         left_directory_matches = defaultdict(list)
         for left_file in self._left_files:
             if not (left_file_contents := left_file.read_words()):
+                self._binary_files.add(left_file)
                 continue
             self._matcher.set_seq2(left_file_contents)
             for right_file in self._right_files:
+                if right_file in self._binary_files:
+                    continue
                 if not (right_file_contents := right_file.read_words()):
+                    self._binary_files.add(right_file)
                     continue
                 self._matcher.set_seq1(right_file_contents)
                 if (
