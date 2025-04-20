@@ -224,12 +224,14 @@ class Diff:
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
             if left_file:
                 from_desc = str(left_file.relative_to(self._left_directory))
-                from_mode = left_file.stat().st_mode
+                from_stat = left_file.stat()
+                from_mode = from_stat.st_mode
             else:
                 from_desc = added_header
             if right_file:
                 to_desc = str(right_file.relative_to(self._right_directory))
-                to_mode = right_file.stat().st_mode
+                to_stat = right_file.stat()
+                to_mode = to_stat.st_mode
             else:
                 to_desc = deleted_header
 
@@ -252,8 +254,8 @@ class Diff:
             if left_file in renamed_not_changed_mapping:
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
                 continue
-            if (not left_file and right_file and right_file.stat().st_size == 0) or (
-                left_file and left_file.stat().st_size == 0 and not right_file
+            if (not left_file and right_file and to_stat.st_size == 0) or (
+                left_file and from_stat.st_size == 0 and not right_file
             ):
                 writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
                 continue
