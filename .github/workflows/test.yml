@@ -16,7 +16,7 @@ jobs:
       - run: |
           cp .gitconfig ~
           sudo cp diff/diff.py /usr/bin
-          for item in "a257771 1979d11f76c0d5402535ecf8c5f0d04170739e05db56b2bc8fd8bdc695bb4ab3"
+          for item in "a257771 1979d11f76c0d5402535ecf8c5f0d04170739e05db56b2bc8fd8bdc695bb4ab3" "6e77c56 fbddab8bda30ce501428fb2ca44c15f92ccb536c4feac0133a5567e813c4f789"
           do
             test $(sha256sum $(git ss ${item[0]}) | awk '{print $1}') = ${item[1]}
           done
