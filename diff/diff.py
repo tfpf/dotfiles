@@ -244,14 +244,18 @@ class Diff:
                     short_desc = f"{from_mode:o} {from_desc}"
                 else:
                     short_desc = f"{from_mode:o} {from_desc} ⟶ {to_desc}"
+            elif from_desc == to_desc:
+                short_desc = f"{from_mode:o} ⟶ {to_mode:o} {from_desc}"
             else:
-                if from_desc == to_desc:
-                    short_desc = f"{from_mode:o} ⟶ {to_mode:o} {from_desc}"
-                else:
-                    short_desc = f"{from_mode:o} {from_desc} ⟶ {to_mode:o} {to_desc}"
+                short_desc = f"{from_mode:o} {from_desc} ⟶ {to_mode:o} {to_desc}"
             writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
-            if left_file in renamed_not_changed_mapping:
+            if (
+                left_file in renamed_not_changed_mapping
+                or left_file
+                and right_file
+                and left_file.read_bytes() == right_file.read_bytes()
+            ):
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
                 continue
             if (not left_file and right_file and to_stat.st_size == 0) or (
