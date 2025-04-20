@@ -9,7 +9,7 @@ on:
 
 jobs:
   check-diff:
-    runs-on: ubuntu-22.04
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - run: |
