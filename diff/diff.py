@@ -69,7 +69,7 @@ class Path(pathlib.Path):
 
     def read_words(self) -> Iterable[str] | None:
         try:
-            return super().read_text().split()
+            return super().read_text(encoding="utf-8").split()
         except UnicodeDecodeError:
             return None
 
@@ -241,12 +241,12 @@ class Diff:
                 short_desc = f"{from_mode:o} {from_desc}"
             elif from_mode == to_mode:
                 short_desc = (
-                    f"{from_mode:o} {from_desc}" if from_desc == to_desc else f"{from_mode:o} {from_desc} ⟶ {to_desc}"
+                    f"{from_mode:o} {from_desc}" if from_desc == to_desc else f"{from_mode:o} {from_desc} ➔ {to_desc}"
                 )
             elif from_desc == to_desc:
-                short_desc = f"{from_mode:o} ⟶ {to_mode:o} {from_desc}"
+                short_desc = f"{from_mode:o} ➔ {to_mode:o} {from_desc}"
             else:
-                short_desc = f"{from_mode:o} {from_desc} ⟶ {to_mode:o} {to_desc}"
+                short_desc = f"{from_mode:o} {from_desc} ➔ {to_mode:o} {to_desc}"
             writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
             if left_file in renamed_not_changed_mapping or (
