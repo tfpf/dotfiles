@@ -227,10 +227,36 @@ class Diff:
         left_right_files_len = len(left_right_files)
         renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
-            from_desc = str(left_file.relative_to(self._left_directory)) if left_file else added_header
-            to_desc = str(right_file.relative_to(self._right_directory)) if right_file else deleted_header
+            if left_file:
+                from_desc = str(left_file.relative_to(self._left_directory))
+                from_mode = left_file.stat().st_mode
+            else:
+                from_desc = added_header
+            if right_file:
+                to_desc = str(right_file.relative_to(self._right_directory))
+                to_mode = right_file.stat().st_mode
+            else:
+                to_desc = deleted_header
+
+            if not left_file and right_file:
+                short_desc = f"{to_mode:o} {to_desc}"
+            elif left_file and not right_file:
+                short_desc = f"{from_mode:o} {from_desc}"
+            elif from_mode == to_mode:
+                if from_desc == to_desc:
+                    short_desc = f"{from_mode:o} {from_desc}"
+                else:
+                    short_desc = f"{from_mode:o} {from_desc} ⟶ {to_desc}"
+            else:
+                if from_desc == to_desc:
+                    short_desc = f"{from_mode:o} ⟶ {to_mode:o} {from_desc}"
+                else:
+                    short_desc = f"{from_mode:o} {from_desc} ⟶ {to_mode:o} {to_desc}"
             writer.write(b'  <details open class="separator"><summary><code>')
-            writer.write(f"{pos}/{left_right_files_len} ■ {from_desc} ■ {to_desc}".encode())
+            writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
+            if left_file in self._binary_files or right_file in self._binary_files:
+                writer.write(" ■ binary</code></summary>\n  </details>\n".encode())
+                continue
             if left_file in renamed_not_changed_mapping:
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
                 continue
