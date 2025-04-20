@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import difflib
+import fileinput
 import functools
 import itertools
 import pathlib
@@ -73,8 +74,7 @@ class Path(pathlib.Path):
             return None
 
     def read_lines(self) -> Iterable[str]:
-        with open(self) as self_reader:
-            return self_reader.readlines()
+        return fileinput.FileInput(self, encoding="utf-8")
 
 
 class Diff:
@@ -87,7 +87,6 @@ class Diff:
         self._right_directory = Path(right)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
         self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
-        self._binary_files = set()
         self._left_right_file_mapping = (
             self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
@@ -161,14 +160,10 @@ class Diff:
         left_directory_matches = defaultdict(list)
         for left_file in self._left_files:
             if not (left_file_contents := left_file.read_words()):
-                self._binary_files.add(left_file)
                 continue
             self._matcher.set_seq2(left_file_contents)
             for right_file in self._right_files:
-                if right_file in self._binary_files:
-                    continue
                 if not (right_file_contents := right_file.read_words()):
-                    self._binary_files.add(right_file)
                     continue
                 self._matcher.set_seq1(right_file_contents)
                 if (
@@ -254,9 +249,6 @@ class Diff:
                     short_desc = f"{from_mode:o} {from_desc} ⟶ {to_mode:o} {to_desc}"
             writer.write(b'  <details open class="separator"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
-            if left_file in self._binary_files or right_file in self._binary_files:
-                writer.write(" ■ binary</code></summary>\n  </details>\n".encode())
-                continue
             if left_file in renamed_not_changed_mapping:
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
                 continue
