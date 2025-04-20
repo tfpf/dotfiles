@@ -12,9 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          pipx install --global hatch
-          hatch fmt --check
+      - run: pipx run ruff check
         working-directory: diff
         name: Check if Python source is formatted correctly
 
