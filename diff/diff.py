@@ -236,9 +236,9 @@ class Diff:
                 to_desc = deleted_header
 
             if not left_file and right_file:
-                short_desc = f"{to_mode:o} {to_desc}"
+                short_desc = f"{from_desc} {to_mode:o} {to_desc}"
             elif left_file and not right_file:
-                short_desc = f"{from_mode:o} {from_desc}"
+                short_desc = f"{from_mode:o} {from_desc} {to_desc}"
             elif from_mode == to_mode:
                 short_desc = (
                     f"{from_mode:o} {from_desc}" if from_desc == to_desc else f"{from_mode:o} {from_desc} ⟼ {to_desc}"
