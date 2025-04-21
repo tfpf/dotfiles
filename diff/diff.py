@@ -28,9 +28,6 @@ html_begin = b"""
         .diff_add {background-color:#aaffaa;}
         .diff_chg {background-color:#ffff77;}
         .diff_sub {background-color:#ffaaaa;}
-        .separator {margin-bottom:1cm;}
-        .added_header {color:green;}
-        .deleted_header {color:red;}
     </style>
 </head>
 
@@ -58,9 +55,8 @@ html_end = b"""
 </html>
 """
 
-added_header = '<span class="added_header">+++++</span>'
-deleted_header = '<span class="deleted_header">−−−−−</span>'
-
+added_header = '<span style="color:green;">+++++</span>'
+deleted_header = '<span style="color:red;">−−−−−</span>'
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 
@@ -220,18 +216,15 @@ class Diff:
 
     def _report(self, left_right_files: Iterable[tuple[Path | None, Path | None]], writer):
         left_right_files_len = len(left_right_files)
-        renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
             if left_file:
                 from_desc = str(left_file.relative_to(self._left_directory))
-                from_stat = left_file.stat()
-                from_mode = from_stat.st_mode
+                from_mode = (from_stat := left_file.stat()).st_mode
             else:
                 from_desc = added_header
             if right_file:
                 to_desc = str(right_file.relative_to(self._right_directory))
-                to_stat = right_file.stat()
-                to_mode = to_stat.st_mode
+                to_mode = (to_stat := right_file.stat()).st_mode
             else:
                 to_desc = deleted_header
 
@@ -247,9 +240,9 @@ class Diff:
                 short_desc = f"{from_mode:o} ⟼ {to_mode:o} {from_desc}"
             else:
                 short_desc = f"{from_mode:o} {from_desc} ⟼ {to_mode:o} {to_desc}"
-            writer.write(b'  <details open class="separator"><summary><code>')
+            writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
-            if left_file in renamed_not_changed_mapping or (
+            if left_file in self._renamed_not_changed_mapping or (
                 left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
             ):
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
@@ -276,7 +269,7 @@ class Diff:
 def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
-    print(html_file)  # noqa
+    print(html_file)  # noqa: T201
     webbrowser.open(html_file.as_uri())
 
 
