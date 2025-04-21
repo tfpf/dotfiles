@@ -58,8 +58,8 @@ html_end = b"""
 </html>
 """
 
-added_header = '/<span class="added_header">+++++</span>'
-deleted_header = '/<span class="deleted_header">−−−−−</span>'
+added_header = '<span class="added_header">+++++</span>'
+deleted_header = '<span class="deleted_header">−−−−−</span>'
 
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
