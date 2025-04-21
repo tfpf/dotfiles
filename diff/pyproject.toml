@@ -19,4 +19,4 @@ classifiers = [
 line-length = 119
 
 [tool.ruff.lint]
-ignore = ["RUF001"]
+ignore = []

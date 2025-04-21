@@ -56,7 +56,7 @@ html_end = b"""
 """
 
 added_header = '<span style="color:green;">+++++</span>'
-deleted_header = '<span style="color:red;">−−−−−</span>'
+deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF001
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 
@@ -257,7 +257,7 @@ class Diff:
             to_lines = right_file.read_lines() if right_file else []
             try:
                 html_table = self._html_diff.make_table(
-                    from_lines, to_lines, from_desc.center(64, " "), to_desc.center(64, " "), context=True
+                    from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
                 )
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
