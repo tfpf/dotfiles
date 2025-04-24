@@ -40,8 +40,10 @@
 [commit]
 	gpgSign = false
 [core]
+	autocrlf = false
 	commentChar = "#"
 	compression = 9
+	eol = lf
 	fscache = true
 	hideDotFiles = true
 	pager = delta
