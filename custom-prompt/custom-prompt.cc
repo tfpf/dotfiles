@@ -91,10 +91,12 @@ namespace C
 
 #ifndef NDEBUG
 #define LOG_DEBUG(fmt, ...)                                                                                           \
-    std::fprintf(stderr,                                                                                              \
+    std::fprintf(                                                                                                     \
+        stderr,                                                                                                       \
         ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG \
                         "%d" ESCAPE_CODE_RAW_RESET " " fmt "\n",                                                      \
-        __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+        __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__                                                       \
+    )
 #else
 #define LOG_DEBUG(fmt, ...)
 #endif
@@ -428,13 +430,13 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     GitRepository* self = static_cast<GitRepository*>(self_);
     if (status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
-            | C::GIT_STATUS_WT_TYPECHANGE))
+           | C::GIT_STATUS_WT_TYPECHANGE))
     {
         ++self->dirty;
     }
     if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
-            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
+           | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
         ++self->staged;
     }
@@ -607,11 +609,13 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // without processing). Consequently, counting like this should result in
     // correct output in a UTF-8 terminal.
     std::string report = report_stream.str();
-    std::size_t report_size = std::count_if(report.cbegin(), report.cend(),
+    std::size_t report_size = std::count_if(
+        report.cbegin(), report.cend(),
         [](char const& report_char)
         {
             return (report_char & 0xC0) != 0x80;
-        });
+        }
+    );
     LOG_DEBUG("Report length is %zu bytes (%zu code points).", report.size(), report_size);
 
     // Ensure that the text is right-aligned. Compensate for multi-byte
@@ -619,7 +623,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
         = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET
-              - 4)
+           - 4)
         / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
@@ -635,8 +639,10 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  */
-void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay,
-    long long unsigned prev_active_wid, std::size_t columns)
+void report_command_status(
+    std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid,
+    std::size_t columns
+)
 {
     LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command.data(), exit_code, delay);
     if (delay <= 5000000000ULL)
@@ -748,7 +754,8 @@ int main_internal(int const argc, char const* argv[])
         },
         // I prefer to transfer ownership of the promise to the thread, because
         // it may continue running after the main thread terminates.
-        std::move(git_repository_information_promise))
+        std::move(git_repository_information_promise)
+    )
         .detach();
 
     std::string_view last_command(argv[1]);

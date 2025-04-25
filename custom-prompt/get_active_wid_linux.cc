@@ -19,8 +19,10 @@ long long unsigned get_active_wid(void)
     long unsigned nitems_return;
     long unsigned bytes_after_return;
     char unsigned* prop_return;
-    XGetWindowProperty(display, root_window, property, 0, 1, False, XA_WINDOW, &actual_type_return,
-        &actual_format_return, &nitems_return, &bytes_after_return, &prop_return);
+    XGetWindowProperty(
+        display, root_window, property, 0, 1, False, XA_WINDOW, &actual_type_return, &actual_format_return,
+        &nitems_return, &bytes_after_return, &prop_return
+    );
 
     Window active_wid = *(Window*)prop_return;
     // XFree(prop_return);
