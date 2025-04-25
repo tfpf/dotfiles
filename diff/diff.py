@@ -4,12 +4,12 @@ import difflib
 import fileinput
 import functools
 import itertools
+import pathlib
 import sys
 import tempfile
 import webbrowser
 from collections import defaultdict
 from collections.abc import Iterable
-from pathlib import Path
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -28,9 +28,6 @@ html_begin = b"""
         .diff_add {background-color:#aaffaa;}
         .diff_chg {background-color:#ffff77;}
         .diff_sub {background-color:#ffaaaa;}
-        .separator {margin-bottom:1cm;}
-        .added_header {color:green;}
-        .deleted_header {color:red;}
     </style>
 </head>
 
@@ -58,10 +55,22 @@ html_end = b"""
 </html>
 """
 
-added_header = '/<span class="added_header">+++++</span>'
-deleted_header = '/<span class="deleted_header">−−−−−</span>'
+added_header = '<span style="color:green;">+++++</span>'
+deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF001
+rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
-Path.relative_to = functools.cache(Path.relative_to)
+
+class Path(pathlib.Path):
+    relative_to = functools.cache(pathlib.Path.relative_to)
+
+    def read_words(self) -> Iterable[str] | None:
+        try:
+            return super().read_text(encoding="utf-8").split()
+        except UnicodeDecodeError:
+            return None
+
+    def read_lines(self) -> Iterable[str]:
+        return fileinput.FileInput(self, encoding="utf-8")
 
 
 class Diff:
@@ -69,13 +78,11 @@ class Diff:
     Compare two directories recursively.
     """
 
-    rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.7, 0.6, 0.5
-
     def __init__(self, left: str, right: str):
         self._left_directory = Path(left)
         self._right_directory = Path(right)
-        self._matcher = difflib.SequenceMatcher(autojunk=False)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
+        self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
         self._left_right_file_mapping = (
             self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
         )
@@ -93,15 +100,6 @@ class Diff:
             for root, _, file_names in directory.walk()
             for file_name in file_names
         }
-
-    @staticmethod
-    def _read_lines(source: Path) -> Iterable[str]:
-        """
-        Read the lines in the given file.
-        :param source: File to read.
-        :return: File contents.
-        """
-        return fileinput.FileInput(source, encoding="utf-8")
 
     @property
     def _changed_not_renamed_mapping(self) -> dict[Path, Path]:
@@ -157,28 +155,17 @@ class Diff:
         """
         left_directory_matches = defaultdict(list)
         for left_file in self._left_files:
-            try:
-                left_file_contents = left_file.read_text()
-            except UnicodeDecodeError:
+            if not (left_file_contents := left_file.read_words()):
                 continue
-            # The second sequence undergoes preprocessing, which can be reused
-            # when the first sequence changes. Hence, set the second sequence
-            # here.
             self._matcher.set_seq2(left_file_contents)
             for right_file in self._right_files:
-                try:
-                    right_file_contents = right_file.read_text()
-                except UnicodeDecodeError:
+                if not (right_file_contents := right_file.read_words()):
                     continue
                 self._matcher.set_seq1(right_file_contents)
-                # Most code commits don't rename and change the same files.
-                # Hence, a similarity ratio obtained cursorily will usually
-                # suffice, thereby making the common case fast at the cost of
-                # making the rare case slow.
                 if (
-                    self._matcher.real_quick_ratio() > self.rename_detect_real_quick_threshold
-                    and self._matcher.quick_ratio() > self.rename_detect_quick_threshold
-                    and (similarity_ratio := self._matcher.ratio()) > self.rename_detect_threshold
+                    self._matcher.real_quick_ratio() > rename_detect_real_quick_threshold
+                    and self._matcher.quick_ratio() > rename_detect_quick_threshold
+                    and (similarity_ratio := self._matcher.ratio()) > rename_detect_threshold
                 ):
                     left_directory_matches[left_file].append((similarity_ratio, right_file))
         for v in left_directory_matches.values():
@@ -229,26 +216,48 @@ class Diff:
 
     def _report(self, left_right_files: Iterable[tuple[Path | None, Path | None]], writer):
         left_right_files_len = len(left_right_files)
-        renamed_not_changed_mapping = self._renamed_not_changed_mapping
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
-            from_desc = str(left_file.relative_to(self._left_directory)) if left_file else added_header
-            to_desc = str(right_file.relative_to(self._right_directory)) if right_file else deleted_header
-            writer.write(b'  <details open class="separator"><summary><code>')
-            writer.write(f"{pos}/{left_right_files_len} ■ {from_desc} ■ {to_desc}".encode())
-            if left_file in renamed_not_changed_mapping:
+            if left_file:
+                from_desc = str(left_file.relative_to(self._left_directory))
+                from_mode = (from_stat := left_file.stat()).st_mode
+            else:
+                from_desc = added_header
+            if right_file:
+                to_desc = str(right_file.relative_to(self._right_directory))
+                to_mode = (to_stat := right_file.stat()).st_mode
+            else:
+                to_desc = deleted_header
+
+            if not left_file and right_file:
+                short_desc = f"{from_desc} {to_mode:o} {to_desc}"
+            elif left_file and not right_file:
+                short_desc = f"{from_mode:o} {from_desc} {to_desc}"
+            elif from_mode == to_mode:
+                short_desc = (
+                    f"{from_mode:o} {from_desc}" if from_desc == to_desc else f"{from_mode:o} {from_desc} ⟼ {to_desc}"
+                )
+            elif from_desc == to_desc:
+                short_desc = f"{from_mode:o} ⟼ {to_mode:o} {from_desc}"
+            else:
+                short_desc = f"{from_mode:o} {from_desc} ⟼ {to_mode:o} {to_desc}"
+            writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
+            writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
+            if left_file in self._renamed_not_changed_mapping or (
+                left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
+            ):
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
                 continue
-            if (not left_file and right_file and right_file.stat().st_size == 0) or (
-                left_file and left_file.stat().st_size == 0 and not right_file
+            if (not left_file and right_file and to_stat.st_size == 0) or (
+                left_file and from_stat.st_size == 0 and not right_file
             ):
                 writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
                 continue
 
-            from_lines = self._read_lines(left_file) if left_file else []
-            to_lines = self._read_lines(right_file) if right_file else []
+            from_lines = left_file.read_lines() if left_file else []
+            to_lines = right_file.read_lines() if right_file else []
             try:
                 html_table = self._html_diff.make_table(
-                    from_lines, to_lines, from_desc.center(64, " "), to_desc.center(64, " "), context=True
+                    from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
                 )
                 writer.write(b"</code></summary>\n")
                 writer.write(html_table.encode())
@@ -260,6 +269,7 @@ class Diff:
 def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
+    print(html_file)  # noqa: T201
     webbrowser.open(html_file.as_uri())
 
 

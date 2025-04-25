@@ -5,7 +5,6 @@ import cmath
 import collections
 import contextlib
 import copy
-import copy
 import csv
 import ctypes
 import datetime
@@ -32,7 +31,7 @@ import math
 import multiprocessing
 import numbers
 import os
-import pathlib
+from pathlib import Path
 import pickle
 import platform
 import pprint
