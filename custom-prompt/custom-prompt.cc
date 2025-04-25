@@ -68,28 +68,29 @@ namespace C
 #define RIGHT_SQUARE_BRACKET "\x5D"
 
 #define ESCAPE_CODE_RAW(id) ESCAPE LEFT_SQUARE_BRACKET id "m"
+#define ESCAPE_CODE_RAW_RESET ESCAPE_CODE_RAW("")
+
+#define ESCAPE_CODE_LOG ESCAPE_CODE_RAW("36")
+#define ESCAPE_CODE_COMMAND_HISTORY ESCAPE_CODE_RAW("36")
+#define ESCAPE_CODE_COMMAND_SUCCESS ESCAPE_CODE_RAW("32")
+#define ESCAPE_CODE_COMMAND_FAILURE ESCAPE_CODE_RAW("31")
+#define ESCAPE_CODE_GIT_DETACHED ESCAPE_CODE_RAW("31")
+
 #define ESCAPE_CODE_COOKED(id) BEGIN_INVISIBLE ESCAPE_CODE_RAW(id) END_INVISIBLE
+#define ESCAPE_CODE_COOKED_RESET ESCAPE_CODE_COOKED("")
 
-#define HOST_ESCAPE_CODE ESCAPE_CODE_COOKED("1;3;93")
-#define DIRECTORY_ESCAPE_CODE ESCAPE_CODE_COOKED("1;96")
-#define VIRTUAL_ENVIRONMENT_ESCAPE_CODE ESCAPE_CODE_COOKED("94")
-#define GIT_STAGED_ESCAPE_CODE ESCAPE_CODE_COOKED("92")
-#define GIT_STATUS_UNAVAILABLE_ESCAPE_CODE ESCAPE_CODE_COOKED("90")
-#define GIT_UNTRACKED_ESCAPE_CODE ESCAPE_CODE_COOKED("91")
-#define GIT_DIRTY_ESCAPE_CODE ESCAPE_CODE_COOKED("93")
-#define GIT_AHEAD_BEHIND_ESCAPE_CODE ESCAPE_CODE_COOKED("36")
-#define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
-#define GIT_BRANCH_ESCAPE_CODE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
-#define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
-#define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
-#define D_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "31m"
-
-// No formatting.
-#define RESET BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "m" END_INVISIBLE
-#define RESET_RAW ESCAPE LEFT_SQUARE_BRACKET "m"
+#define ESCAPE_CODE_HOST ESCAPE_CODE_COOKED("1;3;93")
+#define ESCAPE_CODE_DIRECTORY ESCAPE_CODE_COOKED("1;96")
+#define ESCAPE_CODE_VIRTUAL_ENVIRONMENT ESCAPE_CODE_COOKED("94")
+#define ESCAPE_CODE_GIT_STAGED ESCAPE_CODE_COOKED("92")
+#define ESCAPE_CODE_GIT_STATUS_UNAVAILABLE ESCAPE_CODE_COOKED("90")
+#define ESCAPE_CODE_GIT_UNTRACKED ESCAPE_CODE_COOKED("91")
+#define ESCAPE_CODE_GIT_DIRTY ESCAPE_CODE_COOKED("93")
+#define ESCAPE_CODE_GIT_AHEAD_BEHIND ESCAPE_CODE_COOKED("36")
+#define ESCAPE_CODE_GIT_DESCRIPTION ESCAPE_CODE_COOKED("32")
 
 #ifndef NDEBUG
-#define LOG_FMT(fmt) D_CYAN_RAW "%s" RESET_RAW ":" D_CYAN_RAW "%s" RESET_RAW ":" D_CYAN_RAW "%d" RESET_RAW " " fmt "\n"
+#define LOG_FMT(fmt) ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%d" ESCAPE_CODE_RAW_RESET " " fmt "\n"
 #define LOG_DEBUG(fmt, ...) std::fprintf(stderr, LOG_FMT(fmt), __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
 #else
 #define LOG_DEBUG(fmt, ...)
@@ -486,11 +487,11 @@ std::string GitRepository::get_information(void)
     }
     if (this->detached)
     {
-        information_stream << D_RED << this->description << RESET;
+        information_stream << ESCAPE_CODE_GIT_DETACHED << this->description << ESCAPE_CODE_RAW_RESET;
     }
     else
     {
-        information_stream << GIT_BRANCH_ESCAPE_CODE << this->description << RESET;
+        information_stream << ESCAPE_CODE_GIT_DESCRIPTION << this->description << ESCAPE_CODE_RAW_RESET;
     }
     if (!this->tag.empty())
     {
@@ -498,19 +499,19 @@ std::string GitRepository::get_information(void)
     }
     if (this->dirty > 0)
     {
-        information_stream << GIT_DIRTY_ESCAPE_CODE "  " << this->dirty << RESET;
+        information_stream << ESCAPE_CODE_GIT_DIRTY "  " << this->dirty << ESCAPE_CODE_RAW_RESET;
     }
     if (this->staged > 0)
     {
-        information_stream << GIT_STAGED_ESCAPE_CODE "  " << this->staged << RESET;
+        information_stream << ESCAPE_CODE_GIT_STAGED "  " << this->staged << ESCAPE_CODE_RAW_RESET;
     }
     if (this->untracked > 0)
     {
-        information_stream << GIT_UNTRACKED_ESCAPE_CODE "  " << this->untracked << RESET;
+        information_stream << ESCAPE_CODE_GIT_UNTRACKED "  " << this->untracked << ESCAPE_CODE_RAW_RESET;
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
-        information_stream << GIT_AHEAD_BEHIND_ESCAPE_CODE "  +" << this->ahead << ",−" << this->behind << RESET;
+        information_stream << ESCAPE_CODE_GIT_AHEAD_BEHIND "  +" << this->ahead << ",−" << this->behind << ESCAPE_CODE_RAW_RESET;
     }
     if (!this->state.empty())
     {
@@ -574,21 +575,21 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::ostringstream report_stream;
     if (last_command.size() <= left_piece_len + right_piece_len + 5)
     {
-        report_stream << D_CYAN_RAW HISTORY_ICON RESET_RAW " " << last_command;
+        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " " << last_command;
     }
     else
     {
         LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
-        report_stream << D_CYAN_RAW HISTORY_ICON RESET_RAW " " << last_command.substr(0, left_piece_len);
+        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " " << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
     {
-        report_stream << " " D_GREEN_RAW SUCCESS_ICON RESET_RAW " ";
+        report_stream << " " ESCAPE_CODE_COMMAND_SUCCESS SUCCESS_ICON ESCAPE_CODE_RAW_RESET " ";
     }
     else
     {
-        report_stream << " " D_RED_RAW FAILURE_ICON RESET_RAW " ";
+        report_stream << " " ESCAPE_CODE_COMMAND_FAILURE FAILURE_ICON ESCAPE_CODE_RAW_RESET " ";
     }
     interval.print_short(report_stream);
 
@@ -612,7 +613,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
-        = (sizeof D_CYAN_RAW + sizeof D_GREEN_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
+        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET - 4) / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
@@ -670,10 +671,10 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  */
 void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
 {
-    std::cout << "\n" HOST_ICON " " HOST_ESCAPE_CODE HOST RESET "  " DIRECTORY_ESCAPE_CODE DIRECTORY RESET;
+    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_RAW_RESET "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_RAW_RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
     {
-        std::cout << "  " << GIT_STATUS_UNAVAILABLE_ESCAPE_CODE "unavailable" RESET;
+        std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_RAW_RESET;
     }
     else
     {
@@ -685,7 +686,7 @@ void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_
     }
     if (venv != nullptr)
     {
-        std::cout << "  " VIRTUAL_ENVIRONMENT_ESCAPE_CODE << venv << RESET;
+        std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv << ESCAPE_CODE_RAW_RESET;
     }
     std::cout << "\n";
     while (--shlvl > 0)
