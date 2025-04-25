@@ -90,7 +90,9 @@ namespace C
 #define ESCAPE_CODE_GIT_DESCRIPTION ESCAPE_CODE_COOKED("32")
 
 #ifndef NDEBUG
-#define LOG_FMT(fmt) ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%d" ESCAPE_CODE_RAW_RESET " " fmt "\n"
+#define LOG_FMT(fmt)                                                                                                  \
+    ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG     \
+                    "%d" ESCAPE_CODE_RAW_RESET " " fmt "\n"
 #define LOG_DEBUG(fmt, ...) std::fprintf(stderr, LOG_FMT(fmt), __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
 #else
 #define LOG_DEBUG(fmt, ...)
@@ -511,7 +513,8 @@ std::string GitRepository::get_information(void)
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
-        information_stream << ESCAPE_CODE_GIT_AHEAD_BEHIND "  +" << this->ahead << ",−" << this->behind << ESCAPE_CODE_RAW_RESET;
+        information_stream << ESCAPE_CODE_GIT_AHEAD_BEHIND "  +" << this->ahead << ",−" << this->behind
+                           << ESCAPE_CODE_RAW_RESET;
     }
     if (!this->state.empty())
     {
@@ -580,7 +583,8 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     else
     {
         LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
-        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " " << last_command.substr(0, left_piece_len);
+        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " "
+                      << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
@@ -613,7 +617,9 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
-        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET - 4) / sizeof(char);
+        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET
+              - 4)
+        / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
@@ -671,7 +677,8 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  */
 void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
 {
-    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_RAW_RESET "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_RAW_RESET;
+    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_RAW_RESET
+                 "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_RAW_RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
     {
         std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_RAW_RESET;
