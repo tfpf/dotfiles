@@ -67,38 +67,40 @@ namespace C
 #define BACKSLASH "\x5C"
 #define RIGHT_SQUARE_BRACKET "\x5D"
 
-// Bold, bright and italic.
-#define BBI_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;3;93m" END_INVISIBLE
+#define ESCAPE_CODE_RAW(id) ESCAPE LEFT_SQUARE_BRACKET id "m"
+#define ESCAPE_CODE_RAW_RESET ESCAPE_CODE_RAW("")
 
-// Bold and bright.
-#define BB_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;96m" END_INVISIBLE
-#define BB_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "1;92m" END_INVISIBLE
+// clang-format off
+#define ESCAPE_CODE_LOG             ESCAPE_CODE_RAW("36")
+#define ESCAPE_CODE_COMMAND_HISTORY ESCAPE_CODE_RAW("36")
+#define ESCAPE_CODE_COMMAND_SUCCESS ESCAPE_CODE_RAW("32")
+#define ESCAPE_CODE_COMMAND_FAILURE ESCAPE_CODE_RAW("31")
+// clang-format on
 
-// Bright.
-#define B_BLUE BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "94m" END_INVISIBLE
-#define B_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "92m" END_INVISIBLE
-#define B_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "92m"
-#define B_GREY BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "90m" END_INVISIBLE
-#define B_GREY_RAW ESCAPE LEFT_SQUARE_BRACKET "90m"
-#define B_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "91m" END_INVISIBLE
-#define B_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "91m"
-#define B_YELLOW BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "93m" END_INVISIBLE
+#define ESCAPE_CODE_COOKED(id) BEGIN_INVISIBLE ESCAPE_CODE_RAW(id) END_INVISIBLE
+#define ESCAPE_CODE_COOKED_RESET ESCAPE_CODE_COOKED("")
 
-// Dark.
-#define D_CYAN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "36m" END_INVISIBLE
-#define D_CYAN_RAW ESCAPE LEFT_SQUARE_BRACKET "36m"
-#define D_GREEN BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "32m" END_INVISIBLE
-#define D_GREEN_RAW ESCAPE LEFT_SQUARE_BRACKET "32m"
-#define D_RED BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "31m" END_INVISIBLE
-#define D_RED_RAW ESCAPE LEFT_SQUARE_BRACKET "31m"
-
-// No formatting.
-#define RESET BEGIN_INVISIBLE ESCAPE LEFT_SQUARE_BRACKET "m" END_INVISIBLE
-#define RESET_RAW ESCAPE LEFT_SQUARE_BRACKET "m"
+// clang-format off
+#define ESCAPE_CODE_HOST                   ESCAPE_CODE_COOKED("1;3;93")
+#define ESCAPE_CODE_DIRECTORY              ESCAPE_CODE_COOKED("1;96")
+#define ESCAPE_CODE_VIRTUAL_ENVIRONMENT    ESCAPE_CODE_COOKED("94")
+#define ESCAPE_CODE_GIT_STAGED             ESCAPE_CODE_COOKED("92")
+#define ESCAPE_CODE_GIT_STATUS_UNAVAILABLE ESCAPE_CODE_COOKED("90")
+#define ESCAPE_CODE_GIT_UNTRACKED          ESCAPE_CODE_COOKED("91")
+#define ESCAPE_CODE_GIT_DIRTY              ESCAPE_CODE_COOKED("93")
+#define ESCAPE_CODE_GIT_AHEAD_BEHIND       ESCAPE_CODE_COOKED("2;37")
+#define ESCAPE_CODE_GIT_DESCRIPTION        ESCAPE_CODE_COOKED("32")
+#define ESCAPE_CODE_GIT_DETACHED           ESCAPE_CODE_COOKED("31")
+// clang-format on
 
 #ifndef NDEBUG
-#define LOG_FMT(fmt) D_CYAN_RAW "%s" RESET_RAW ":" D_CYAN_RAW "%s" RESET_RAW ":" D_CYAN_RAW "%d" RESET_RAW " " fmt "\n"
-#define LOG_DEBUG(fmt, ...) std::fprintf(stderr, LOG_FMT(fmt), __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__)
+#define LOG_DEBUG(fmt, ...)                                                                                           \
+    std::fprintf(                                                                                                     \
+        stderr,                                                                                                       \
+        ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG "%s" ESCAPE_CODE_RAW_RESET ":" ESCAPE_CODE_LOG \
+                        "%d" ESCAPE_CODE_RAW_RESET " " fmt "\n",                                                      \
+        __FILE__, __func__, __LINE__ __VA_OPT__(, ) __VA_ARGS__                                                       \
+    )
 #else
 #define LOG_DEBUG(fmt, ...)
 #endif
@@ -432,13 +434,13 @@ int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned sta
     GitRepository* self = static_cast<GitRepository*>(self_);
     if (status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
-            | C::GIT_STATUS_WT_TYPECHANGE))
+           | C::GIT_STATUS_WT_TYPECHANGE))
     {
         ++self->dirty;
     }
     if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
-            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
+           | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
         ++self->staged;
     }
@@ -494,11 +496,11 @@ std::string GitRepository::get_information(void)
     }
     if (this->detached)
     {
-        information_stream << D_RED << this->description << RESET;
+        information_stream << ESCAPE_CODE_GIT_DETACHED << this->description << ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
-        information_stream << D_GREEN << this->description << RESET;
+        information_stream << ESCAPE_CODE_GIT_DESCRIPTION << this->description << ESCAPE_CODE_COOKED_RESET;
     }
     if (!this->tag.empty())
     {
@@ -506,19 +508,20 @@ std::string GitRepository::get_information(void)
     }
     if (this->dirty > 0)
     {
-        information_stream << B_YELLOW "  " << this->dirty << RESET;
+        information_stream << ESCAPE_CODE_GIT_DIRTY "  " << this->dirty << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->staged > 0)
     {
-        information_stream << B_GREEN "  " << this->staged << RESET;
+        information_stream << ESCAPE_CODE_GIT_STAGED "  " << this->staged << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->untracked > 0)
     {
-        information_stream << B_RED "  " << this->untracked << RESET;
+        information_stream << ESCAPE_CODE_GIT_UNTRACKED "  " << this->untracked << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
-        information_stream << D_CYAN "  +" << this->ahead << ",−" << this->behind << RESET;
+        information_stream << ESCAPE_CODE_GIT_AHEAD_BEHIND "  +" << this->ahead << ",−" << this->behind
+                           << ESCAPE_CODE_COOKED_RESET;
     }
     if (!this->state.empty())
     {
@@ -582,21 +585,22 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::ostringstream report_stream;
     if (last_command.size() <= left_piece_len + right_piece_len + 5)
     {
-        report_stream << D_CYAN_RAW HISTORY_ICON RESET_RAW " " << last_command;
+        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " " << last_command;
     }
     else
     {
         LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
-        report_stream << D_CYAN_RAW HISTORY_ICON RESET_RAW " " << last_command.substr(0, left_piece_len);
+        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " "
+                      << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
     {
-        report_stream << " " D_GREEN_RAW SUCCESS_ICON RESET_RAW " ";
+        report_stream << " " ESCAPE_CODE_COMMAND_SUCCESS SUCCESS_ICON ESCAPE_CODE_RAW_RESET " ";
     }
     else
     {
-        report_stream << " " D_RED_RAW FAILURE_ICON RESET_RAW " ";
+        report_stream << " " ESCAPE_CODE_COMMAND_FAILURE FAILURE_ICON ESCAPE_CODE_RAW_RESET " ";
     }
     interval.print_short(report_stream);
 
@@ -609,18 +613,22 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // without processing). Consequently, counting like this should result in
     // correct output in a UTF-8 terminal.
     std::string report = report_stream.str();
-    std::size_t report_size = std::count_if(report.cbegin(), report.cend(),
+    std::size_t report_size = std::count_if(
+        report.cbegin(), report.cend(),
         [](char const& report_char)
         {
             return (report_char & 0xC0) != 0x80;
-        });
+        }
+    );
     LOG_DEBUG("Report length is %zu bytes (%zu code points).", report.size(), report_size);
 
     // Ensure that the text is right-aligned. Compensate for multi-byte
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
-        = (sizeof D_CYAN_RAW + sizeof D_GREEN_RAW + 2 * sizeof RESET_RAW - 4) / sizeof(char);
+        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET
+           - 4)
+        / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG("Padding report to %zu characters.", width);
     std::clog << '\r' << std::setw(width) << report << '\n';
@@ -635,8 +643,10 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  */
-void report_command_status(std::string_view& last_command, int exit_code, long long unsigned delay,
-    long long unsigned prev_active_wid, std::size_t columns)
+void report_command_status(
+    std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid,
+    std::size_t columns
+)
 {
     LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command.data(), exit_code, delay);
     if (delay <= 5000000000ULL)
@@ -678,10 +688,11 @@ void report_command_status(std::string_view& last_command, int exit_code, long l
  */
 void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
 {
-    std::cout << "\n" HOST_ICON " " BBI_YELLOW HOST RESET "  " BB_CYAN DIRECTORY RESET;
+    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
+                 "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
     {
-        std::cout << "  " << B_GREY "unavailable" RESET;
+        std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
@@ -693,7 +704,7 @@ void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_
     }
     if (venv != nullptr)
     {
-        std::cout << "  " B_BLUE << venv << RESET;
+        std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv << ESCAPE_CODE_COOKED_RESET;
     }
     std::cout << "\n";
     while (--shlvl > 0)
@@ -747,7 +758,8 @@ int main_internal(int const argc, char const* argv[])
         },
         // I prefer to transfer ownership of the promise to the thread, because
         // it may continue running after the main thread terminates.
-        std::move(git_repository_information_promise))
+        std::move(git_repository_information_promise)
+    )
         .detach();
 
     std::string_view last_command(argv[1]);
