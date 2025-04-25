@@ -496,11 +496,11 @@ std::string GitRepository::get_information(void)
     }
     if (this->detached)
     {
-        information_stream << ESCAPE_CODE_GIT_DETACHED << this->description << ESCAPE_CODE_RAW_RESET;
+        information_stream << ESCAPE_CODE_GIT_DETACHED << this->description << ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
-        information_stream << ESCAPE_CODE_GIT_DESCRIPTION << this->description << ESCAPE_CODE_RAW_RESET;
+        information_stream << ESCAPE_CODE_GIT_DESCRIPTION << this->description << ESCAPE_CODE_COOKED_RESET;
     }
     if (!this->tag.empty())
     {
@@ -508,20 +508,20 @@ std::string GitRepository::get_information(void)
     }
     if (this->dirty > 0)
     {
-        information_stream << ESCAPE_CODE_GIT_DIRTY "  " << this->dirty << ESCAPE_CODE_RAW_RESET;
+        information_stream << ESCAPE_CODE_GIT_DIRTY "  " << this->dirty << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->staged > 0)
     {
-        information_stream << ESCAPE_CODE_GIT_STAGED "  " << this->staged << ESCAPE_CODE_RAW_RESET;
+        information_stream << ESCAPE_CODE_GIT_STAGED "  " << this->staged << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->untracked > 0)
     {
-        information_stream << ESCAPE_CODE_GIT_UNTRACKED "  " << this->untracked << ESCAPE_CODE_RAW_RESET;
+        information_stream << ESCAPE_CODE_GIT_UNTRACKED "  " << this->untracked << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
         information_stream << ESCAPE_CODE_GIT_AHEAD_BEHIND "  +" << this->ahead << ",−" << this->behind
-                           << ESCAPE_CODE_RAW_RESET;
+                           << ESCAPE_CODE_COOKED_RESET;
     }
     if (!this->state.empty())
     {
@@ -626,7 +626,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
-        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET
+        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_COOKED_RESET
            - 4)
         / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
@@ -688,11 +688,11 @@ void report_command_status(
  */
 void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
 {
-    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_RAW_RESET
-                 "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_RAW_RESET;
+    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
+                 "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
     {
-        std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_RAW_RESET;
+        std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
@@ -704,7 +704,7 @@ void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_
     }
     if (venv != nullptr)
     {
-        std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv << ESCAPE_CODE_RAW_RESET;
+        std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv << ESCAPE_CODE_COOKED_RESET;
     }
     std::cout << "\n";
     while (--shlvl > 0)
