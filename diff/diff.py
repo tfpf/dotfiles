@@ -4,12 +4,13 @@ import difflib
 import fileinput
 import functools
 import itertools
-import pathlib
+import os
 import sys
 import tempfile
 import webbrowser
 from collections import defaultdict
 from collections.abc import Iterable
+from pathlib import Path
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -60,17 +61,21 @@ deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF0
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 
-class Path(pathlib.Path):
-    relative_to = functools.cache(pathlib.Path.relative_to)
+def read_words(self: Path) -> Iterable[str] | None:
+    try:
+        return self.read_text(encoding="utf-8").split()
+    except UnicodeDecodeError:
+        return None
 
-    def read_words(self) -> Iterable[str] | None:
-        try:
-            return super().read_text(encoding="utf-8").split()
-        except UnicodeDecodeError:
-            return None
 
-    def read_lines(self) -> Iterable[str]:
-        return fileinput.FileInput(self, encoding="utf-8")
+def read_lines(self: Path) -> Iterable[str]:
+    return fileinput.FileInput(self, encoding="utf-8")
+
+
+# Cannot subclass it in older Python versions. Patch it instead.
+Path.relative_to = functools.cache(Path.relative_to)
+Path.read_words = read_words
+Path.read_lines = read_lines
 
 
 class Diff:
@@ -92,12 +97,13 @@ class Diff:
         """
         Recursively map the relative paths of all files in the given
         directory to their absolute paths.
+
         :param directory: Directory to traverse.
         :return: Files in the tree rooted at the given directory.
         """
         return {
-            (file := root / file_name).relative_to(directory): file
-            for root, _, file_names in directory.walk()
+            (file := Path(root) / file_name).relative_to(directory): file
+            for root, _, file_names in os.walk(directory)
             for file_name in file_names
         }
 
@@ -106,6 +112,7 @@ class Diff:
         """
         To each file in the left directory, trivially map the file in the right
         directory having the same relative path, if it exists.
+
         :return: Mapping between left and right directory files.
         """
         left_files, right_files = self._files_in(self._left_directory), self._files_in(self._right_directory)
@@ -125,6 +132,7 @@ class Diff:
         """
         To each file in the left directory, map the file in the right directory
         having the same contents, if it exists.
+
         :return: Mapping between left and right directory files.
         """
         left_directory_lookup = defaultdict(list)
@@ -151,6 +159,7 @@ class Diff:
         """
         To each text file in the left directory, map the text file in the right
         directory having similar contents, if it exists.
+
         :return: Mapping between left and right directory files.
         """
         left_directory_matches = defaultdict(list)
@@ -196,6 +205,7 @@ class Diff:
         """
         Write HTML tables summarising the recursive differences between two
         directories.
+
         :return: File to which tables were written.
         """
         left_right_files = sorted(
