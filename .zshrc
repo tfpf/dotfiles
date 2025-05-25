@@ -213,6 +213,7 @@ compinit
 zstyle ':completion:*' file-sort name
 zstyle ':completion:*' insert-tab false
 zstyle ':completion:*' menu false
+zstyle ':completion:*' rehash true
 zstyle ':completion:*' special-dirs true
 # When displaying a completion word, `PREFIX` is the string already typed at
 # the prompt. Show whatever matches the base name of `PREFIX` in grey, and the
