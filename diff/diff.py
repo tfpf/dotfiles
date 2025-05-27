@@ -11,8 +11,11 @@ import sys
 import tempfile
 import webbrowser
 from collections import defaultdict
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
