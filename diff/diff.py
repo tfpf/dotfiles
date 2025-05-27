@@ -3,6 +3,7 @@
 import difflib
 import fileinput
 import functools
+from typing import Optional
 import itertools
 import os
 import sys
@@ -61,7 +62,7 @@ deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF0
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 
-def read_words(self: Path) -> Iterable[str] | None:
+def read_words(self: Path) -> Optional[Iterable[str]]:
     try:
         return self.read_text(encoding="utf-8").split()
     except UnicodeDecodeError:
@@ -224,7 +225,7 @@ class Diff:
             writer.write(html_end)
         return Path(writer.name)
 
-    def _report(self, left_right_files: Iterable[tuple[Path | None, Path | None]], writer):
+    def _report(self, left_right_files: Iterable[tuple[Optional[Path], Optional[Path]]], writer):
         left_right_files_len = len(left_right_files)
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
             if left_file:
