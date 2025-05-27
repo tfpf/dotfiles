@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import difflib
-import fileinput
 import functools
 import itertools
 import os
@@ -74,7 +73,8 @@ def read_words(self: Path) -> Iterable[str] | None:
 
 
 def read_lines(self: Path) -> Iterable[str]:
-    return fileinput.FileInput(self, encoding="utf-8")
+    with open(self, encoding="utf-8") as self_reader:
+        yield from self_reader
 
 
 # Cannot subclass it in older Python versions. Patch it instead.
