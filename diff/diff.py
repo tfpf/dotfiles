@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
+from __future__ import annotations
+
 import difflib
-import fileinput
 import functools
 import itertools
 import os
@@ -9,8 +10,11 @@ import sys
 import tempfile
 import webbrowser
 from collections import defaultdict
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 html_begin = b"""
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -69,7 +73,8 @@ def read_words(self: Path) -> Iterable[str] | None:
 
 
 def read_lines(self: Path) -> Iterable[str]:
-    return fileinput.FileInput(self, encoding="utf-8")
+    with open(self, encoding="utf-8") as self_reader:
+        yield from self_reader
 
 
 # Cannot subclass it in older Python versions. Patch it instead.
