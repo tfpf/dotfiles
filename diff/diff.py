@@ -229,7 +229,7 @@ class Diff:
             writer.write(html_end)
         return Path(writer.name)
 
-    def _report(self, left_right_files: Iterable[tuple[Path | None, Path | None]], writer):
+    def _report(self, left_right_files: Iterable[tuple[Path, None] | tuple[Path, Path] | tuple[None, Path]], writer):
         left_right_files_len = len(left_right_files)
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
             if left_file:
