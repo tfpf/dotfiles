@@ -7,6 +7,7 @@ import functools
 import itertools
 import os
 import sys
+print(sys.version_info)
 import tempfile
 import webbrowser
 from collections import defaultdict
