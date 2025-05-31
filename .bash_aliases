@@ -38,6 +38,7 @@ then
 fi
 
 alias p='python -B'
+alias pp='python -m IPython --no-confirm-exit'
 alias pip='python -m pip'
 alias timeit='python -m timeit'
 
