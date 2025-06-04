@@ -144,6 +144,7 @@ export GIT_EDITOR=vim
 HISTFILE=~/.zsh_history
 HISTSIZE=2000
 export _INKSCAPE_GC=disable
+export JQ_COLORS='2;37:3;38;5;174:3;38;5;174:0:38;5;108:0:0'
 export MANPAGER='less -i'
 export MAN_POSIXLY_CORRECT=1
 GIT_PS1_SHOWCOLORHINTS=1
