@@ -5,6 +5,7 @@ alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{
 alias c++preprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
 alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
+alias jq='jq -S'
 alias less='command less -i'
 alias perfstat='perf stat -e task-clock,cycles,instructions,branches,branch-misses,cache-references,cache-misses '
 alias pgrep='command pgrep -il'

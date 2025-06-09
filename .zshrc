@@ -144,7 +144,7 @@ export GIT_EDITOR=vim
 HISTFILE=~/.zsh_history
 HISTSIZE=2000
 export _INKSCAPE_GC=disable
-export JQ_COLORS='2;37:3;38;5;174:3;38;5;174:0:38;5;108:0:0'
+export JQ_COLORS='2;37:3;38;5;153:3;38;5;153:38;5;153:38;5;108:2:2:38;5;174'
 export MANPAGER='less -i'
 export MAN_POSIXLY_CORRECT=1
 GIT_PS1_SHOWCOLORHINTS=1
@@ -241,6 +241,7 @@ alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{
 alias c++preprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
 alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
+alias jq='jq -S'
 alias less='command less -i'
 alias perfstat='perf stat -e task-clock,cycles,instructions,branches,branch-misses,cache-references,cache-misses '
 alias pgrep='command pgrep -il'
