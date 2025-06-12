@@ -1,0 +1,3 @@
+#compdef git-lfs
+
+command -v git-lfs &>/dev/null && . <(git-lfs completion zsh)

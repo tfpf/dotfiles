@@ -66,6 +66,11 @@
 [fetch]
 	prune = true
 	pruneTags = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	process = git-lfs filter-process
+	required = true
+	smudge = git-lfs smudge -- %f
 [gc]
 	auto = 256
 	autoDetach = false
