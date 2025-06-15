@@ -8,7 +8,7 @@ import copy
 import csv
 import ctypes
 import datetime
-import decimal
+from decimal import Decimal
 import difflib
 import dis
 import enum
