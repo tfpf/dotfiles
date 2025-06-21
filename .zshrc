@@ -274,7 +274,13 @@ then
     alias cat='bat'
 fi
 
-alias p='python -B'
-alias pp='python -m IPython'
+# On Linux, the basic REPL uses the coloured completions GNU readline is
+# configured with, so I prefer it to the PyREPL. On macOS and Windows, the
+# configuration is not read, so I prefer IPython, which supports completions
+# similar to those of GNU readline (though without colouring).
+case $(python -m platform --terse) in
+    (Linux*) alias p='python -B'; alias pp='python -m IPython';;
+    (*) alias p='python -m IPython 2>/dev/null || python -B';;
+esac
 alias pip='python -m pip'
 alias timeit='python -m timeit'
