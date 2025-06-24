@@ -8,6 +8,7 @@ import platform
 if any(map(platform.platform(terse=True).startswith, ["macOS", "Windows"])):
     with contextlib.suppress(ImportError):
         import IPython
+
         if not IPython.get_ipython():
             IPython.start_ipython()
             raise SystemExit
@@ -21,7 +22,6 @@ import copy
 import csv
 import ctypes
 import datetime
-from decimal import Decimal
 import difflib
 import dis
 import enum
@@ -45,7 +45,6 @@ import math
 import multiprocessing
 import numbers
 import os
-from pathlib import Path
 import pickle
 import pprint
 import random
@@ -70,3 +69,5 @@ import typing
 import uuid
 import zipfile
 import zoneinfo
+from decimal import Decimal
+from pathlib import Path
