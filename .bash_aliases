@@ -38,10 +38,7 @@ then
     alias cat='bat'
 fi
 
-# On Linux, the basic Python REPL uses the coloured completions GNU Readline is
-# configured with, so I prefer it to the PyREPL. On macOS and Windows, the
-# configuration is not read, so I prefer IPython, which supports completions
-# similar to those of GNU Readline (though without colouring).
+# See the Python startup file.
 case $(python -m platform --terse) in
     (Linux*)
         alias p='python -B'
@@ -50,29 +47,19 @@ case $(python -m platform --terse) in
     (macOS*)
         p()
         {
-            if [ $# -ge 1 ]
+            if [ $# -ge 1 -o -n "$VIRTUAL_ENV" ]
             then
                 python -B "$@"
                 return
             fi
-            if [ -n "$VIRTUAL_ENV" ]
-            then
-                python -m IPython || python -B
-            else
-                ipython || python -B
-            fi
+            # Homebrew-installed IPython is a separate package unassociated
+            # with any Homebrew-installed Python. Hence, it must be started
+            # differently.
+            ipython || python -B
         }
         ;;
     (Windows*)
-        p()
-        {
-            if [ $# -ge 1 ]
-            then
-                python -B "$@"
-                return
-            fi
-            python -m IPython || python -B
-        }
+        alias p='python -B'
         ;;
 esac
 alias pip='python -m pip'
