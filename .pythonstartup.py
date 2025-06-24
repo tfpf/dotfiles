@@ -1,3 +1,14 @@
+# On Linux, the basic Python REPL reads my GNU Readline configuration file and
+# uses coloured completion prefixes, so I prefer it to the PyREPL. On macOS and
+# Windows, the configuration is not read. Hence, I prefer IPython, which
+# provides similar completions (though without coloured prefixes).
+if any(map(platform.platform(terse=True).startswith, ["macOS", "Windows"])):
+    with contextlib.suppress(ImportError):
+        import IPython
+        if not IPython.get_ipython():
+            IPython.start_ipython()
+            raise SystemExit
+
 import base64
 import builtins
 import calendar
