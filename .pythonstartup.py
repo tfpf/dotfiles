@@ -1,3 +1,6 @@
+import contextlib
+import platform
+
 # On Linux, the basic Python REPL reads my GNU Readline configuration file and
 # uses coloured completion prefixes, so I prefer it to the PyREPL. On macOS and
 # Windows, the configuration is not read. Hence, I prefer IPython, which
@@ -14,7 +17,6 @@ import builtins
 import calendar
 import cmath
 import collections
-import contextlib
 import copy
 import csv
 import ctypes
@@ -45,7 +47,6 @@ import numbers
 import os
 from pathlib import Path
 import pickle
-import platform
 import pprint
 import random
 import re
