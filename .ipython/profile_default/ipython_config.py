@@ -12,7 +12,9 @@ c.TerminalIPythonApp.display_banner = True
 c.InteractiveShell.autocall = 0
 c.InteractiveShell.autoindent = True
 c.InteractiveShell.automagic = True
-c.InteractiveShell.banner1 = f"{platform.python_implementation()} {sys.version} with IPython {IPython.__version__}\n"
+c.InteractiveShell.banner1 = (
+    f"{platform.python_implementation()} {sys.version} on {sys.platform} with IPython {IPython.__version__}\n"
+)
 c.InteractiveShell.colors = "Linux"
 c.TerminalInteractiveShell.auto_match = False
 c.TerminalInteractiveShell.confirm_exit = False
