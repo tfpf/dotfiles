@@ -11,7 +11,7 @@ c.BaseIPythonApplication.profile = "default"
 c.TerminalIPythonApp.display_banner = True
 c.InteractiveShell.autocall = 0
 c.InteractiveShell.autoindent = True
-c.InteractiveShell.automagic = True
+c.InteractiveShell.automagic = False
 c.InteractiveShell.banner1 = (
     f"{platform.python_implementation()} {sys.version} on {sys.platform} with IPython {IPython.__version__}\n"
 )
