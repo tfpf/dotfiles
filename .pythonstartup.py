@@ -63,7 +63,6 @@ import textwrap
 import threading
 import time
 import timeit
-import tkinter as tk
 import types
 import typing
 import uuid
@@ -71,3 +70,7 @@ import zipfile
 import zoneinfo
 from decimal import Decimal
 from pathlib import Path
+
+with contextlib.suppress(ImportError):
+    import tkinter as tk
+    from tkinter import ttk
