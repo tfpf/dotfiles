@@ -65,6 +65,11 @@ deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF0
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 
+def read_lines(self: Path) -> Iterable[str]:
+    with open(self, encoding="utf-8") as self_reader:
+        yield from self_reader
+
+
 def read_words(self: Path) -> Iterable[str] | None:
     try:
         return self.read_text(encoding="utf-8").split()
@@ -72,15 +77,7 @@ def read_words(self: Path) -> Iterable[str] | None:
         return None
 
 
-def read_lines(self: Path) -> Iterable[str]:
-    with open(self, encoding="utf-8") as self_reader:
-        yield from self_reader
-
-
-# Cannot subclass it in older Python versions. Patch it instead.
 Path.relative_to = functools.cache(Path.relative_to)
-Path.read_words = read_words
-Path.read_lines = read_lines
 
 
 class Diff:
@@ -123,13 +120,8 @@ class Diff:
         left_files, right_files = self._files_in(self._left_directory), self._files_in(self._right_directory)
         common_files = left_files.keys() & right_files.keys()
         left_right_file_mapping = {left_files[common_file]: right_files[common_file] for common_file in common_files}
-
-        # Setting instance attributes outside the constructor is unusual, but
-        # I'll allow it because this method is only ever called from the
-        # constructor.
         self._left_files = {v for k, v in left_files.items() if k not in common_files}
         self._right_files = {v for k, v in right_files.items() if k not in common_files}
-
         return left_right_file_mapping
 
     @functools.cached_property
@@ -152,8 +144,7 @@ class Diff:
             if not (identical_left_files := left_directory_lookup.get(hash(right_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
-            identical_left_file = identical_left_files.pop()
-            left_right_file_mapping[identical_left_file] = right_file
+            left_right_file_mapping[identical_left_file := identical_left_files.pop()] = right_file
             self._left_files.remove(identical_left_file)
             self._right_files.remove(right_file)
 
@@ -169,11 +160,11 @@ class Diff:
         """
         left_directory_matches = defaultdict(list)
         for left_file in self._left_files:
-            if not (left_file_contents := left_file.read_words()):
+            if not (left_file_contents := read_words(left_file)):
                 continue
             self._matcher.set_seq2(left_file_contents)
             for right_file in self._right_files:
-                if not (right_file_contents := right_file.read_words()):
+                if not (right_file_contents := read_words(right_file)):
                     continue
                 self._matcher.set_seq1(right_file_contents)
                 if (
@@ -268,8 +259,8 @@ class Diff:
                 writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
                 continue
 
-            from_lines = left_file.read_lines() if left_file else []
-            to_lines = right_file.read_lines() if right_file else []
+            from_lines = read_lines(left_file) if left_file else []
+            to_lines = read_lines(right_file) if right_file else []
             try:
                 html_table = self._html_diff.make_table(
                     from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
