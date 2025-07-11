@@ -1,4 +1,3 @@
-.cm-line, pre {
-    font-family: "RecMonoCasual Nerd Font" !important;
-    font-size: 13px !important;
+.cm-line, code, pre {
+    font-family: "RecMonoCasual Nerd Font", monospace !important;
 }
