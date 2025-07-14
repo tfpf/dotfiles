@@ -144,7 +144,7 @@ class Diff:
             if not (identical_left_files := left_directory_lookup.get(hash(right_file_contents))):
                 continue
             # Arbitrarily pick the last of the identical files.
-            left_right_file_mapping[identical_left_file := identical_left_files.pop()] = right_file
+            left_right_file_mapping[(identical_left_file := identical_left_files.pop())] = right_file
             self._left_files.remove(identical_left_file)
             self._right_files.remove(right_file)
 
