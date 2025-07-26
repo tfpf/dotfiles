@@ -247,8 +247,7 @@ class Diff:
                 short_desc.append("⟼")
             if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
                 short_desc.append(f"to_stat.st_mode")
-            if from_desc == to_desc:
-                short_desc.append(to_desc)
+            short_desc.append(to_desc)
             short_desc = " ".join(short_desc)
             writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
