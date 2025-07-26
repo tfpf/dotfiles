@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "diff"
-version = "0.0.0"
+version = "0.0.1"
 authors = [
     { name = "Vishal Pankaj Chandratreya" },
 ]
