@@ -250,7 +250,6 @@ class Diff:
             if from_desc == to_desc:
                 short_desc.append(to_desc)
             short_desc = " ".join(short_desc)
-
             writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
             if left_file in self._renamed_only_mapping or (
