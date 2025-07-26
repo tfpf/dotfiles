@@ -248,9 +248,8 @@ class Diff:
             if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
                 short_desc.append(f"{to_stat.st_mode:o}")
             short_desc.append(to_desc)
-            short_desc = " ".join(short_desc)
             writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
-            writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
+            writer.write(str.encode(f"{pos}/{left_right_files_len} ■ " + " ".join(short_desc)))
             if left_file in self._renamed_only_mapping or (
                 left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
             ):
