@@ -82,17 +82,23 @@ Path.relative_to = functools.cache(Path.relative_to)
 
 class Diff:
     """
-    Compare two directories recursively.
+    Compare two files directly or two directories recursively.
     """
 
     def __init__(self, left: str, right: str):
-        self._left_directory = Path(left)
-        self._right_directory = Path(right)
+        self._left_directory, self._right_directory = Path(left), Path(right)
+        if self._left_directory.is_file() and self._right_directory.is_file():
+            self._left_right_file_mapping = {self._left_directory: self._right_directory}
+            self._left_files, self._right_files = set(), set()
+            self._left_directory, self._right_directory = self._left_directory.parent, self._right_directory.parent
+        elif self._left_directory.is_dir() and self._right_directory.is_dir():
+            self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
+            self._left_right_file_mapping = (
+                self._changed_only_mapping | self._renamed_only_mapping | self._renamed_and_changed_mapping
+            )
+        else:
+            raise SystemExit(1)
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
-        self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
-        self._left_right_file_mapping = (
-            self._changed_not_renamed_mapping | self._renamed_not_changed_mapping | self._renamed_and_changed_mapping
-        )
 
     @staticmethod
     def _files_in(directory: Path) -> dict[Path, Path]:
@@ -110,7 +116,7 @@ class Diff:
         }
 
     @property
-    def _changed_not_renamed_mapping(self) -> dict[Path, Path]:
+    def _changed_only_mapping(self) -> dict[Path, Path]:
         """
         To each file in the left directory, trivially map the file in the right
         directory having the same relative path, if it exists.
@@ -125,7 +131,7 @@ class Diff:
         return left_right_file_mapping
 
     @functools.cached_property
-    def _renamed_not_changed_mapping(self) -> dict[Path, Path]:
+    def _renamed_only_mapping(self) -> dict[Path, Path]:
         """
         To each file in the left directory, map the file in the right directory
         having the same contents, if it exists.
@@ -248,7 +254,7 @@ class Diff:
                 short_desc = f"{from_mode:o} {from_desc} ⟼ {to_mode:o} {to_desc}"
             writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
-            if left_file in self._renamed_not_changed_mapping or (
+            if left_file in self._renamed_only_mapping or (
                 left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
             ):
                 writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
