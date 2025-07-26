@@ -230,28 +230,27 @@ class Diff:
         left_right_files_len = len(left_right_files)
         for pos, (left_file, right_file) in enumerate(left_right_files, 1):
             if left_file:
-                from_desc = str(left_file.relative_to(self._left_directory))
-                from_mode = (from_stat := left_file.stat()).st_mode
+                from_desc, from_stat = str(left_file.relative_to(self._left_directory)), left_file.stat()
             else:
                 from_desc = added_header
             if right_file:
-                to_desc = str(right_file.relative_to(self._right_directory))
-                to_mode = (to_stat := right_file.stat()).st_mode
+                to_desc, to_stat = str(right_file.relative_to(self._right_directory)), right_file.stat()
             else:
                 to_desc = deleted_header
 
-            if not left_file and right_file:
-                short_desc = f"{from_desc} {to_mode:o} {to_desc}"
-            elif left_file and not right_file:
-                short_desc = f"{from_mode:o} {from_desc} {to_desc}"
-            elif from_mode == to_mode:
-                short_desc = (
-                    f"{from_mode:o} {from_desc}" if from_desc == to_desc else f"{from_mode:o} {from_desc} ⟼ {to_desc}"
-                )
-            elif from_desc == to_desc:
-                short_desc = f"{from_mode:o} ⟼ {to_mode:o} {from_desc}"
-            else:
-                short_desc = f"{from_mode:o} {from_desc} ⟼ {to_mode:o} {to_desc}"
+            short_desc = []
+            if left_file:
+                short_desc.append(f"{from_stat.st_mode:o}")
+            if from_desc != to_desc:
+                short_desc.append(from_desc)
+            if left_file and right_file and (from_desc != to_desc or from_stat.st_mode != to_stat.st_mode):
+                short_desc.append("⟼")
+            if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
+                short_desc.append(f"to_stat.st_mode")
+            if from_desc == to_desc:
+                short_desc.append(to_desc)
+            short_desc = " ".join(short_desc)
+
             writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
             writer.write(f"{pos}/{left_right_files_len} ■ {short_desc}".encode())
             if left_file in self._renamed_only_mapping or (
