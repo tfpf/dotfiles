@@ -29,6 +29,7 @@ html_begin = b"""
         table.diff {font-family:monospace; border:medium;}
         .diff_header {background-color:#e0e0e0;}
         td.diff_header {text-align:right;}
+        summary {background-color:#e0e0e0; position:sticky; top:0px}
         .diff_next {background-color:#c0c0c0;}
         .diff_add {background-color:#aaffaa;}
         .diff_chg {background-color:#ffff77;}
