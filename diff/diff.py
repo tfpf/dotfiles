@@ -82,7 +82,7 @@ Path.relative_to = functools.cache(Path.relative_to)
 
 class Diff:
     """
-    Compare two files directly or two directories recursively.
+    Compare two regular files directly or two directories recursively.
     """
 
     def __init__(self, left: str, right: str):
@@ -97,7 +97,7 @@ class Diff:
                 self._changed_only_mapping | self._renamed_only_mapping | self._renamed_and_changed_mapping
             )
         else:
-            raise SystemExit(1)
+            raise ValueError("arguments must be two regular files or two directories")  # noqa: EM101, TRY003
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
