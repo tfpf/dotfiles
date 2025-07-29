@@ -232,7 +232,7 @@ class Diff:
             if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
                 short_desc.append(f"{to_stat.st_mode:o}")
             short_desc.append(to_desc)
-            writer.write(b'  <div><details open><summary><code>')
+            writer.write(b"  <div><details open><summary><code>")
             writer.write((f"{pos}/{left_right_files_len} ■ " + " ".join(short_desc)).encode())
             if left_file in self._renamed_only_mapping or (
                 left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
