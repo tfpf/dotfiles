@@ -26,40 +26,22 @@ html_begin = b"""
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
     <style type="text/css">
-        table.diff {font-family:monospace; border:medium;}
-        .diff_header {background-color:#e0e0e0;}
-        td.diff_header {text-align:right;}
-        summary {background-color:#e0e0e0; position:sticky; top:0px}
-        .diff_next {background-color:#c0c0c0;}
-        .diff_add {background-color:#aaffaa;}
-        .diff_chg {background-color:#ffff77;}
-        .diff_sub {background-color:#ffaaaa;}
+        table.diff {font-family: monospace; border: medium;}
+        .diff_header {background-color: #e0e0e0;}
+        td.diff_header {text-align: right;}
+        details {display: inline; margin-bottom: 1cm;}
+        summary {background-color: #e0e0e0; border-width: 1px 1px 0px 1px; border-style: solid; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
+        .diff_next {background-color: #c0c0c0;}
+        .diff_add {background-color: #aaffaa;}
+        .diff_chg {background-color: #ffff77;}
+        .diff_sub {background-color: #ffaaaa;}
     </style>
 </head>
 
 <body>
 """
 
-html_end = b"""
-    <table class="diff" summary="Legends">
-        <tr><th colspan="2">Legends</th></tr>
-        <tr><td><table border="" summary="Colours">
-            <tr><th>Colours</th></tr>
-            <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr>
-            <tr><td class="diff_chg">Changed</td></tr>
-            <tr><td class="diff_sub">Deleted</td></tr>
-        </table></td>
-        <td><table border="" summary="Links">
-            <tr><th colspan="2">Links</th></tr>
-            <tr><td>(f)irst change</td></tr>
-            <tr><td>(n)ext change</td></tr>
-            <tr><td>(t)op</td></tr>
-        </table></td></tr>
-    </table>
-</body>
-
-</html>
-"""
+html_end = b"</body></html>"
 
 added_header = '<span style="color:green;">+++++</span>'
 deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF001
@@ -250,17 +232,17 @@ class Diff:
             if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
                 short_desc.append(f"{to_stat.st_mode:o}")
             short_desc.append(to_desc)
-            writer.write(b'  <details open style="margin-bottom:1cm;"><summary><code>')
+            writer.write(b"  <div><details open><summary><code>")
             writer.write((f"{pos}/{left_right_files_len} ■ " + " ".join(short_desc)).encode())
             if left_file in self._renamed_only_mapping or (
                 left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
             ):
-                writer.write(" ■ identical</code></summary>\n  </details>\n".encode())
+                writer.write(" ■ identical</code></summary>\n  </details></div>\n".encode())
                 continue
             if (not left_file and right_file and to_stat.st_size == 0) or (
                 left_file and from_stat.st_size == 0 and not right_file
             ):
-                writer.write(" ■ empty</code></summary>\n  </details>\n".encode())
+                writer.write(" ■ empty</code></summary>\n  </details></div>\n".encode())
                 continue
 
             from_lines = read_lines(left_file) if left_file else []
@@ -273,7 +255,7 @@ class Diff:
                 writer.write(html_table.encode())
             except UnicodeDecodeError:
                 writer.write(" ■ binary</code></summary>\n".encode())
-            writer.write(b"\n  </details>\n")
+            writer.write(b"\n  </details></div>\n")
 
 
 def main():
