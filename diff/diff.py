@@ -26,40 +26,21 @@ html_begin = b"""
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
     <style type="text/css">
-        table.diff {font-family:monospace; border:medium;}
-        .diff_header {background-color:#e0e0e0;}
-        td.diff_header {text-align:right;}
-        summary {background-color:#e0e0e0; position:sticky; top:0px}
-        .diff_next {background-color:#c0c0c0;}
-        .diff_add {background-color:#aaffaa;}
-        .diff_chg {background-color:#ffff77;}
-        .diff_sub {background-color:#ffaaaa;}
+        table.diff {font-family: monospace; border: medium;}
+        .diff_header {background-color: #e0e0e0;}
+        td.diff_header {text-align: right;}
+        summary {background-color: #e0e0e0; border-width: 1px 1px 0px 1px; border-style: solid; position: sticky; top: 0px;}
+        .diff_next {background-color: #c0c0c0;}
+        .diff_add {background-color: #aaffaa;}
+        .diff_chg {background-color: #ffff77;}
+        .diff_sub {background-color: #ffaaaa;}
     </style>
 </head>
 
 <body>
 """
 
-html_end = b"""
-    <table class="diff" summary="Legends">
-        <tr><th colspan="2">Legends</th></tr>
-        <tr><td><table border="" summary="Colours">
-            <tr><th>Colours</th></tr>
-            <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr>
-            <tr><td class="diff_chg">Changed</td></tr>
-            <tr><td class="diff_sub">Deleted</td></tr>
-        </table></td>
-        <td><table border="" summary="Links">
-            <tr><th colspan="2">Links</th></tr>
-            <tr><td>(f)irst change</td></tr>
-            <tr><td>(n)ext change</td></tr>
-            <tr><td>(t)op</td></tr>
-        </table></td></tr>
-    </table>
-</body>
-
-</html>
-"""
+html_end = b"</html>"
 
 added_header = '<span style="color:green;">+++++</span>'
 deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF001
