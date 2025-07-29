@@ -40,7 +40,7 @@ html_begin = b"""
 <body>
 """
 
-html_end = b"</html>"
+html_end = b"</body></html>"
 
 added_header = '<span style="color:green;">+++++</span>'
 deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF001
