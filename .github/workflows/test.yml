@@ -16,5 +16,5 @@ jobs:
       - run: |
           cp .gitconfig ~
           sudo cp diff/diff.py /usr/bin
-          test $(sha256sum $(git ss a257771) | awk '{print $1}') = 9f056a201864c3a58d6e343f08a13931c425da40b6553dc393cb28c5ec8ce2c5
+          test $(sha256sum $(git ss a257771) | awk '{print $1}') = 344d9963e44d1d07031eced473b1948ff2acc3b1494afb8a28b22083b58799bb
         name: Verify diff hash
