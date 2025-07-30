@@ -6,9 +6,9 @@ import difflib
 import functools
 import itertools
 import os
+import subprocess
 import sys
 import tempfile
-import webbrowser
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -262,7 +262,7 @@ def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
     print(html_file)  # noqa: T201
-    webbrowser.open(html_file.as_uri())
+    subprocess.Popen(["/usr/bin/chromium", html_file.as_uri()])
 
 
 if __name__ == "__main__":
