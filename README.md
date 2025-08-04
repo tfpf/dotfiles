@@ -11,6 +11,9 @@ All of it is purely a product of natural intelligence (or stupidity, as the case
 ---
 
 These are the configuration files I use on Linux, macOS and Windows to set up a consistent development environment.
+Also included are some whimsical utilities I developed purely out of spite and found quite useful.
+
+# Custom Prompt
 
 [`custom-prompt`](custom-prompt) contains code to create a prompt for Bash or Zsh with information about the current
 Git repository and the current Python virtual environment, and report the running time of long commands. A session may
@@ -46,3 +49,19 @@ To actually get the custom prompt in Bash or Zsh, compile the code to obtain `cu
 `custom-zsh-prompt` (or download them from the [latest release](https://github.com/tfpf/dotfiles/releases/latest)),
 copy/move them to a directory which is in `PATH`, and use them as done in [`.bash_aliases`](.bash_aliases) or
 [`.zshrc`](.zshrc).
+
+# Diff
+
+[`diff`](diff) contains a script to show the differences between two files or directories. It is intended to be used as
+an external diff tool for Git, as done in [`.gitconfig`](.gitconfig). As in the case of the custom prompt, copy/move
+[`diff/diff.py`](diff/diff.py) to a directory which is in `PATH` to enable this use case.
+
+```console
+git ss 848d7de
+```
+
+This also allows you to diff two files directly.
+
+```console
+diff.py .config/wireplumber/*/*
+```
