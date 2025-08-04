@@ -53,15 +53,23 @@ copy/move them to a directory which is in `PATH`, and use them as done in [`.bas
 # Diff
 
 [`diff`](diff) contains a script to show the differences between two files or directories. It is intended to be used as
-an external diff tool for Git, as done in [`.gitconfig`](.gitconfig). As in the case of the custom prompt, copy/move
-[`diff/diff.py`](diff/diff.py) to a directory which is in `PATH` to enable this use case.
+an external diff tool for Git, and set up as seen in [`.gitconfig`](.gitconfig). As in the case of the custom prompt,
+copy/move [`diff/diff.py`](diff/diff.py) to a directory which is in `PATH` to enable this use case.
 
 ```console
 git ss 848d7de
 ```
 
-This also allows you to diff two files directly.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ceef8123-ffc9-48ae-861a-b8f09d18ced9" />
+</p>
+
+It can also diff two files directly.
 
 ```console
 diff.py .config/wireplumber/*/*
 ```
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f5700b68-ca9c-490c-aaab-73741af14af6" />
+</p>
