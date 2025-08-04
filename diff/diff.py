@@ -74,7 +74,7 @@ class Diff:
         if self._left_directory.is_file() and self._right_directory.is_file():
             self._left_right_file_mapping = {self._left_directory: self._right_directory}
             self._left_files, self._right_files = set(), set()
-            self._left_directory = Path(os.path.commonprefix([self._left_directory, self._right_directory]))
+            self._left_directory = Path(os.path.commonpath([self._left_directory, self._right_directory]))
             self._right_directory = self._left_directory
         elif self._left_directory.is_dir() and self._right_directory.is_dir():
             self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
