@@ -684,9 +684,11 @@ void report_command_status(
  *
  * @param shlvl Current shell level.
  * @param git_repository_information_future Git information provider.
- * @param venv Python virtual environment.
+ * @param venv_view Python virtual environment.
  */
-void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_information_future, char const* venv)
+void display_primary_prompt(
+    int shlvl, std::future<std::string>& git_repository_information_future, std::string_view& venv_view
+)
 {
     std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                  "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
@@ -702,9 +704,9 @@ void display_primary_prompt(int shlvl, std::future<std::string>& git_repository_
             std::cout << "  " << git_repository_information;
         }
     }
-    if (venv != nullptr)
+    if (!venv_view.empty())
     {
-        std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv << ESCAPE_CODE_COOKED_RESET;
+        std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv_view << ESCAPE_CODE_COOKED_RESET;
     }
     std::cout << "\n";
     while (--shlvl > 0)
@@ -773,8 +775,18 @@ int main_internal(int const argc, char const* argv[])
     set_terminal_title(pwd);
 
     int shlvl = std::stoi(argv[7]);
-    char const* venv = getenv("VIRTUAL_ENV_PROMPT");
-    display_primary_prompt(shlvl, git_repository_information_future, venv);
+    std::string_view venv_view;
+    char const* venv;
+    if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
+    {
+        venv_view = venv;
+    }
+    else if ((venv = getenv("VIRTUAL_ENV")) != nullptr)
+    {
+        venv_view = venv;
+        venv_view.remove_prefix(venv_view.rfind('/' + 1));
+    }
+    display_primary_prompt(shlvl, git_repository_information_future, venv_view);
 
     return EXIT_SUCCESS;
 }
