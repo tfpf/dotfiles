@@ -508,19 +508,19 @@ std::string GitRepository::get_information(void)
     }
     if (this->dirty > 0)
     {
-        information_stream << ESCAPE_CODE_GIT_DIRTY "  " << this->dirty << ESCAPE_CODE_COOKED_RESET;
+        information_stream << " " ESCAPE_CODE_GIT_DIRTY " " << this->dirty << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->staged > 0)
     {
-        information_stream << ESCAPE_CODE_GIT_STAGED "  " << this->staged << ESCAPE_CODE_COOKED_RESET;
+        information_stream << " " ESCAPE_CODE_GIT_STAGED " " << this->staged << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->untracked > 0)
     {
-        information_stream << ESCAPE_CODE_GIT_UNTRACKED "  " << this->untracked << ESCAPE_CODE_COOKED_RESET;
+        information_stream << " " ESCAPE_CODE_GIT_UNTRACKED " " << this->untracked << ESCAPE_CODE_COOKED_RESET;
     }
     if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
     {
-        information_stream << ESCAPE_CODE_GIT_AHEAD_BEHIND "  +" << this->ahead << ",−" << this->behind
+        information_stream << " " ESCAPE_CODE_GIT_AHEAD_BEHIND " +" << this->ahead << ",−" << this->behind
                            << ESCAPE_CODE_COOKED_RESET;
     }
     if (!this->state.empty())
