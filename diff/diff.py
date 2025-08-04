@@ -27,12 +27,12 @@ html_begin = b"""
     <title>Diff</title>
     <style type="text/css">
         table.diff {font-family: monospace; border: medium;}
-        .diff_header {background-color: #e0e0e0;}
+        .diff_header {background-color: #e8f2ff;}
         td.diff_header {text-align: right;}
         details {display: inline-block; margin: 0px 4px 80px 4px;}
-        summary {background-color: #e0e0e0; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
+        summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
         details[open] summary {border-bottom-width: 0px;}
-        .diff_next {background-color: #c0c0c0;}
+        .diff_next {background-color: #e8f2ff;}
         .diff_add {background-color: #aaffaa;}
         .diff_chg {background-color: #ffff77;}
         .diff_sub {background-color: #ffaaaa;}
