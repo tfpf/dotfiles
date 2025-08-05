@@ -784,7 +784,7 @@ int main_internal(int const argc, char const* argv[])
     else if ((venv = getenv("VIRTUAL_ENV")) != nullptr)
     {
         venv_view = venv;
-        venv_view.remove_prefix(venv_view.rfind('/' + 1));
+        venv_view.remove_prefix(venv_view.rfind('/') + 1);
     }
     display_primary_prompt(shlvl, git_repository_information_future, venv_view);
 
