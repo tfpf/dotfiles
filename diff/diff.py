@@ -26,10 +26,10 @@ html_begin = b"""
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
     <style type="text/css">
-        table.diff {font-family: monospace; border: medium;}
+        table.diff {border: medium;}
         .diff_header {background-color: #e8f2ff;}
         td.diff_header {text-align: right;}
-        body {display: inline-block;}
+        body {display: inline-block; font-family: monospace;}
         details {display: inline-block; margin: 0px 4px 80px 4px;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
         details[open] summary {border-bottom-width: 0px;}
@@ -234,17 +234,17 @@ class Diff:
             if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
                 short_desc.append(f"{to_stat.st_mode:o}")
             short_desc.append(to_desc)
-            writer.write(b"  <div><details open><summary><code>")
+            writer.write(b"  <div><details open><summary>")
             writer.write((f"{pos}/{left_right_files_len} ■ " + " ".join(short_desc)).encode())
             if left_file in self._renamed_only_mapping or (
                 left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
             ):
-                writer.write(" ■ identical</code></summary>\n  </details></div>\n".encode())
+                writer.write(" ■ identical</summary>\n  </details></div>\n".encode())
                 continue
             if (not left_file and right_file and to_stat.st_size == 0) or (
                 left_file and from_stat.st_size == 0 and not right_file
             ):
-                writer.write(" ■ empty</code></summary>\n  </details></div>\n".encode())
+                writer.write(" ■ empty</summary>\n  </details></div>\n".encode())
                 continue
 
             from_lines = read_lines(left_file) if left_file else []
@@ -253,10 +253,10 @@ class Diff:
                 html_table = self._html_diff.make_table(
                     from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
                 )
-                writer.write(b"</code></summary>\n")
+                writer.write(b"</summary>\n")
                 writer.write(html_table.encode())
             except UnicodeDecodeError:
-                writer.write(" ■ binary</code></summary>\n".encode())
+                writer.write(" ■ binary</summary>\n".encode())
             writer.write(b"\n  </details></div>\n")
 
 
