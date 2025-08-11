@@ -249,6 +249,7 @@ class Diff:
                 html_table = self._html_diff.make_table(
                     from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
                 )
+                # They might be identical if only the mode was changed.
                 if "No Differences Found" in html_table:
                     writer.write(" ■ identical</summary>\n".encode())
                 else:
