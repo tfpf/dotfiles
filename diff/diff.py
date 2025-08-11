@@ -32,7 +32,7 @@ html_begin = b"""
         body {display: inline-block; font-family: monospace;}
         details {display: inline-block; margin: 0px 4px 80px 4px;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
-        details[open] summary {border-bottom-width: 0px;}
+        details[open] summary {border-bottom-color: #e8f2ff;}
         .diff_next {background-color: #e8f2ff;}
         .diff_add {background-color: #aaffaa;}
         .diff_chg {background-color: #ffff77;}
