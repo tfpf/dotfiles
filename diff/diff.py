@@ -72,18 +72,16 @@ class Diff:
 
     def __init__(self, left: str, right: str):
         self._left_directory, self._right_directory = Path(left).absolute(), Path(right).absolute()
-        if self._left_directory.is_file() and self._right_directory.is_file():
-            self._left_right_file_mapping = {self._left_directory: self._right_directory}
-            self._left_files, self._right_files = set(), set()
-            self._left_directory = Path(os.path.commonpath([self._left_directory, self._right_directory]))
-            self._right_directory = self._left_directory
-        elif self._left_directory.is_dir() and self._right_directory.is_dir():
+        if self._left_directory.is_dir() and self._right_directory.is_dir():
             self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
             self._left_right_file_mapping = (
                 self._changed_only_mapping | self._renamed_only_mapping | self._renamed_and_changed_mapping
             )
         else:
-            raise ValueError("arguments must be two regular files or two directories")  # noqa: EM101, TRY003
+            self._left_right_file_mapping = {self._left_directory: self._right_directory}
+            self._left_files, self._right_files = set(), set()
+            self._left_directory = Path(os.path.commonpath([self._left_directory, self._right_directory]))
+            self._right_directory = self._left_directory
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
