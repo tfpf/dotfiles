@@ -234,9 +234,7 @@ class Diff:
             short_desc.append(to_desc)
             writer.write(b"  <div><details open><summary>")
             writer.write((f"{pos}/{left_right_files_len} ■ " + " ".join(short_desc)).encode())
-            if left_file in self._renamed_only_mapping or (
-                left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
-            ):
+            if left_file in self._renamed_only_mapping :
                 writer.write(" ■ identical</summary>\n  </details></div>\n".encode())
                 continue
             if (not left_file and right_file and to_stat.st_size == 0) or (
@@ -245,8 +243,9 @@ class Diff:
                 writer.write(" ■ empty</summary>\n  </details></div>\n".encode())
                 continue
 
-            from_lines = read_lines(left_file) if left_file else []
-            to_lines = read_lines(right_file) if right_file else []
+            from_lines = [*read_lines(left_file)] if left_file else []
+            to_lines = [*read_lines(right_file)] if right_file else []
+            print(f"{from_lines=}\n{to_lines=}")
             try:
                 html_table = self._html_diff.make_table(
                     from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
