@@ -32,7 +32,7 @@ html_begin = b"""
         body {display: inline-block; font-family: monospace;}
         details {display: inline-block; margin: 0px 4px 80px 4px;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
-        details[open] summary {border-bottom-width: 0px;}
+        details[open] summary {border-bottom-color: #e8f2ff;}
         .diff_next {background-color: #e8f2ff;}
         .diff_add {background-color: #aaffaa;}
         .diff_chg {background-color: #ffff77;}
@@ -72,18 +72,16 @@ class Diff:
 
     def __init__(self, left: str, right: str):
         self._left_directory, self._right_directory = Path(left).absolute(), Path(right).absolute()
-        if self._left_directory.is_file() and self._right_directory.is_file():
-            self._left_right_file_mapping = {self._left_directory: self._right_directory}
-            self._left_files, self._right_files = set(), set()
-            self._left_directory = Path(os.path.commonpath([self._left_directory, self._right_directory]))
-            self._right_directory = self._left_directory
-        elif self._left_directory.is_dir() and self._right_directory.is_dir():
+        if self._left_directory.is_dir() and self._right_directory.is_dir():
             self._matcher = difflib.SequenceMatcher(isjunk=None, autojunk=False)
             self._left_right_file_mapping = (
                 self._changed_only_mapping | self._renamed_only_mapping | self._renamed_and_changed_mapping
             )
         else:
-            raise ValueError("arguments must be two regular files or two directories")  # noqa: EM101, TRY003
+            self._left_right_file_mapping = {self._left_directory: self._right_directory}
+            self._left_files, self._right_files = set(), set()
+            self._left_directory = Path(os.path.commonpath([self._left_directory, self._right_directory]))
+            self._right_directory = self._left_directory
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
@@ -236,9 +234,7 @@ class Diff:
             short_desc.append(to_desc)
             writer.write(b"  <div><details open><summary>")
             writer.write((f"{pos}/{left_right_files_len} ■ " + " ".join(short_desc)).encode())
-            if left_file in self._renamed_only_mapping or (
-                left_file and right_file and left_file.read_bytes() == right_file.read_bytes()
-            ):
+            if left_file in self._renamed_only_mapping:
                 writer.write(" ■ identical</summary>\n  </details></div>\n".encode())
                 continue
             if (not left_file and right_file and to_stat.st_size == 0) or (
@@ -253,8 +249,12 @@ class Diff:
                 html_table = self._html_diff.make_table(
                     from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
                 )
-                writer.write(b"</summary>\n")
-                writer.write(html_table.encode())
+                # They might be identical if only the mode was changed.
+                if "No Differences Found" in html_table:
+                    writer.write(" ■ identical</summary>\n".encode())
+                else:
+                    writer.write(b"</summary>\n")
+                    writer.write(html_table.encode())
             except UnicodeDecodeError:
                 writer.write(" ■ binary</summary>\n".encode())
             writer.write(b"\n  </details></div>\n")
