@@ -80,8 +80,9 @@ class Diff:
         else:
             self._left_right_file_mapping = {self._left_directory: self._right_directory}
             self._left_files, self._right_files = set(), set()
-            self._left_directory = Path(os.path.commonpath([self._left_directory, self._right_directory]))
-            self._right_directory = self._left_directory
+            self._left_directory = self._right_directory = Path(
+                os.path.commonpath([self._left_directory.parent, self._right_directory.parent])
+            )
         self._html_diff = difflib.HtmlDiff(wrapcolumn=119)
 
     @staticmethod
