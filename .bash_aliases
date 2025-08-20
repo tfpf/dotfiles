@@ -5,7 +5,8 @@ alias cpreprocess='gcc -E -x c - | command grep -Fv "#" | clang-format -style="{
 alias c++preprocess='gcc -E -x c++ - | command grep -Fv "#" | clang-format -style="{ColumnLimit: 119}" | bat -l c'
 alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
-alias jq='jq -S'
+alias jq='command jq -RrS --unbuffered '"'"'. as $line | try fromjson catch $line'"'"
+alias jqa='command jq -rS'
 alias less='command less -i'
 alias perfstat='perf stat -e task-clock,cycles,instructions,branches,branch-misses,cache-references,cache-misses '
 alias pgrep='command pgrep -il'
@@ -181,25 +182,4 @@ rr()
 import()
 {
     printf "This is Bash. Did you mean to type this in Python?\n" >&2 && return 1
-}
-
-json.tool()
-{
-    python -u -c '
-import json
-import sys
-
-def fmt(loader, source):
-    try:
-        json.dump(loader(source), ensure_ascii=False, fp=sys.stdout, indent=2, sort_keys=True)
-        print()
-    except json.decoder.JSONDecodeError as e:
-        print(e.doc.rstrip(), file=sys.stderr)
-
-if len(sys.argv) > 1 and sys.argv[1] == "-a":
-    fmt(json.load, sys.stdin)
-    raise SystemExit
-for line in sys.stdin:
-    fmt(json.loads, line)
-    ' "$@" | bat -l json -pp --theme=TwoDark
 }
