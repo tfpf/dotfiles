@@ -423,29 +423,32 @@ int GitRepository::update_tag(char const* name, C::git_oid* oid, void* self_)
  * Check whether the given file is modified, staged or untracked. If it is,
  * update the corresponding members of the given `GitRepository` instance.
  *
- * @param _path File path.
+ * @param path File path.
  * @param status_flags Flags indicating the status of the file.
  * @param self_ `GitRepository` instance whose members should be updated.
  *
  * @return 0.
  */
-int GitRepository::update_dirty_staged_untracked(char const* _path, unsigned status_flags, void* self_)
+int GitRepository::update_dirty_staged_untracked(char const* path, unsigned status_flags, void* self_)
 {
     GitRepository* self = static_cast<GitRepository*>(self_);
     if (status_flags
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
            | C::GIT_STATUS_WT_TYPECHANGE))
     {
+        LOG_DEBUG("%s is dirty", path);
         ++self->dirty;
     }
     if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
+        LOG_DEBUG("%s is staged", path);
         ++self->staged;
     }
     if (status_flags & C::GIT_STATUS_WT_NEW)
     {
+        LOG_DEBUG("%s is untracked", path);
         ++self->untracked;
     }
     return 0;
