@@ -1,12 +1,11 @@
 #ifdef __linux__
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
-#include <stddef.h>
 
 long long unsigned get_active_wid(void)
 {
-    Display* display = XOpenDisplay(NULL);
-    if (display == NULL)
+    Display* display = XOpenDisplay(nullptr);
+    if (display == nullptr)
     {
         return 0;
     }
