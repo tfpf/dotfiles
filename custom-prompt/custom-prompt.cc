@@ -577,10 +577,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     {
         LOG_DEBUG(
             "Breaking command into pieces",
-            {
-                { "left_piece_len", static_cast<std::intmax_t>(left_piece_len) },
-                { "right_piece_len", static_cast<std::intmax_t>(right_piece_len) },
-            }
+            { { "left_piece_len", left_piece_len }, { "right_piece_len", right_piece_len } }
         );
         report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " "
                       << last_command.substr(0, left_piece_len);
@@ -612,13 +609,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
             return (report_char & 0xC0) != 0x80;
         }
     );
-    LOG_DEBUG(
-        "Constructed report",
-        {
-            { "bytes", static_cast<std::intmax_t>(report.size()) },
-            { "code_points", static_cast<std::intmax_t>(report_size) },
-        }
-    );
+    LOG_DEBUG("Constructed report", { { "bytes", report.size() }, { "code_points", report_size } });
 
     // Ensure that the text is right-aligned. Compensate for multi-byte
     // characters and non-printing sequences.
@@ -628,7 +619,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
            - 4)
         / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
-    LOG_DEBUG("Padding report", { { "width", static_cast<std::intmax_t>(width) } });
+    LOG_DEBUG("Padding report", { { "width", width } });
     std::clog << '\r' << std::setw(width) << report << '\n';
 }
 
@@ -648,11 +639,7 @@ void report_command_status(
 {
     LOG_DEBUG(
         "Obtained last command details",
-        {
-            { "command", last_command },
-            { "exit_code", exit_code },
-            { "nanoseconds", delay },
-        }
+        { { "command", last_command }, { "exit_code", exit_code }, { "nanoseconds", delay } }
     );
     if (delay <= 5000000000ULL)
     {
@@ -676,13 +663,7 @@ void report_command_status(
     }
 
     long long unsigned curr_active_wid = get_active_wid();
-    LOG_DEBUG(
-        "Obtained focused window details",
-        {
-            { "previous", static_cast<std::intmax_t>(prev_active_wid) },
-            { "current", static_cast<std::intmax_t>(curr_active_wid) },
-        }
-    );
+    LOG_DEBUG("Obtained focused window details", { { "previous", prev_active_wid }, { "current", curr_active_wid } });
     if (prev_active_wid != curr_active_wid)
     {
         notify_desktop(last_command, exit_code, interval);

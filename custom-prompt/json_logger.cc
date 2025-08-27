@@ -13,7 +13,7 @@
 #define RIGHT_CURLY_BRACKET "\x7D"
 
 void log_debug(
-    char const* file, char const* func, std::intmax_t line, char const* msg,
+    char const* file, char const* func, std::uintmax_t line, char const* msg,
     std::vector<std::pair<JSONKey, JSONValue>> msg_args
 )
 {
