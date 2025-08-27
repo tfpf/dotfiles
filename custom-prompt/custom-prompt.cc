@@ -93,6 +93,7 @@ namespace C
 #define ESCAPE_CODE_GIT_AHEAD_BEHIND       ESCAPE_CODE_COOKED("2;37")
 #define ESCAPE_CODE_GIT_DESCRIPTION        ESCAPE_CODE_COOKED("32")
 #define ESCAPE_CODE_GIT_DETACHED           ESCAPE_CODE_COOKED("31")
+
 // clang-format on
 
 /**
@@ -735,7 +736,7 @@ void display_primary_prompt(
  */
 void set_terminal_title(std::string_view& pwd)
 {
-    // LOG_DEBUG("Current directory path is '%s'.", pwd.data());
+    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd } });
     pwd.remove_prefix(pwd.rfind('/') + 1);
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 }
