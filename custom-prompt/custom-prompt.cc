@@ -651,7 +651,7 @@ void report_command_status(
         {
             { "command", last_command },
             { "exit_code", exit_code },
-            { "nanoseconds", static_cast<std::intmax_t>(delay) },
+            { "nanoseconds", delay },
         }
     );
     if (delay <= 5000000000ULL)

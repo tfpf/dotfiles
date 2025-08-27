@@ -8,7 +8,7 @@
 #include <vector>
 
 using JSONKey = char const*;
-using JSONValue = std::variant<std::intmax_t, std::string_view>;
+using JSONValue = std::variant<int, long, long long, long long unsigned, long unsigned, unsigned, std::string_view>;
 
 void log_debug(
     char const*, char const*, std::intmax_t, char const* msg, std::vector<std::pair<JSONKey, JSONValue>> = {}

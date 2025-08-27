@@ -33,13 +33,19 @@ void log_debug(
         char const* actual_delimiter = ",";
         for (auto const& msg_arg : msg_args)
         {
-            if (auto val = std::get_if<std::intmax_t>(&msg_arg.second))
-            {
-                oss << delimiter << "\"" << msg_arg.first << "\":" << *val;
-            }
-            else if (auto val = std::get_if<std::string_view>(&msg_arg.second))
+            if (auto val = std::get_if<std::string_view>(&msg_arg.second))
             {
                 oss << delimiter << "\"" << msg_arg.first << "\":\"" << *val << "\"";
+            }
+            else
+            {
+                std::visit(
+                    [&](auto val)
+                    {
+                        oss << delimiter << "\"" << msg_arg.first << "\":" << val;
+                    },
+                    msg_arg.second
+                );
             }
             delimiter = actual_delimiter;
         }
