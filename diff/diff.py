@@ -25,6 +25,22 @@ html_begin = b"""
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
+    <script>
+        window.addEventListener("load", function () {
+            const details_elements = document.getElementsByTagName("details");
+            for (let i = 0; i < details_elements.length; ++i) {
+                const details_element = details_elements[i];
+                details_element.addEventListener("toggle", () => {
+                    if (details_element.getBoundingClientRect().top < 0) {
+                        details_element.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
+                    }
+                });
+            }
+        });
+    </script>
     <style type="text/css">
         table.diff {border: medium;}
         .diff_header {background-color: #e8f2ff;}
