@@ -29,7 +29,6 @@ void log_debug(
     if (!msg_args.empty())
     {
         oss << ",\"msg_args\":" LEFT_CURLY_BRACKET;
-
         char const* delimiter = "";
         char const* actual_delimiter = ", ";
         for (auto const& msg_arg : msg_args)
