@@ -93,7 +93,6 @@ namespace C
 #define ESCAPE_CODE_GIT_AHEAD_BEHIND       ESCAPE_CODE_COOKED("2;37")
 #define ESCAPE_CODE_GIT_DESCRIPTION        ESCAPE_CODE_COOKED("32")
 #define ESCAPE_CODE_GIT_DETACHED           ESCAPE_CODE_COOKED("31")
-
 // clang-format on
 
 /**
