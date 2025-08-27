@@ -126,10 +126,12 @@ Interval::Interval(long long unsigned delay)
     this->hours = delay / 60;
     LOG_DEBUG(
         "Calculated delay",
-        { { "hours", this->hours },
-          { "minutes", this->minutes },
-          { "seconds", this->seconds },
-          { "milliseconds", this->milliseconds } }
+        {
+            { "hours", this->hours },
+            { "minutes", this->minutes },
+            { "seconds", this->seconds },
+            { "milliseconds", this->milliseconds },
+        }
     );
 }
 
@@ -417,19 +419,19 @@ int GitRepository::update_dirty_staged_untracked(char const* path, unsigned stat
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
            | C::GIT_STATUS_WT_TYPECHANGE))
     {
-        // LOG_DEBUG("%s is dirty", path);
+        LOG_DEBUG("Checking repository file", { { "path", path }, { "status", "dirty" } });
         ++self->dirty;
     }
     if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
-        // LOG_DEBUG("%s is staged", path);
+        LOG_DEBUG("Checking repository file", { { "path", path }, { "status", "staged" } });
         ++self->staged;
     }
     if (status_flags & C::GIT_STATUS_WT_NEW)
     {
-        // LOG_DEBUG("%s is untracked", path);
+        LOG_DEBUG("Checking repository file", { { "path", path }, { "status", "untracked" } });
         ++self->untracked;
     }
     return 0;
@@ -539,7 +541,7 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
     description_stream << "exit " << exit_code << " in ";
     interval.print_long(description_stream);
     std::string description = description_stream.str();
-    // LOG_DEBUG("Sending notification with title '%s' and subtitle '%s'.", last_command.data(), description.data());
+    LOG_DEBUG("Sending notification", { { "title", last_command }, { "subtitle", description } });
 #if defined __APPLE__ || defined _WIN32
     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
     // use on these systems respectively.
@@ -573,7 +575,13 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     }
     else
     {
-        // LOG_DEBUG("Breaking command into pieces of lengths %zu and %zu.", left_piece_len, right_piece_len);
+        LOG_DEBUG(
+            "Breaking command into pieces",
+            {
+                { "left_piece_len", static_cast<std::intmax_t>(left_piece_len) },
+                { "right_piece_len", static_cast<std::intmax_t>(right_piece_len) },
+            }
+        );
         report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " "
                       << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
@@ -604,7 +612,13 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
             return (report_char & 0xC0) != 0x80;
         }
     );
-    // LOG_DEBUG("Report length is %zu bytes (%zu code points).", report.size(), report_size);
+    LOG_DEBUG(
+        "Constructed report",
+        {
+            { "bytes", static_cast<std::intmax_t>(report.size()) },
+            { "code_points", static_cast<std::intmax_t>(report_size) },
+        }
+    );
 
     // Ensure that the text is right-aligned. Compensate for multi-byte
     // characters and non-printing sequences.
@@ -614,7 +628,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
            - 4)
         / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
-    // LOG_DEBUG("Padding report to %zu characters.", width);
+    LOG_DEBUG("Padding report", { { "width", static_cast<std::intmax_t>(width) } });
     std::clog << '\r' << std::setw(width) << report << '\n';
 }
 
@@ -632,7 +646,14 @@ void report_command_status(
     std::size_t columns
 )
 {
-    // LOG_DEBUG("Command '%s' exited with code %d in %llu ns.", last_command.data(), exit_code, delay);
+    LOG_DEBUG(
+        "Obtained last command details",
+        {
+            { "command", last_command },
+            { "exit_code", exit_code },
+            { "nanoseconds", static_cast<std::intmax_t>(delay) },
+        }
+    );
     if (delay <= 5000000000ULL)
     {
 #ifdef NDEBUG
@@ -655,8 +676,13 @@ void report_command_status(
     }
 
     long long unsigned curr_active_wid = get_active_wid();
-    // LOG_DEBUG("ID of focused window when command started was %llu.", prev_active_wid);
-    // LOG_DEBUG("ID of focused window when command finished is %llu.", curr_active_wid);
+    LOG_DEBUG(
+        "Obtained focused window details",
+        {
+            { "previous", static_cast<std::intmax_t>(prev_active_wid) },
+            { "current", static_cast<std::intmax_t>(curr_active_wid) },
+        }
+    );
     if (prev_active_wid != curr_active_wid)
     {
         notify_desktop(last_command, exit_code, interval);
