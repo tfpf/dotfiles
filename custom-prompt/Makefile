@@ -9,7 +9,7 @@ MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
-OtherObjects = get_active_wid_linux.o get_active_wid_windows.o
+OtherObjects = get_active_wid_linux.o get_active_wid_windows.o json_logger.o
 
 ifneq "$(OS)" "Windows_NT"
     UNAME = $(shell uname)
