@@ -419,19 +419,19 @@ int GitRepository::update_dirty_staged_untracked(char const* path, unsigned stat
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
            | C::GIT_STATUS_WT_TYPECHANGE))
     {
-        LOG_DEBUG("Checking repository file", { { "path", path }, { "status", "dirty" } });
+        LOG_DEBUG("Found file in repository", { { "path", path }, { "status", "dirty" } });
         ++self->dirty;
     }
     if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
-        LOG_DEBUG("Checking repository file", { { "path", path }, { "status", "staged" } });
+        LOG_DEBUG("Found file in repository", { { "path", path }, { "status", "staged" } });
         ++self->staged;
     }
     if (status_flags & C::GIT_STATUS_WT_NEW)
     {
-        LOG_DEBUG("Checking repository file", { { "path", path }, { "status", "untracked" } });
+        LOG_DEBUG("Found file in repository", { { "path", path }, { "status", "untracked" } });
         ++self->untracked;
     }
     return 0;
