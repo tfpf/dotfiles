@@ -30,18 +30,16 @@ void log_debug(
     {
         oss << ",\"msg_args\":" LEFT_CURLY_BRACKET;
         char const* delimiter = "";
-        char const* actual_delimiter = ", ";
+        char const* actual_delimiter = ",";
         for (auto const& msg_arg : msg_args)
         {
-            std::intmax_t const* intval;
-            std::string_view const* svval;
-            if ((intval = std::get_if<std::intmax_t>(&msg_arg.second)) != nullptr)
+            if (auto val = std::get_if<std::intmax_t>(&msg_arg.second))
             {
-                oss << delimiter << "\"" << msg_arg.first << "\":" << *intval;
+                oss << delimiter << "\"" << msg_arg.first << "\":" << *val;
             }
-            else if ((svval = std::get_if<std::string_view>(&msg_arg.second)) != nullptr)
+            else if (auto val = std::get_if<std::string_view>(&msg_arg.second))
             {
-                oss << delimiter << "\"" << msg_arg.first << "\":\"" << *svval << "\"";
+                oss << delimiter << "\"" << msg_arg.first << "\":\"" << *val << "\"";
             }
             delimiter = actual_delimiter;
         }
