@@ -9,7 +9,7 @@ MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
-GetActiveWidObjects = get_active_wid_linux.o get_active_wid_windows.o
+OtherObjects = get_active_wid_linux.o get_active_wid_windows.o
 
 ifneq "$(OS)" "Windows_NT"
     UNAME = $(shell uname)
@@ -18,7 +18,7 @@ ifneq "$(OS)" "Windows_NT"
         LDLIBS += $(shell pkg-config --libs glib-2.0 libnotify x11)
     else
         LDLIBS += -framework Cocoa -framework CoreGraphics
-        GetActiveWidObjects += get_active_wid_macos.o
+        OtherObjects += get_active_wid_macos.o
     endif
 endif
 
@@ -36,12 +36,12 @@ $(MainBashObject): CPPFLAGS += -DBASH
 $(MainBashObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-$(MainBashExecutable): $(GetActiveWidObjects) $(MainBashObject)
+$(MainBashExecutable): $(OtherObjects) $(MainBashObject)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
 
 $(MainZshObject): CPPFLAGS += -DZSH
 $(MainZshObject): $(MainSource)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $<
 
-$(MainZshExecutable): $(GetActiveWidObjects) $(MainZshObject)
+$(MainZshExecutable): $(OtherObjects) $(MainZshObject)
 	$(LINK.o) $^ $(LDLIBS) $(OUTPUT_OPTION)
