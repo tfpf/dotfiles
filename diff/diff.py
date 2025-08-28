@@ -26,7 +26,7 @@ html_begin = b"""
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
     <script>
-        window.addEventListener("load", function () {
+        window.addEventListener("load", () => {
             const details_elements = document.getElementsByTagName("details");
             for (let i = 0; i < details_elements.length; ++i) {
                 const details_element = details_elements[i];
