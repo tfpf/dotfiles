@@ -45,7 +45,7 @@ html_begin = b"""
         table.diff {border: medium;}
         .diff_header {background-color: #e8f2ff;}
         td.diff_header {text-align: right;}
-        body {background: repeating-linear-gradient(#ffffff, #f2f2f2 200px, #ffffff 400px); display: inline-block; font-family: monospace; padding-bottom: 100vh;}
+        body {background: repeating-linear-gradient(#ffffff, #f7f7f7 200px, #ffffff 400px); display: inline-block; font-family: monospace; padding-bottom: 100vh;}
         details {display: inline-block; margin: 0px 4px 80px 4px;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
         details[open] summary {border-bottom-color: #e8f2ff;}
