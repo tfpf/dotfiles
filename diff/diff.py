@@ -25,11 +25,27 @@ html_begin = b"""
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
+    <script>
+        window.addEventListener("load", () => {
+            const details_elements = document.getElementsByTagName("details");
+            for (let i = 0; i < details_elements.length; ++i) {
+                const details_element = details_elements[i];
+                details_element.addEventListener("toggle", () => {
+                    if (details_element.getBoundingClientRect().top < 0) {
+                        details_element.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
+                    }
+                });
+            }
+        });
+    </script>
     <style type="text/css">
         table.diff {border: medium;}
         .diff_header {background-color: #e8f2ff;}
         td.diff_header {text-align: right;}
-        body {display: inline-block; font-family: monospace;}
+        body {background: repeating-linear-gradient(#ffffff, #f7f7f7 200px, #ffffff 400px); display: inline-block; font-family: monospace; padding-bottom: 100vh;}
         details {display: inline-block; margin: 0px 4px 80px 4px;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
         details[open] summary {border-bottom-color: #e8f2ff;}
