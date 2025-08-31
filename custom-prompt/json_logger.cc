@@ -42,17 +42,22 @@ std::ostream& operator<<(std::ostream& ostream, JSONString json_string)
         {
         case '\t':
             ostream << "\\t";
+            break;
         case '\n':
             ostream << "\\n";
+            break;
         case '\v':
             ostream << "\\v";
+            break;
         case '"':
             ostream << "\\\"";
+            break;
         default:
             ostream << "\\x" << static_cast<int>(c);
         }
     }
     ostream << '"';
+    return ostream;
 }
 
 void log_debug(
@@ -60,18 +65,20 @@ void log_debug(
     std::vector<std::pair<JSONKey, JSONValue>> msg_args
 )
 {
-    std::ostringstream oss;
     std::time_t curr_time = std::time(nullptr);
     char curr_time_buf[32];
     std::strftime(curr_time_buf, sizeof curr_time_buf / sizeof *curr_time_buf, "%FT%T%z", std::localtime(&curr_time));
-    oss << LEFT_CURLY_BRACKET "\"created\":\"" << curr_time_buf << "\"";
-    oss << ",\"source\":" LEFT_CURLY_BRACKET "\"file\":\"" << file << "\",\"func\":\"" << func
-        << "\",\"line\":" << line << RIGHT_CURLY_BRACKET;
-    oss << ",\"msg\":\"" << msg << "\"";
+
+    std::ostringstream oss;
+    oss << LEFT_CURLY_BRACKET << JSONString("created") << ":" << JSONString(curr_time_buf);
+    oss << ',' << JSONString("source") << ":" LEFT_CURLY_BRACKET << JSONString("file") << ":" << JSONString(file)
+        << ',' << JSONString("func") << ":" << JSONString(func) << ',' << JSONString("line") << ":" << line
+        << RIGHT_CURLY_BRACKET;
+    oss << ',' << JSONString("msg") << ":" << JSONString(msg);
 
     if (!msg_args.empty())
     {
-        oss << ",\"msg_args\":" LEFT_CURLY_BRACKET;
+        oss << ',' << JSONString("msg_args") << ":" << LEFT_CURLY_BRACKET;
         char const* delimiter = "";
         char const* actual_delimiter = ",";
         for (auto const& msg_arg : msg_args)
@@ -79,7 +86,7 @@ void log_debug(
             std::visit(
                 [&](auto const& val)
                 {
-                    oss << delimiter << "\"" << msg_arg.first << "\":" << val;
+                    oss << delimiter << msg_arg.first << ":" << val;
                 },
                 msg_arg.second
             );
