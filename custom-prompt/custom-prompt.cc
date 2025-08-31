@@ -678,6 +678,10 @@ void report_command_status(
  * Linux/macOS root directory: in which case, the title will be set to just a
  * slash.
  *
+ * The primary prompt will contain the current directory in full, unless the
+ * terminal is narrow: in which case, it will contain the basename of the
+ * current directory.
+ *
  * @param pwd Current directory.
  * @param columns Width of the terminal window.
  * @param shlvl Current shell level.
