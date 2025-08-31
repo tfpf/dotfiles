@@ -26,18 +26,16 @@ html_begin = b"""
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Diff</title>
     <script>
+        function detailsElementToggleListener(toggleEvent) {
+            const detailsElement = toggleEvent.target
+            if (detailsElement.getBoundingClientRect().top < 0) {
+                detailsElement.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        }
         window.addEventListener("load", () => {
-            const details_elements = document.getElementsByTagName("details");
-            for (let i = 0; i < details_elements.length; ++i) {
-                const details_element = details_elements[i];
-                details_element.addEventListener("toggle", () => {
-                    if (details_element.getBoundingClientRect().top < 0) {
-                        details_element.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                        });
-                    }
-                });
+            const detailsElements = document.getElementsByTagName("details");
+            for (let i = 0; i < detailsElements.length; ++i) {
+                detailsElements[i].addEventListener("toggle", detailsElementToggleListener);
             }
         });
     </script>
