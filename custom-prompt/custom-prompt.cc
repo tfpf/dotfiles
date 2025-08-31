@@ -687,17 +687,18 @@ void report_command_status(
  * @param venv_view Python virtual environment.
  */
 void set_terminal_title_display_primary_prompt(
-    std::size_t columns, std::string_view const& pwd, int shlvl,
-    std::future<std::string>& git_repository_information_future, std::string_view& venv_view
+    std::size_t columns, std::string_view& pwd, int shlvl, std::future<std::string>& git_repository_information_future,
+    std::string_view& venv_view
 )
 {
-    std::string_view short_pwd = pwd.substr(pwd.rfind('/') + 1);
-    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd }, { "short_pwd", short_pwd } });
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << short_pwd << '/' << ESCAPE BACKSLASH;
+    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd } });
+    std::size_t pwd_size = pwd.size();
+    pwd.remove_prefix(pwd.rfind('/') + 1);
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 
-    if (pwd.size() > 5 * columns / 8)
+    if (pwd_size > 5 * columns / 8)
     {
-        std::cout << "\n  " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
+        std::cout << "\n " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
