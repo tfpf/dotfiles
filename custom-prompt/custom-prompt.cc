@@ -673,10 +673,9 @@ void report_command_status(
  * Set the title of the current terminal window (which should automatically set
  * the title of the current terminal tab). Show the primary prompt.
  *
- * The terminal title will be set to the last component of the current
- * directory followed by a slash, unless the current directory is the
- * Linux/macOS root directory: in which case, the title will be set to just a
- * slash.
+ * The terminal title will be set to the basename of the current directory
+ * followed by a slash, unless the current directory is the Linux/macOS root
+ * directory: in which case, the title will be set to just a slash.
  *
  * The primary prompt will contain the current directory in full, unless the
  * terminal is narrow: in which case, it will contain the basename of the
