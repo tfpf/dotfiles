@@ -698,10 +698,12 @@ void set_terminal_title_display_primary_prompt(
 
     if (pwd_size > 5 * columns / 8)
     {
+        LOG_DEBUG("Displaying directory basename in prompt", { { "pwd_size", pwd_size }, { "columns", columns } });
         std::cout << "\n " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
+        LOG_DEBUG("Displaying full directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } });
         std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                      "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
