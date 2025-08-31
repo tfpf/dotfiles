@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& ostream, JSONString const& json_string)
     return ostream;
 }
 
-void log_debug(
+void JSONLogger::log_debug(
     char const* file, char const* func, std::uintmax_t line, char const* msg,
     std::vector<std::pair<JSONKey, JSONValue>> msg_args
 )

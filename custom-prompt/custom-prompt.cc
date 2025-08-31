@@ -95,6 +95,8 @@ namespace C
 
 // clang-format on
 
+static JSONLogger logger;
+
 /**
  * Represent an amount of time.
  */
@@ -124,7 +126,7 @@ Interval::Interval(long long unsigned delay)
     this->minutes = (delay /= 60) % 60;
     this->hours = delay / 60;
     LOG_DEBUG(
-        "Calculated delay",
+        logger, "Calculated delay",
         {
             { "hours", this->hours },
             { "minutes", this->minutes },
@@ -418,19 +420,19 @@ int GitRepository::update_dirty_staged_untracked(char const* path, unsigned stat
         & (C::GIT_STATUS_WT_DELETED | C::GIT_STATUS_WT_MODIFIED | C::GIT_STATUS_WT_RENAMED
            | C::GIT_STATUS_WT_TYPECHANGE))
     {
-        LOG_DEBUG("Found file in repository", { { "path", path }, { "status", "dirty" } });
+        LOG_DEBUG(logger, "Found file in repository", { { "path", path }, { "status", "dirty" } });
         ++self->dirty;
     }
     if (status_flags
         & (C::GIT_STATUS_INDEX_DELETED | C::GIT_STATUS_INDEX_MODIFIED | C::GIT_STATUS_INDEX_NEW
            | C::GIT_STATUS_INDEX_RENAMED | C::GIT_STATUS_INDEX_TYPECHANGE))
     {
-        LOG_DEBUG("Found file in repository", { { "path", path }, { "status", "staged" } });
+        LOG_DEBUG(logger, "Found file in repository", { { "path", path }, { "status", "staged" } });
         ++self->staged;
     }
     if (status_flags & C::GIT_STATUS_WT_NEW)
     {
-        LOG_DEBUG("Found file in repository", { { "path", path }, { "status", "untracked" } });
+        LOG_DEBUG(logger, "Found file in repository", { { "path", path }, { "status", "untracked" } });
         ++self->untracked;
     }
     return 0;
@@ -540,7 +542,7 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
     description_stream << "exit " << exit_code << " in ";
     interval.print_long(description_stream);
     std::string description = description_stream.str();
-    LOG_DEBUG("Sending notification", { { "title", last_command }, { "subtitle", description } });
+    LOG_DEBUG(logger, "Sending notification", { { "title", last_command }, { "subtitle", description } });
 #if defined __APPLE__ || defined _WIN32
     // Use OSC 777, which is supported on Kitty and Wezterm, the terminals I
     // use on these systems respectively.
@@ -575,7 +577,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     else
     {
         LOG_DEBUG(
-            "Breaking command into pieces",
+            logger, "Breaking command into pieces",
             { { "left_piece_len", left_piece_len }, { "right_piece_len", right_piece_len } }
         );
         report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " "
@@ -608,7 +610,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
             return (report_char & 0xC0) != 0x80;
         }
     );
-    LOG_DEBUG("Constructed report", { { "bytes", report.size() }, { "code_points", report_size } });
+    LOG_DEBUG(logger, "Constructed report", { { "bytes", report.size() }, { "code_points", report_size } });
 
     // Ensure that the text is right-aligned. Compensate for multi-byte
     // characters and non-printing sequences.
@@ -618,7 +620,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
            - 4)
         / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
-    LOG_DEBUG("Padding report", { { "width", width } });
+    LOG_DEBUG(logger, "Padding report", { { "width", width } });
     std::clog << '\r' << std::setw(width) << report << '\n';
 }
 
@@ -637,7 +639,7 @@ void report_command_status(
 )
 {
     LOG_DEBUG(
-        "Obtained last command details",
+        logger, "Obtained last command details",
         { { "command", last_command }, { "exit_code", exit_code }, { "nanoseconds", delay } }
     );
     if (delay <= 5000000000ULL)
@@ -662,7 +664,9 @@ void report_command_status(
     }
 
     long long unsigned curr_active_wid = get_active_wid();
-    LOG_DEBUG("Obtained focused window details", { { "previous", prev_active_wid }, { "current", curr_active_wid } });
+    LOG_DEBUG(
+        logger, "Obtained focused window details", { { "previous", prev_active_wid }, { "current", curr_active_wid } }
+    );
     if (prev_active_wid != curr_active_wid)
     {
         notify_desktop(last_command, exit_code, interval);
@@ -692,7 +696,7 @@ void set_terminal_title_display_primary_prompt(
     std::string_view& venv_view
 )
 {
-    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd } });
+    LOG_DEBUG(logger, "Obtained present working directory", { { "pwd", pwd } });
     std::size_t pwd_size = pwd.size();
     pwd.remove_prefix(pwd.rfind('/') + 1);
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
@@ -703,14 +707,16 @@ void set_terminal_title_display_primary_prompt(
     if (pwd_size > 5 * columns / 8)
     {
         LOG_DEBUG(
-            "Displaying basename of current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+            logger, "Displaying basename of current directory in prompt",
+            { { "pwd_size", pwd_size }, { "columns", columns } }
         );
         std::cout << "\n " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
         LOG_DEBUG(
-            "Displaying full path of current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+            logger, "Displaying full path of current directory in prompt",
+            { { "pwd_size", pwd_size }, { "columns", columns } }
         );
         std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                      "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
