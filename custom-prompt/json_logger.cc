@@ -12,15 +12,29 @@
 #define LEFT_CURLY_BRACKET "\x7B"
 #define RIGHT_CURLY_BRACKET "\x7D"
 
-JSONString::JSONString(char const* s): sv(s){}
-JSONString::JSONString(std::string const& s): sv(s){}
-JSONString::JSONString(std::string_view const& s): sv(s){}
-JSONString::JSONString(JSONString const& s): sv(s.sv){}
+JSONString::JSONString(char const* s) : sv(s)
+{
+}
 
-std::ostream& operator<<(std::ostream& ostream, JSONString json_string){
+JSONString::JSONString(std::string const& s) : sv(s)
+{
+}
+
+JSONString::JSONString(std::string_view const& s) : sv(s)
+{
+}
+
+JSONString::JSONString(JSONString const& s) : sv(s.sv)
+{
+}
+
+std::ostream& operator<<(std::ostream& ostream, JSONString json_string)
+{
     ostream << '"';
-    for(auto const& c: json_string.sv){
-        if(std::isprint(c)){
+    for (auto const& c : json_string.sv)
+    {
+        if (std::isprint(c))
+        {
             ostream << c;
             continue;
         }

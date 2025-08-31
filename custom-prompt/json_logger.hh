@@ -7,8 +7,9 @@
 #include <variant>
 #include <vector>
 
-class JSONString{
-    private:
+class JSONString
+{
+private:
     std::string_view sv;
 
 public:
@@ -17,7 +18,7 @@ public:
     JSONString(std::string_view const&);
     JSONString(JSONString const&);
 
-friend std::ostream& operator<<(std::ostream&, JSONString);
+    friend std::ostream& operator<<(std::ostream&, JSONString);
 };
 
 using JSONKey = JSONString;
