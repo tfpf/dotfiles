@@ -41,6 +41,7 @@ namespace C
 #define USER "\\u"
 #define HOST "\\h"
 #define DIRECTORY "\\w"
+#define SHORT_DIRECTORY "\\W"
 #define PROMPT_SYMBOL "\\$"
 #elif defined ZSH
 #define BEGIN_INVISIBLE "\x25\x7B"
@@ -48,6 +49,7 @@ namespace C
 #define USER "\x25n"
 #define HOST "\x25m"
 #define DIRECTORY "\x25~"
+#define SHORT_DIRECTORY "\x25" "1~"
 #define PROMPT_SYMBOL "\x25#"
 #else
 #error "unknown shell"
@@ -691,6 +693,10 @@ void set_terminal_title_display_primary_prompt(
     LOG_DEBUG("Obtained present working directory", { { "pwd", pwd }, { "short_pwd", short_pwd } });
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << short_pwd << '/' << ESCAPE BACKSLASH;
 
+    if(pwd.size() > 5 * columns / 8){
+    std::cout << "\n  " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
+    }else{
+    }
     std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                  "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
