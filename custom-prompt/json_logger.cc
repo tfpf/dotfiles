@@ -33,11 +33,6 @@ std::ostream& operator<<(std::ostream& ostream, JSONString json_string)
     ostream << '"';
     for (auto const& c : json_string.sv)
     {
-        if (std::isprint(c))
-        {
-            ostream << c;
-            continue;
-        }
         switch (c)
         {
         case '\t':
@@ -53,7 +48,14 @@ std::ostream& operator<<(std::ostream& ostream, JSONString json_string)
             ostream << "\\\"";
             break;
         default:
-            ostream << "\\x" << static_cast<int>(c);
+            if (std::isprint(c))
+            {
+                ostream << c;
+            }
+            else
+            {
+                ostream << "\\x" << static_cast<int>(c);
+            }
         }
     }
     ostream << '"';
