@@ -697,15 +697,21 @@ void set_terminal_title_display_primary_prompt(
     pwd.remove_prefix(pwd.rfind('/') + 1);
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 
-    // Just a heuristic. Not meant to be precise.
+    // Just a heuristic. The portion of the path up to the home directory gets
+    // replaced with a tilde in my current configuration, so this is in no way
+    // precise.
     if (pwd_size > 5 * columns / 8)
     {
-        LOG_DEBUG("Displaying directory basename in prompt", { { "pwd_size", pwd_size }, { "columns", columns } });
+        LOG_DEBUG(
+            "Displaying basename of current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+        );
         std::cout << "\n " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
-        LOG_DEBUG("Displaying full directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } });
+        LOG_DEBUG(
+            "Displaying full path to current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+        );
         std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                      "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
