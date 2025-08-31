@@ -7,8 +7,21 @@
 #include <variant>
 #include <vector>
 
-using JSONKey = char const*;
-using JSONValue = std::variant<int, long, long long, long long unsigned, long unsigned, unsigned, std::string_view>;
+class JSONString{
+    private:
+    std::string_view sv;
+
+public:
+    JSONString(char const*);
+    JSONString(std::string const&);
+    JSONString(std::string_view const&);
+    JSONString(JSONString const&);
+
+friend std::ostream& operator<<(std::ostream&, JSONString);
+};
+
+using JSONKey = JSONString;
+using JSONValue = std::variant<int, long, long long, long long unsigned, long unsigned, unsigned, JSONString>;
 
 void log_debug(
     char const*, char const*, std::uintmax_t, char const* msg, std::vector<std::pair<JSONKey, JSONValue>> = {}

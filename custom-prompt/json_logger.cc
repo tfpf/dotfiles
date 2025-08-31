@@ -12,6 +12,35 @@
 #define LEFT_CURLY_BRACKET "\x7B"
 #define RIGHT_CURLY_BRACKET "\x7D"
 
+JSONString::JSONString(char const* s): sv(s){}
+JSONString::JSONString(std::string const& s): sv(s){}
+JSONString::JSONString(std::string_view const& s): sv(s){}
+JSONString::JSONString(JSONString const& s): sv(s.sv){}
+
+std::ostream& operator<<(std::ostream& ostream, JSONString json_string){
+    ostream << '"';
+    for(auto const& c: json_string.sv){
+        if(std::isprint(c)){
+            ostream << c;
+            continue;
+        }
+        switch (c)
+        {
+        case '\t':
+            ostream << "\\t";
+        case '\n':
+            ostream << "\\n";
+        case '\v':
+            ostream << "\\v";
+        case '"':
+            ostream << "\\\"";
+        default:
+            ostream << "\\x" << static_cast<int>(c);
+        }
+    }
+    ostream << '"';
+}
+
 void log_debug(
     char const* file, char const* func, std::uintmax_t line, char const* msg,
     std::vector<std::pair<JSONKey, JSONValue>> msg_args
@@ -33,20 +62,13 @@ void log_debug(
         char const* actual_delimiter = ",";
         for (auto const& msg_arg : msg_args)
         {
-            if (auto val = std::get_if<std::string_view>(&msg_arg.second))
-            {
-                oss << delimiter << "\"" << msg_arg.first << "\":\"" << *val << "\"";
-            }
-            else
-            {
-                std::visit(
-                    [&](auto val)
-                    {
-                        oss << delimiter << "\"" << msg_arg.first << "\":" << val;
-                    },
-                    msg_arg.second
-                );
-            }
+            std::visit(
+                [&](auto const& val)
+                {
+                    oss << delimiter << "\"" << msg_arg.first << "\":" << val;
+                },
+                msg_arg.second
+            );
             delimiter = actual_delimiter;
         }
         oss << RIGHT_CURLY_BRACKET;
