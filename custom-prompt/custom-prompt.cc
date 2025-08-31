@@ -696,6 +696,7 @@ void set_terminal_title_display_primary_prompt(
     pwd.remove_prefix(pwd.rfind('/') + 1);
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 
+    // Just a heuristic. Not meant to be precise.
     if (pwd_size > 5 * columns / 8)
     {
         LOG_DEBUG("Displaying directory basename in prompt", { { "pwd_size", pwd_size }, { "columns", columns } });
