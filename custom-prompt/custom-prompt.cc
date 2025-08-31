@@ -710,7 +710,7 @@ void set_terminal_title_display_primary_prompt(
     else
     {
         LOG_DEBUG(
-            "Displaying full path to current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+            "Displaying full path of current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
         );
         std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                      "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
