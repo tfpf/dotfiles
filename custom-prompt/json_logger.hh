@@ -19,7 +19,7 @@ public:
     JSONString(std::string_view const&);
     JSONString(JSONString const&);
 
-    friend std::ostream& operator<<(std::ostream&, JSONString);
+    friend std::ostream& operator<<(std::ostream&, JSONString const&);
 };
 
 using JSONKey = JSONString;

@@ -28,7 +28,7 @@ JSONString::JSONString(JSONString const& s) : sv(s.sv)
 {
 }
 
-std::ostream& operator<<(std::ostream& ostream, JSONString json_string)
+std::ostream& operator<<(std::ostream& ostream, JSONString const& json_string)
 {
     ostream << '"';
     for (auto const& c : json_string.sv)
