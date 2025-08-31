@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string_view>
 #include <utility>
+#include <iostream>
 #include <variant>
 #include <vector>
 
