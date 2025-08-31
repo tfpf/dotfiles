@@ -41,14 +41,16 @@ namespace C
 #define USER "\\u"
 #define HOST "\\h"
 #define DIRECTORY "\\w"
+#define SHORT_DIRECTORY "\\W"
 #define PROMPT_SYMBOL "\\$"
 #elif defined ZSH
-#define BEGIN_INVISIBLE "\x25\x7B"
-#define END_INVISIBLE "\x25\x7D"
-#define USER "\x25n"
-#define HOST "\x25m"
-#define DIRECTORY "\x25~"
-#define PROMPT_SYMBOL "\x25#"
+#define BEGIN_INVISIBLE "%\x7B"
+#define END_INVISIBLE "%\x7D"
+#define USER "%n"
+#define HOST "%m"
+#define DIRECTORY "%~"
+#define SHORT_DIRECTORY "%1~"
+#define PROMPT_SYMBOL "%#"
 #else
 #error "unknown shell"
 #endif
@@ -668,18 +670,51 @@ void report_command_status(
 }
 
 /**
- * Show the primary prompt.
+ * Set the title of the current terminal window (which should automatically set
+ * the title of the current terminal tab). Show the primary prompt.
  *
+ * The terminal title will be set to the basename of the current directory
+ * followed by a slash, unless the current directory is the Linux/macOS root
+ * directory: in which case, the title will be set to just a slash.
+ *
+ * The primary prompt will contain the current directory in full, unless the
+ * terminal is narrow: in which case, it will contain the basename of the
+ * current directory.
+ *
+ * @param pwd Current directory.
+ * @param columns Width of the terminal window.
  * @param shlvl Current shell level.
  * @param git_repository_information_future Git information provider.
  * @param venv_view Python virtual environment.
  */
-void display_primary_prompt(
-    int shlvl, std::future<std::string>& git_repository_information_future, std::string_view& venv_view
+void set_terminal_title_display_primary_prompt(
+    std::size_t columns, std::string_view& pwd, int shlvl, std::future<std::string>& git_repository_information_future,
+    std::string_view& venv_view
 )
 {
-    std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
-                 "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
+    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd } });
+    std::size_t pwd_size = pwd.size();
+    pwd.remove_prefix(pwd.rfind('/') + 1);
+    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
+
+    // Just a heuristic. The portion of the path up to the home directory gets
+    // replaced with a tilde in my current configuration, so this is in no way
+    // precise.
+    if (pwd_size > 5 * columns / 8)
+    {
+        LOG_DEBUG(
+            "Displaying basename of current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+        );
+        std::cout << "\n " ESCAPE_CODE_DIRECTORY SHORT_DIRECTORY ESCAPE_CODE_COOKED_RESET;
+    }
+    else
+    {
+        LOG_DEBUG(
+            "Displaying full path of current directory in prompt", { { "pwd_size", pwd_size }, { "columns", columns } }
+        );
+        std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
+                     "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
+    }
     if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
     {
         std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
@@ -702,21 +737,6 @@ void display_primary_prompt(
         std::cout << "▶";
     }
     std::cout << PROMPT_SYMBOL " ";
-}
-
-/**
- * Set the title of the current terminal window to the current directory
- * followed by the directory separator, unless the current directory is the
- * Linux/macOS root directory in which case, set the title to just a slash.
- * This should also automatically update the title of the current terminal tab.
- *
- * @param pwd Current directory.
- */
-void set_terminal_title(std::string_view& pwd)
-{
-    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd } });
-    pwd.remove_prefix(pwd.rfind('/') + 1);
-    std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << pwd << '/' << ESCAPE BACKSLASH;
 }
 
 /**
@@ -760,8 +780,6 @@ int main_internal(int const argc, char const* argv[])
     report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
 
     std::string_view pwd(argv[6]);
-    set_terminal_title(pwd);
-
     int shlvl = std::stoi(argv[7]);
     std::string_view venv_view;
     char const* venv;
@@ -774,7 +792,7 @@ int main_internal(int const argc, char const* argv[])
         venv_view = venv;
         venv_view.remove_prefix(venv_view.rfind('/') + 1);
     }
-    display_primary_prompt(shlvl, git_repository_information_future, venv_view);
+    set_terminal_title_display_primary_prompt(columns, pwd, shlvl, git_repository_information_future, venv_view);
 
     return EXIT_SUCCESS;
 }
