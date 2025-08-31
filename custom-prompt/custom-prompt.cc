@@ -44,15 +44,13 @@ namespace C
 #define SHORT_DIRECTORY "\\W"
 #define PROMPT_SYMBOL "\\$"
 #elif defined ZSH
-#define BEGIN_INVISIBLE "\x25\x7B"
-#define END_INVISIBLE "\x25\x7D"
-#define USER "\x25n"
-#define HOST "\x25m"
-#define DIRECTORY "\x25~"
-#define SHORT_DIRECTORY                                                                                               \
-    "\x25"                                                                                                            \
-    "1~"
-#define PROMPT_SYMBOL "\x25#"
+#define BEGIN_INVISIBLE "%\x7B"
+#define END_INVISIBLE "%\x7D"
+#define USER "%n"
+#define HOST "%m"
+#define DIRECTORY "%~"
+#define SHORT_DIRECTORY "%1~"
+#define PROMPT_SYMBOL "%#"
 #else
 #error "unknown shell"
 #endif
