@@ -683,11 +683,12 @@ void report_command_status(
  * @param venv_view Python virtual environment.
  */
 void set_terminal_title_display_primary_prompt(
-    std::size_t columns, std::string_view const& pwd, int shlvl, std::future<std::string>& git_repository_information_future, std::string_view& venv_view
+    std::size_t columns, std::string_view const& pwd, int shlvl,
+    std::future<std::string>& git_repository_information_future, std::string_view& venv_view
 )
 {
     std::string_view short_pwd = pwd.substr(pwd.rfind('/') + 1);
-    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd },{"short_pwd", short_pwd} });
+    LOG_DEBUG("Obtained present working directory", { { "pwd", pwd }, { "short_pwd", short_pwd } });
     std::clog << ESCAPE RIGHT_SQUARE_BRACKET "0;" << short_pwd << '/' << ESCAPE BACKSLASH;
 
     std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
