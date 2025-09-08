@@ -53,7 +53,7 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 export GIT_EDITOR=vim
 # Inkscape does not work with GLIBC on some Linux distributions.
 export _INKSCAPE_GC=disable
-export JQ_COLORS='2;37:3;38;5;153:3;38;5;153:38;5;153:38;5;108:2:2:38;5;174'
+export JQ_COLORS='38;5;242:3;38;5;153:3;38;5;153:38;5;153:38;5;108:2:2:38;5;174'
 export MANPAGER='less -i'
 # Open the first matching manual page instead of prompting.
 export MAN_POSIXLY_CORRECT=1
