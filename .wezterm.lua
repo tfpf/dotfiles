@@ -21,7 +21,7 @@ config.cursor_thickness = 1
 
 config.default_cursor_style = 'SteadyBar'
 
-config.default_prog = {'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-start', '-ucrt64'}
+config.default_prog = {'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-start', '-shell', 'zsh', '-ucrt64'}
 
 config.font = wezterm.font 'RecMonoCasual Nerd Font'
 
