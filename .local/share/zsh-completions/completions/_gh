@@ -1,0 +1,3 @@
+#compdef gh
+
+command -v gh &>/dev/null && . <(gh completion -s zsh)
