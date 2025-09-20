@@ -42,7 +42,7 @@ readable_link()
 e()
 {
     [ -n "$VIRTUAL_ENV" ] && deactivate
-    reset && exec zsh
+    exec zsh
 }
 
 envarmunge()
