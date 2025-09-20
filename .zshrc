@@ -35,7 +35,7 @@ readable_link()
     local webpage_title=${webpage_till_title##*<title*>}
     webpage_title=${webpage_title//|/│}
     printf " [%s](%s)\n" "$webpage_title" "$1" >&2
-    printf " [%s|%s)\n" "$webpage_title" "$1" >&2
+    printf " [%s|%s]\n" "$webpage_title" "$1" >&2
     printf " \e]8;;%s\e\\%s\e]8;;\e\\ \n" "$1" "$webpage_title" >&2
 }
 
