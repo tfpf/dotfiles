@@ -165,7 +165,7 @@ pdfopt()
 readable_link()
 {
     local webpage
-    webpage=$(curl -LSs "$1") || return $?
+    webpage=$(curl -fLSs "$1") || return $?
     local webpage_till_title=${webpage%%</title>*}
     local webpage_title=${webpage_till_title##*<title*>}
     webpage_title=${webpage_title//|/│}  # Pipes are special in Jira comments.
