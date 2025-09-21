@@ -162,6 +162,18 @@ pdfopt()
        "$1"
 }
 
+readable_link()
+{
+    local webpage
+    webpage=$(curl -LSs "$1") || return $?
+    local webpage_till_title=${webpage%%</title>*}
+    local webpage_title=${webpage_till_title##*<title*>}
+    webpage_title=${webpage_title//|/│}  # Pipes are special in Jira comments.
+    printf " [%s](%s)\n" "$webpage_title" "$1" >&2
+    printf " [%s|%s]\n" "$webpage_title" "$1" >&2
+    printf " \e]8;;%s\e\\%s\e]8;;\e\\ \n" "$1" "$webpage_title" >&2
+}
+
 # Random string generator.
 rr()
 {
