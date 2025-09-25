@@ -19,6 +19,7 @@ c.InteractiveShell.colors = "Linux"
 c.TerminalInteractiveShell.auto_match = False
 c.TerminalInteractiveShell.confirm_exit = False
 c.TerminalInteractiveShell.display_completions = "readlinelike"
+c.TerminalInteractiveshell.handle_return = None
 c.TerminalInteractiveShell.highlight_matching_brackets = True
 c.TerminalInteractiveShell.mouse_support = False
 c.Completer.backslash_combining_completions = True
