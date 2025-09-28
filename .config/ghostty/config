@@ -9,7 +9,6 @@ focus-follows-mouse            = true
 font-family                    = RecMonoCasual Nerd Font
 font-size                      = 13
 foreground                     = #FFFFFF
-gtk-adwaita                    = false
 gtk-titlebar                   = true
 initial-window                 = true
 keybind                        = alt+]=goto_split:next
