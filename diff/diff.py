@@ -44,7 +44,8 @@ html_begin = b"""
         .diff_header {background-color: #e8f2ff;}
         td.diff_header {text-align: right;}
         body {background-color: #fdfbf3; display: inline-block; font-family: monospace; padding-bottom: 100vh;}
-        details {display: inline-block; margin: 0px 4px 80px 4px;}
+        div {margin: 0px 4px 80px 4px;}
+        details {display: inline-block;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
         details[open] summary {border-bottom-color: #e8f2ff;}
         .diff_next {background-color: #e8f2ff;}
@@ -221,6 +222,8 @@ class Diff:
         )
         with tempfile.NamedTemporaryFile(delete=False, prefix="git-difftool-", suffix=".html") as writer:
             writer.write(html_begin)
+            if commit_metadata := os.getenv("COMMIT_METADATA"):
+                writer.write(f"<div><pre>{commit_metadata}</pre></div>".encode())
             self._report(left_right_files, writer)
             writer.write(html_end)
         return Path(writer.name)
@@ -278,6 +281,7 @@ class Diff:
 def main():
     diff = Diff(sys.argv[1], sys.argv[2])
     html_file = diff.report()
+    print(html_file)  # noqa: T201
     webbrowser.open(html_file.as_uri())
 
 
