@@ -26,6 +26,6 @@ c.Completer.backslash_combining_completions = True
 
 if IPython.version_info < (9,):
     c.TerminalInteractiveShell.highlighting_style = "gruvbox-dark"
-if IPython.version_info >= (9,):
-    c.InteractiveShell.colors = "neutral"
+else:
+    c.InteractiveShell.colors = "neutral" if IPython.version_info < (9, 7) else "gruvbox-dark"
     c.InteractiveShell.enable_tip = False
