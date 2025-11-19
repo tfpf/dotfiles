@@ -69,7 +69,7 @@ import uuid
 import zipfile
 import zoneinfo
 from decimal import Decimal
-from pathlib import Path
+from pathlib import Path, PosixPath, PurePath, PurePosixPath, PureWindowsPath
 
 with contextlib.suppress(ImportError):
     import tkinter as tk
