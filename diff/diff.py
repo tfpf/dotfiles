@@ -45,6 +45,7 @@ html_begin = b"""
         td.diff_header {text-align: right;}
         body {background-color: #fdfbf3; display: inline-block; font-family: monospace; padding-bottom: 100vh;}
         div {margin: 0px 4px 80px 4px;}
+        pre {max-width: 50vw; white-space: pre-wrap;}
         details {display: inline-block;}
         summary {background-color: #e8f2ff; border-width: 1px 1px 1px 1px; border-style: solid; cursor: pointer; padding: 0px 4px 0px 4px; position: sticky; top: 0px;}
         details[open] summary {border-bottom-color: #e8f2ff;}
@@ -247,7 +248,7 @@ class Diff:
                 short_desc.append(from_desc)
             if left_file and right_file and (from_desc != to_desc or from_stat.st_mode != to_stat.st_mode):
                 short_desc.append("⟼")
-            if not left_file or right_file and from_stat.st_mode != to_stat.st_mode:
+            if not left_file or (right_file and from_stat.st_mode != to_stat.st_mode):
                 short_desc.append(f"{to_stat.st_mode:o}")
             short_desc.append(to_desc)
             writer.write(b"  <div><details open><summary>")
