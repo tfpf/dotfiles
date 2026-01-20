@@ -70,6 +70,7 @@ se lcs=nbsp:␣,tab:▶·,trail:· " How to display certain characters. They wil
 se list                      " Display certain characters more prominently. See `lcs`.
 se lsp=0                     " Line spacing.
 se mh                        " Hide mouse pointer while typing.
+se mousef                    " Focus follows mouse.
 se nosi                      " Don't try to be oversmart while indenting.
 se nosm                      " Do not jump to the matching bracket one is inserted.
 se noswapfile                " Do not create swap files.
