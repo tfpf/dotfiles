@@ -7,6 +7,7 @@ alias d='diff -ad -W $COLUMNS -y --suppress-common-lines'
 alias g='gvim'
 alias jq='command jq -RrS --unbuffered '"'"'. as $line | try fromjson catch $line'"'"
 alias jqa='command jq -S'
+alias jqc='jq -c'
 alias less='command less -i'
 alias perfstat='perf stat -e task-clock,cycles,instructions,branches,branch-misses,cache-references,cache-misses '
 alias pgrep='command pgrep -il'
