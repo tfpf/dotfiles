@@ -12,7 +12,7 @@ option_as_alt = "Both"
 
 [font]
 normal = { family = "RecMonoCasual Nerd Font", style = "Regular" }
-size = 13
+size = 12
 builtin_box_drawing = true
 
 [colors]
