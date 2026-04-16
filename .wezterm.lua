@@ -25,7 +25,7 @@ config.default_prog = {'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-st
 
 config.font = wezterm.font 'RecMonoCasual Nerd Font'
 
-config.font_size = 13
+config.font_size = 12
 
 config.keys = {}
 for i = 1, 9 do
