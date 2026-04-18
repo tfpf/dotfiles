@@ -1,7 +1,7 @@
-// clang-format off
 #ifndef GET_ACTIVE_WID_HH_
 #define GET_ACTIVE_WID_HH_
 
+// clang-format off
 #ifdef __cplusplus
 extern "C"
 {
@@ -18,4 +18,6 @@ long long unsigned get_active_wid(void);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
