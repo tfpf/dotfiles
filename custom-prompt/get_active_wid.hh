@@ -1,8 +1,10 @@
+// clang-format off
 #ifndef GET_ACTIVE_WID_HH_
 #define GET_ACTIVE_WID_HH_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /*
