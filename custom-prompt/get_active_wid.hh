@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 /*
- * On Linux, return 0. There is no standard way to query windows on Wayland.
+ * On Linux, return the ID of the active window if X is running, else 0.
  *
  * On macOS, return the ID of the topmost window if one is found, else 0.
  *
