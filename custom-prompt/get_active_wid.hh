@@ -1,21 +1,25 @@
 #ifndef GET_ACTIVE_WID_HH_
 #define GET_ACTIVE_WID_HH_
 
+// clang-format off
+
 #ifdef __APPLE__
+extern "C" {
+#endif
+
 /*
- * Get the ID of the currently-focused window.
+ * On Linux, return 0. There is no standard way to query windows on Wayland.
  *
- * @return Active window ID. If no topmost window is found, 0 is returned.
- */
-extern "C" long long unsigned get_active_wid(void);
-#else
-/*
- * Get the ID of the currently-focused window.
+ * On macOS, return the ID of the topmost window if one is found, else 0.
  *
- * @return Active window ID. On Linux, if there is no X display running, 0 is
- * returned.
+ * On Windows, return the ID of the foreground window.
+ *
+ * @return Active window ID.
  */
 long long unsigned get_active_wid(void);
+
+#ifdef __APPLE__
+}
 #endif
 
 #endif
