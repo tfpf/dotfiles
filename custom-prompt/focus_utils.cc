@@ -111,17 +111,17 @@ bool terminal_has_focus(void)
         return false;
     }
     std::string_view buf_view(buf, count);
-    size_t focus_in_seq_pos = buf_view.rfind("\x1b\x5bI");
-    if (focus_in_seq_pos == std::string_view::npos)
-    {
-        return false;
-    }
     size_t focus_out_seq_pos = buf_view.rfind("\x1b\x5bO");
     if (focus_out_seq_pos == std::string_view::npos)
     {
         return true;
     }
-    return focus_in_seq_pos > focus_out_seq_pos;
+    size_t focus_in_seq_pos = buf_view.rfind("\x1b\x5bI");
+    if (focus_in_seq_pos == std::string_view::npos)
+    {
+        return false;
+    }
+    return focus_out_seq_pos < focus_in_seq_pos;
 }
 
 #endif
