@@ -42,7 +42,7 @@ jobs:
     runs-on: ${{ matrix.os.name }}
     strategy:
       matrix:
-        os: [{name: 'macos-13', id: 'amd64-macos'}, {name: 'macos-14', id: 'aarch64-macos'}]
+        os: [{name: 'macos-14', id: 'aarch64-macos'}, {name: 'macos-15-intel', id: 'amd64-macos'}]
     steps:
       - uses: actions/checkout@v4
       - run: sudo .github/workflows/build_libgit2.bash
