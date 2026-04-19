@@ -18,8 +18,6 @@ bool terminal_has_focus(void)
 
 #include <iostream>
 #include <string_view>
-#include <chrono>
-#include <thread>
 
 #include <stddef.h>
 #include <termios.h>
@@ -35,19 +33,26 @@ long long unsigned get_active_wid(void)
     return 0;
 }
 
-class NonBlockingStandardInputReader
+/**
+ * Read focus escape sequences (and everything else mixed with them) from
+ * standard input in a non-blocking manner.
+ */
+class NonBlockingFocusEscapeSequenceReader
 {
 private:
     bool error_occurred;
     termios prev_termios, curr_termios;
 
 public:
-    NonBlockingStandardInputReader(void);
+    NonBlockingFocusEscapeSequenceReader(void);
     ssize_t read(char[], size_t);
-    ~NonBlockingStandardInputReader();
+    ~NonBlockingFocusEscapeSequenceReader();
 };
 
-NonBlockingStandardInputReader::NonBlockingStandardInputReader(void) : error_occurred(false)
+/**
+ * Enable non-canonical mode and focus reporting.
+ */
+NonBlockingFocusEscapeSequenceReader::NonBlockingFocusEscapeSequenceReader(void) : error_occurred(false)
 {
     if (tcgetattr(STDIN_FILENO, &this->prev_termios) == -1)
     {
@@ -56,45 +61,54 @@ NonBlockingStandardInputReader::NonBlockingStandardInputReader(void) : error_occ
     }
     this->curr_termios = this->prev_termios;
     this->curr_termios.c_lflag &= ~(ECHO | ICANON);
-    this->curr_termios.c_cc[VMIN] = 0;
-    this->curr_termios.c_cc[VTIME] = 0;
+    // Block until at least as many bytes as can constitute a focus escape
+    // sequence are available from standard input.
+    this->curr_termios.c_cc[VMIN] = 3;
+    // But not for too long.
+    this->curr_termios.c_cc[VTIME] = 1;
     if (tcsetattr(STDIN_FILENO, TCSANOW, &this->curr_termios) == -1)
     {
         this->error_occurred = true;
         return;
     }
-    LOG_DEBUG(logger, "Enabling focus mode" );
     std::clog << "\x1b\x5b?1004h";
 }
 
-ssize_t NonBlockingStandardInputReader::read(char buf[], size_t count)
+/**
+ * Read from standard input.
+ *
+ * @param buf Destination buffer.
+ * @param count Maximum number of bytes to read.
+ *
+ * @return Number of bytes read if successful, -1 otherwise.
+ */
+ssize_t NonBlockingFocusEscapeSequenceReader::read(char buf[], size_t count)
 {
-    LOG_DEBUG(logger, "Reading focus sequence" );
-    std::this_thread::sleep_for(std::chrono::seconds(5));
     return ::read(STDIN_FILENO, buf, count);
 }
 
-NonBlockingStandardInputReader::~NonBlockingStandardInputReader()
+/**
+ * Disable focus reporting and non-canonical mode.
+ */
+NonBlockingFocusEscapeSequenceReader::~NonBlockingFocusEscapeSequenceReader()
 {
+    std::clog << "\x1b\x5b?1004l";
     if (this->error_occurred)
     {
         return;
     }
     tcsetattr(STDIN_FILENO, TCSANOW, &this->prev_termios);
-    LOG_DEBUG(logger, "Disabling focus mode" );
-    std::clog << "\x1b\x5b?1004l";
 }
 
 bool terminal_has_focus(void)
 {
     char buf[1024] = {};
-    ssize_t count = NonBlockingStandardInputReader().read(buf, sizeof buf / sizeof *buf);
-    LOG_DEBUG(logger, "Read", {{"count", count}});
+    ssize_t count = NonBlockingFocusEscapeSequenceReader().read(buf, sizeof buf / sizeof *buf);
+    LOG_DEBUG(logger, "Non-blocking read completed", { { "count", count }, { "buf", buf } });
     if (count <= 0)
     {
         return false;
     }
-
     std::string_view buf_view(buf, count);
     size_t focus_in_seq_pos = buf_view.rfind("\x1b\x5bI");
     if (focus_in_seq_pos == std::string_view::npos)

@@ -1,7 +1,7 @@
 #ifndef FOCUS_UTILS_HH_
 #define FOCUS_UTILS_HH_
 
-/*
+/**
  * On Windows, obtain the ID of the active window. On Linux and macOS, do
  * nothing.
  *
@@ -9,7 +9,7 @@
  */
 long long unsigned get_active_wid(void);
 
-/*
+/**
  * On Linux and macOS, check whether the terminal has GUI focus. On Windows, do
  * nothing.
  *
