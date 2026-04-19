@@ -17,6 +17,7 @@ bool terminal_has_focus(void)
 #else  ////////////////////////////////////////////////////////////////////////
 
 #include <string_view>
+#include <iostream>
 
 #include <stddef.h>
 #include <termios.h>
@@ -74,13 +75,24 @@ NonBlockingStandardInputReader::~NonBlockingStandardInputReader()
 bool terminal_has_focus(void)
 {
     char buf[1024] = {};
-    ssize_t cnt = NonBlockingStandardInputReader().read(buf, sizeof buf / sizeof *buf);
-    if (cnt <= 0)
+    ssize_t count = NonBlockingStandardInputReader().read(buf, sizeof buf / sizeof *buf);
+    if (count <= 0)
     {
         return false;
     }
 
-    return false;
+    std::string_view buf_view(buf, count);
+    size_t focus_in_seq_pos = buf_view.rfind("\x1b\x5bI");
+    if (focus_in_seq_pos == std::string_view::npos)
+    {
+        return false;
+    }
+    size_t focus_out_seq_pos = buf_view.rfind("\x1b\x5bO");
+    if (focus_out_seq_pos == std::string_view::npos)
+    {
+        return true;
+    }
+    return focus_in_seq_pos > focus_out_seq_pos;
 }
 
 #endif
