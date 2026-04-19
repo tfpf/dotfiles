@@ -26,6 +26,8 @@ bool terminal_has_focus(void)
 #include "focus_utils.hh"
 #include "json_logger.hh"
 
+#define BUFSIZE 1024
+
 static JSONLogger logger;
 
 long long unsigned get_active_wid(void)
@@ -61,9 +63,8 @@ NonBlockingFocusEscapeSequenceReader::NonBlockingFocusEscapeSequenceReader(void)
     }
     this->curr_termios = this->prev_termios;
     this->curr_termios.c_lflag &= ~(ECHO | ICANON);
-    // Block until at least as many bytes as can constitute a focus escape
-    // sequence are available from standard input.
-    this->curr_termios.c_cc[VMIN] = 3;
+    // Block until sufficiently many bytes are available from standard input.
+    this->curr_termios.c_cc[VMIN] = BUFSIZE;
     // But not for too long.
     this->curr_termios.c_cc[VTIME] = 1;
     if (tcsetattr(STDIN_FILENO, TCSANOW, &this->curr_termios) == -1)
@@ -102,7 +103,7 @@ NonBlockingFocusEscapeSequenceReader::~NonBlockingFocusEscapeSequenceReader()
 
 bool terminal_has_focus(void)
 {
-    char buf[1024] = {};
+    char buf[BUFSIZE] = {};
     ssize_t count = NonBlockingFocusEscapeSequenceReader().read(buf, sizeof buf / sizeof *buf);
     LOG_DEBUG(logger, "Non-blocking read completed", { { "count", count }, { "buf", buf } });
     if (count <= 0)
