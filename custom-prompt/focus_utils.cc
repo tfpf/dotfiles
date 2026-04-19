@@ -26,7 +26,7 @@ bool terminal_has_focus(void)
 #include "focus_utils.hh"
 #include "json_logger.hh"
 
-#define BUFSIZE 1024
+#define BUFSIZE 255
 
 static JSONLogger logger;
 
@@ -103,7 +103,7 @@ NonBlockingFocusEscapeSequenceReader::~NonBlockingFocusEscapeSequenceReader()
 
 bool terminal_has_focus(void)
 {
-    char buf[BUFSIZE] = {};
+    char buf[BUFSIZE];
     ssize_t count = NonBlockingFocusEscapeSequenceReader().read(buf, sizeof buf / sizeof *buf);
     LOG_DEBUG(logger, "Non-blocking read completed", { { "count", count }, { "buf", buf } });
     if (count <= 0)
