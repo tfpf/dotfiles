@@ -14,7 +14,7 @@ bool terminal_has_focus(void)
     return false;
 }
 
-#else  ////////////////////////////////////////////////////////////////////////
+#else
 
 #include <iostream>
 #include <string_view>
