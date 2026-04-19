@@ -14,7 +14,7 @@
 #include <thread>
 #include <utility>
 
-#include "get_active_wid.hh"
+#include "focus_utils.hh"
 #include "json_logger.hh"
 
 namespace C
@@ -663,11 +663,17 @@ void report_command_status(
         return;
     }
 
+#ifdef _WIN32
     long long unsigned curr_active_wid = get_active_wid();
     LOG_DEBUG(
         logger, "Obtained focused window details", { { "previous", prev_active_wid }, { "current", curr_active_wid } }
     );
     if (prev_active_wid != curr_active_wid)
+#else
+    bool terminal_focused = terminal_has_focus();
+    LOG_DEBUG(logger, "Obtained focus details", { { "terminal_focused", terminal_focused } });
+    if (!terminal_focused)
+#endif
     {
         notify_desktop(last_command, exit_code, interval);
     }
