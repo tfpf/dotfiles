@@ -9,6 +9,12 @@ MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
 OtherObjects = focus_utils.o json_logger.o
 
+UNAME = $(shell uname)
+ifeq "$(UNAME)" "Linux"
+    CPPFLAGS += $(shell pkg-config --cflags libnotify)
+    LDLIBS += $(shell pkg-config --libs libnotify)
+endif
+
 .PHONY: debug release
 
 debug: $(MainBashExecutable) $(MainZshExecutable)
