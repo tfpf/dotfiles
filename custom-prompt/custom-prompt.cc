@@ -550,8 +550,10 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
 #else
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
-    C::notify_init(__FILE__);
-    C::NotifyNotification* notif = C::notify_notification_new(last_command.data(), description.data(), "terminal");
+    C::notify_init("Terminal");
+    C::NotifyNotification* notif = C::notify_notification_new(
+        last_command.data(), description.data(), exit_code == 0 ? "dialog-information" : "dialog-error"
+    );
     C::notify_notification_show(notif, nullptr);
     // C::notify_uninit();
 #endif
