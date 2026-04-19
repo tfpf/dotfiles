@@ -6,7 +6,7 @@
 
 long long unsigned get_active_wid(void)
 {
-    return static_cast<long long unsigned>(GetForegroundWindow());
+    return (long long unsigned)GetForegroundWindow();
 }
 
 bool terminal_has_focus(void)
