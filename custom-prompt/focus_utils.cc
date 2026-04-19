@@ -16,6 +16,8 @@ bool terminal_has_focus(void)
 
 #else  ////////////////////////////////////////////////////////////////////////
 
+#include <string_view>
+
 #include <stddef.h>
 #include <termios.h>
 #include <unistd.h>
@@ -73,6 +75,10 @@ bool terminal_has_focus(void)
 {
     char buf[1024] = {};
     ssize_t cnt = NonBlockingStandardInputReader().read(buf, sizeof buf / sizeof *buf);
+    if (cnt <= 0)
+    {
+        return false;
+    }
 
     return false;
 }
