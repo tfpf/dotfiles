@@ -1,17 +1,20 @@
+#include "focus_utils.hh"
+#include "json_logger.hh"
+
+static JSONLogger logger;
+
 #ifdef _WIN32
 
 #include <windows.h>
 
 #include "focus_utils.hh"
 
-long long unsigned get_active_wid(void)
-{
-    return (long long unsigned)GetForegroundWindow();
-}
-
 bool terminal_has_focus(void)
 {
-    return false;
+    auto console_window = (long long unsigned)GetConsoleWindow();
+    auto foreground_window = (long long unsigned)GetForegroundWindow();
+    LOG_DEBUG(logger, "Obtained window details", {{"foreground", foreground_window}, {"console", console_window}});
+    return console_window == foreground_window;
 }
 
 #else
@@ -23,12 +26,7 @@ bool terminal_has_focus(void)
 #include <termios.h>
 #include <unistd.h>
 
-#include "focus_utils.hh"
-#include "json_logger.hh"
-
 #define BUFSIZE 255
-
-static JSONLogger logger;
 
 long long unsigned get_active_wid(void)
 {
@@ -36,25 +34,23 @@ long long unsigned get_active_wid(void)
 }
 
 /**
- * Read focus escape sequences (and everything else mixed with them) from
- * standard input in a non-blocking manner.
+ * Temporarily modify standard input to allow non-blocking reads.
  */
-class NonBlockingFocusEscapeSequenceReader
+class NonBlockingStandardInputGuard
 {
 private:
     bool error_occurred;
     termios prev_termios, curr_termios;
 
 public:
-    NonBlockingFocusEscapeSequenceReader(void);
-    ssize_t read(char[], size_t);
-    ~NonBlockingFocusEscapeSequenceReader();
+    NonBlockingStandardInputGuard(void);
+    ~NonBlockingStandardInputGuard();
 };
 
 /**
- * Enable non-canonical mode and focus reporting.
+ * Enable non-canonical mode.
  */
-NonBlockingFocusEscapeSequenceReader::NonBlockingFocusEscapeSequenceReader(void) : error_occurred(false)
+NonBlockingStandardInputGuard::NonBlockingStandardInputGuard(void) : error_occurred(false)
 {
     if (tcgetattr(STDIN_FILENO, &this->prev_termios) == -1)
     {
@@ -70,42 +66,31 @@ NonBlockingFocusEscapeSequenceReader::NonBlockingFocusEscapeSequenceReader(void)
     if (tcsetattr(STDIN_FILENO, TCSANOW, &this->curr_termios) == -1)
     {
         this->error_occurred = true;
-        return;
     }
-    std::clog << "\x1b\x5b?1004h";
 }
 
 /**
- * Read from standard input.
- *
- * @param buf Destination buffer.
- * @param count Maximum number of bytes to read.
- *
- * @return Number of bytes read if successful, -1 otherwise.
+ * Disable non-canonical mode.
  */
-ssize_t NonBlockingFocusEscapeSequenceReader::read(char buf[], size_t count)
+NonBlockingStandardInputGuard::~NonBlockingStandardInputGuard()
 {
-    return ::read(STDIN_FILENO, buf, count);
-}
-
-/**
- * Disable focus reporting and non-canonical mode.
- */
-NonBlockingFocusEscapeSequenceReader::~NonBlockingFocusEscapeSequenceReader()
-{
-    std::clog << "\x1b\x5b?1004l";
-    if (this->error_occurred)
+    if (!this->error_occurred)
     {
-        return;
-    }
     tcsetattr(STDIN_FILENO, TCSANOW, &this->prev_termios);
+    }
 }
 
 bool terminal_has_focus(void)
 {
     char buf[BUFSIZE];
-    ssize_t count = NonBlockingFocusEscapeSequenceReader().read(buf, sizeof buf / sizeof *buf);
-    LOG_DEBUG(logger, "Non-blocking read completed", { { "count", count }, { "buf", buf } });
+    ssize_t count;
+    {
+     NonBlockingStandardInputGuard _;
+     // Enable and immediately disable focus reporting.
+     std::clog << "\x1b\x5b?1004h" << "\x1b\x5b?1004l";
+     count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
+    }
+    LOG_DEBUG(logger, "Completed non-blocking standard input read", { { "count", count } });
     if (count <= 0)
     {
         return false;

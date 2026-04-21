@@ -4,16 +4,16 @@
 _after_command()
 {
     local exit_code=$?
-    [ -z "${__begin_window+.}" ] && return
+    [ -z "${__begin_ts+.}" ] && return
     local last_command=$(history -n -1 2>/dev/null)
-    PS1=$(custom-zsh-prompt "$last_command" $exit_code $=__begin_window $COLUMNS $PWD $SHLVL)
-    unset __begin_window
+    PS1=$(custom-zsh-prompt "$last_command" $exit_code $__begin_ts $COLUMNS $PWD $SHLVL)
+    unset __begin_ts
 }
 
 _before_command()
 {
-    [ -n "${__begin_window+.}" ] && return
-    __begin_window=$(custom-zsh-prompt)
+    [ -n "${__begin_ts+.}" ] && return
+    __begin_ts=$(custom-zsh-prompt)
 }
 
 cfs()
