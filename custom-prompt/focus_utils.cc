@@ -5,8 +5,7 @@ static JSONLogger logger;
 
 #ifdef _WIN32
 
-#include <string_view>
-
+#include <tchar.h>
 #include <windows.h>
 
 #include "focus_utils.hh"
@@ -22,7 +21,7 @@ bool terminal_has_focus(void)
     }
     // I use WezTerm on Windows because it supports OSC 777. Checking whether
     // a Wezterm window is active is reasonable for me.
-    return std::string_view(class_name, class_name_len) == "org.wezfurlong.wezterm";
+    return _tcscmp(class_name, _T("org.wezfurlong.wezterm")) == 0;
 }
 
 #else
