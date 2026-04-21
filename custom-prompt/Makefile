@@ -1,6 +1,4 @@
-CC = gcc
 CPPFLAGS = $(shell pkg-config --cflags libgit2)
-CFLAGS = -fstrict-aliasing -std=c11 -Wall -Wextra -Wno-unused-parameter
 CXXFLAGS = -fstrict-aliasing -std=c++17 -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lstdc++ $(shell pkg-config --libs libgit2)
 
@@ -9,17 +7,12 @@ MainBashObject = custom-bash-prompt.o
 MainBashExecutable = bin/$(MainBashObject:.o=)
 MainZshObject = custom-zsh-prompt.o
 MainZshExecutable = bin/$(MainZshObject:.o=)
-OtherObjects = get_active_wid_linux.o get_active_wid_windows.o json_logger.o
+OtherObjects = focus_utils.o json_logger.o
 
-ifneq "$(OS)" "Windows_NT"
-    UNAME = $(shell uname)
-    ifeq "$(UNAME)" "Linux"
-        CPPFLAGS += $(shell pkg-config --cflags glib-2.0 libnotify x11)
-        LDLIBS += $(shell pkg-config --libs glib-2.0 libnotify x11)
-    else
-        LDLIBS += -framework Cocoa -framework CoreGraphics
-        OtherObjects += get_active_wid_macos.o
-    endif
+UNAME = $(shell uname)
+ifeq "$(UNAME)" "Linux"
+    CPPFLAGS += $(shell pkg-config --cflags libnotify)
+    LDLIBS += $(shell pkg-config --libs libnotify)
 endif
 
 .PHONY: debug release
@@ -27,7 +20,6 @@ endif
 debug: $(MainBashExecutable) $(MainZshExecutable)
 
 release: CPPFLAGS += -DNDEBUG
-release: CFLAGS += -flto -O2
 release: CXXFLAGS += -flto -O2
 release: LDFLAGS += -flto -O2
 release: debug

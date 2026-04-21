@@ -14,7 +14,7 @@
 #include <thread>
 #include <utility>
 
-#include "get_active_wid.hh"
+#include "focus_utils.hh"
 #include "json_logger.hh"
 
 namespace C
@@ -550,8 +550,10 @@ void notify_desktop(std::string_view const& last_command, int exit_code, Interva
 #else
     // Xfce Terminal (the best terminal) does not support OSC 777. Do it the
     // hard way.
-    C::notify_init(__FILE__);
-    C::NotifyNotification* notif = C::notify_notification_new(last_command.data(), description.data(), "terminal");
+    C::notify_init("Terminal");
+    C::NotifyNotification* notif = C::notify_notification_new(
+        last_command.data(), description.data(), exit_code == 0 ? "dialog-information" : "dialog-error"
+    );
     C::notify_notification_show(notif, nullptr);
     // C::notify_uninit();
 #endif
@@ -630,12 +632,10 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param last_command Most-recently run command.
  * @param exit_code Code with which the command exited.
  * @param delay Running time of the command in nanoseconds.
- * @param prev_active_wid ID of the focused window when the command started.
  * @param columns Width of the terminal window.
  */
 void report_command_status(
-    std::string_view& last_command, int exit_code, long long unsigned delay, long long unsigned prev_active_wid,
-    std::size_t columns
+    std::string_view& last_command, int exit_code, long long unsigned delay, std::size_t columns
 )
 {
     LOG_DEBUG(
@@ -662,12 +662,9 @@ void report_command_status(
     {
         return;
     }
-
-    long long unsigned curr_active_wid = get_active_wid();
-    LOG_DEBUG(
-        logger, "Obtained focused window details", { { "previous", prev_active_wid }, { "current", curr_active_wid } }
-    );
-    if (prev_active_wid != curr_active_wid)
+    bool terminal_focused = terminal_has_focus();
+    LOG_DEBUG(logger, "Obtained focus details", { { "terminal_focused", terminal_focused } });
+    if (!terminal_focused)
     {
         notify_desktop(last_command, exit_code, interval);
     }
@@ -759,7 +756,7 @@ int main_internal(int const argc, char const* argv[])
     long long unsigned ts = get_timestamp();
     if (argc <= 1)
     {
-        std::cout << ts << ' ' << get_active_wid() << '\n';
+        std::cout << ts << '\n';
         return EXIT_SUCCESS;
     }
 
@@ -781,12 +778,11 @@ int main_internal(int const argc, char const* argv[])
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
     long long unsigned delay = ts - std::stoull(argv[3]);
-    long long unsigned prev_active_wid = std::stoull(argv[4]);
-    std::size_t columns = std::stoull(argv[5]);
-    report_command_status(last_command, exit_code, delay, prev_active_wid, columns);
+    std::size_t columns = std::stoull(argv[4]);
+    report_command_status(last_command, exit_code, delay, columns);
 
-    std::string_view pwd(argv[6]);
-    int shlvl = std::stoi(argv[7]);
+    std::string_view pwd(argv[5]);
+    int shlvl = std::stoi(argv[6]);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
@@ -814,7 +810,7 @@ int main(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "0", "79", "/", "1", nullptr };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "79", "/", "1", nullptr };
         int constexpr argc = sizeof argv / sizeof *argv - 1;
         return main_internal(argc, argv);
     }

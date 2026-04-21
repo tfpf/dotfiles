@@ -131,8 +131,8 @@ command grep -Fiq microsoft /proc/version && . $HOME/.bash_aliases_wsl.bash
 # executed.
 _before_command()
 {
-    [ -n "${__begin_window+.}" ] && return
-    __begin_window=$(custom-bash-prompt)
+    [ -n "${__begin_ts+.}" ] && return
+    __begin_ts=$(custom-bash-prompt)
 }
 
 # Post-command for command timing. It will be called just before the prompt is
@@ -140,10 +140,10 @@ _before_command()
 _after_command()
 {
     local exit_code=$?
-    [ -z "${__begin_window+.}" ] && return
+    [ -z "${__begin_ts+.}" ] && return
     local last_command=$(history 1)
-    PS1=$(custom-bash-prompt "$last_command" $exit_code $__begin_window $COLUMNS "$PWD" $SHLVL)
-    unset __begin_window
+    PS1=$(custom-bash-prompt "$last_command" $exit_code $__begin_ts $COLUMNS "$PWD" $SHLVL)
+    unset __begin_ts
 }
 
 trap _before_command DEBUG
