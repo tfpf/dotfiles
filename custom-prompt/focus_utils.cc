@@ -13,8 +13,9 @@ bool terminal_has_focus(void)
     HWND foreground_window = GetForegroundWindow();
     TCHAR class_name[64];
     int class_name_len = GetClassName(foreground_window, class_name, sizeof class_name / sizeof *class_name);
-    LOG_DEBUG(logger, "Read active window", {{"class_name_len", class_name_len}  });
-    if(class_name_len == 0){
+    LOG_DEBUG(logger, "Read active window", { { "class_name_len", class_name_len } });
+    if (class_name_len == 0)
+    {
         return false;
     }
     // I use WezTerm on Windows because it supports OSC 777. Checking whether
@@ -76,7 +77,7 @@ NonBlockingStandardInputGuard::~NonBlockingStandardInputGuard()
 {
     if (!this->error_occurred)
     {
-    tcsetattr(STDIN_FILENO, TCSANOW, &this->prev_termios);
+        tcsetattr(STDIN_FILENO, TCSANOW, &this->prev_termios);
     }
 }
 
@@ -85,10 +86,10 @@ bool terminal_has_focus(void)
     char buf[BUFSIZE];
     ssize_t count;
     {
-     NonBlockingStandardInputGuard _;
-     // Enable and immediately disable focus reporting.
-     std::clog << "\x1b\x5b?1004h" << "\x1b\x5b?1004l";
-     count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
+        NonBlockingStandardInputGuard _;
+        // Enable and immediately disable focus reporting.
+        std::clog << "\x1b\x5b?1004h\x1b\x5b?1004l";
+        count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
     }
     LOG_DEBUG(logger, "Read non-blocking standard input", { { "count", count } });
     if (count <= 0)

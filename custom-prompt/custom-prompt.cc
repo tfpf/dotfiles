@@ -635,7 +635,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param columns Width of the terminal window.
  */
 void report_command_status(
-    std::string_view& last_command, int exit_code, long long unsigned delay,     std::size_t columns
+    std::string_view& last_command, int exit_code, long long unsigned delay, std::size_t columns
 )
 {
     LOG_DEBUG(
