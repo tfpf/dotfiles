@@ -22,7 +22,7 @@ bool terminal_has_focus(void)
     }
     // I use WezTerm on Windows because it supports OSC 777. Checking whether
     // a Wezterm window is active is reasonable for me.
-    return std::string_view(class_name) == "org.wezfurlong.wezterm";
+    return std::string_view(class_name, class_name_len) == "org.wezfurlong.wezterm";
 }
 
 #else
