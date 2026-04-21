@@ -16,7 +16,7 @@ bool terminal_has_focus(void)
     HWND foreground_window = GetForegroundWindow();
     TCHAR class_name[64];
     int class_name_len = GetClassName(foreground_window, class_name, sizeof class_name / sizeof *class_name);
-    LOG_DEBUG(logger, "Obtained window details", {{"class_name_len", class_name_len}  });
+    LOG_DEBUG(logger, "Read active window", {{"class_name_len", class_name_len}  });
     if(class_name_len == 0){
         return false;
     }
@@ -98,7 +98,7 @@ bool terminal_has_focus(void)
      std::clog << "\x1b\x5b?1004h" << "\x1b\x5b?1004l";
      count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
     }
-    LOG_DEBUG(logger, "Completed non-blocking standard input read", { { "count", count } });
+    LOG_DEBUG(logger, "Read non-blocking standard input", { { "count", count } });
     if (count <= 0)
     {
         return false;
