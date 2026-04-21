@@ -5,16 +5,24 @@ static JSONLogger logger;
 
 #ifdef _WIN32
 
+#include <string_view>
+
 #include <windows.h>
 
 #include "focus_utils.hh"
 
 bool terminal_has_focus(void)
 {
-    auto console_window = (long long unsigned)GetConsoleWindow();
-    auto foreground_window = (long long unsigned)GetForegroundWindow();
-    LOG_DEBUG(logger, "Obtained window details", {{"foreground", foreground_window}, {"console", console_window}});
-    return console_window == foreground_window;
+    HWND foreground_window = GetForegroundWindow();
+    TCHAR class_name[64];
+    int class_name_len = GetClassName(foreground_window, class_name, sizeof class_name / sizeof *class_name);
+    LOG_DEBUG(logger, "Obtained window details", {{"class_name_len", class_name_len}  });
+    if(class_name_len == 0){
+        return false;
+    }
+    // I use WezTerm on Windows because it supports OSC 777. Checking whether
+    // a Wezterm window is active is reasonable for me.
+    return std::string_view(class_name) == "org.wezfurlong.wezterm";
 }
 
 #else
