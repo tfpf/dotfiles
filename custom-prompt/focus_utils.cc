@@ -33,11 +33,6 @@ bool terminal_has_focus(void)
 
 #define BUFSIZE 255
 
-long long unsigned get_active_wid(void)
-{
-    return 0;
-}
-
 /**
  * Temporarily modify standard input to allow non-blocking reads.
  */
