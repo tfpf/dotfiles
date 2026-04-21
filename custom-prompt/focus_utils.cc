@@ -8,8 +8,6 @@ static JSONLogger logger;
 #include <tchar.h>
 #include <windows.h>
 
-#include "focus_utils.hh"
-
 bool terminal_has_focus(void)
 {
     HWND foreground_window = GetForegroundWindow();
