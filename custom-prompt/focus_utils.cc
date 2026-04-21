@@ -18,8 +18,9 @@ bool terminal_has_focus(void)
     {
         return false;
     }
-    // I use WezTerm on Windows because it supports OSC 777. Checking whether
-    // a Wezterm window is active is reasonable for me.
+    // I use WezTerm on Windows because it supports OSC 777; I never open more
+    // than one window. Hence, checking whether a Wezterm window is active is
+    // sufficient for me.
     return _tcscmp(class_name, _T("org.wezfurlong.wezterm")) == 0;
 }
 
