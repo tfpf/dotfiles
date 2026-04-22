@@ -96,6 +96,13 @@ bool terminal_has_focus(void)
     char buf[1024];
     ssize_t count;
     {
+        NonBlockingStandardInputGuard guard;
+        if (guard.error_occurred())
+        {
+            return false;
+        }
+        // Enable focus reporting.
+        std::clog << "\x1b\x5b?1004h";
         // Consume standard input so that anything entered previously does not
         // get read instead of the focus escape sequence.
         while (true)
@@ -110,13 +117,6 @@ bool terminal_has_focus(void)
                 break;
             }
         }
-        NonBlockingStandardInputGuard guard;
-        if (guard.error_occurred())
-        {
-            return false;
-        }
-        // Enable focus reporting.
-        std::clog << "\x1b\x5b?1004h";
         count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
         // Disable focus reporting. If it is disabled immediately after
         // enabling it instead of here, the terminal may never send any focus
