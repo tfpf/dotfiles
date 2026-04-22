@@ -101,13 +101,15 @@ bool terminal_has_focus(void)
         {
             return false;
         }
+
         // Consume standard input so that anything entered previously is
         // removed and it is ready to receive focus escape sequences. There is
-        // a small chance that the user types something after consuming
-        // standard input but before the terminal sends the sequences. This
-        // rare failure is acceptable.
+        // a small chance that the user types something after standard input is
+        // consumed but before the terminal sends the sequences. This rare
+        // failure is acceptable.
         while ((count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf)) > 0)
         {
+            LOG_DEBUG(logger, "Cleared standard input", { { "count", count } });
         }
         if (count < 0)
         {
@@ -117,11 +119,13 @@ bool terminal_has_focus(void)
         // Enable focus reporting.
         std::clog << "\x1b\x5b?1004h";
         count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
-        // Disable focus reporting. If it is disabled immediately after enabling it
-        // instead of here, the terminal may never send any focus escape sequences.
-        // There is a small chance that more sequences get written to standard
-        // input before focus reporting gets disabled but after the previous
-        // sequences have been read. This rare failure is acceptable.
+
+        // Disable focus reporting. If it is disabled immediately after
+        // enabling it instead of here, the terminal may never send any focus
+        // escape sequences. There is a small chance that more sequences get
+        // written to standard input before focus reporting gets disabled but
+        // after the previous sequences have been read. This rare failure is
+        // acceptable.
         std::clog << "\x1b\x5b?1004l";
     }
 
