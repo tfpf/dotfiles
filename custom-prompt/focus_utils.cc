@@ -101,48 +101,47 @@ bool terminal_has_focus(void)
         {
             return false;
         }
-        // Consume standard input so that anything entered previously does not
-        // get read instead of the focus escape sequence.
-        while (true)
+        // Consume standard input so that anything entered previously is
+        // removed and it is ready to receive the focus escape sequence. There
+        // is a small chance that the user types something after consuming
+        // standard input but before the terminal sends the sequence. This rare
+        // failure is all right.
+        while ((count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf)) > 0)
         {
-            count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
-            if (count < 0)
-            {
-                return false;
-            }
-            if (count == 0)
-            {
-                break;
-            }
         }
-        // Enable focus reporting.
-        std::clog << "\x1b\x5b?1004h";
-        count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
-        // Disable focus reporting. If it is disabled immediately after
-        // enabling it instead of here, the terminal may never send any focus
-        // escape sequences. There is a small chance that the sequences get
-        // written to standard input before focus reporting gets disabled but
-        // after the previous sequences have been read. It should cause no
-        // damage, so I'll allow it.
-        std::clog << "\x1b\x5b?1004l";
+        if (count < 0)
+        {
+            return false;
+        }
     }
-    LOG_DEBUG(logger, "Read non-blocking standard input", { { "count", count } });
-    if (count <= 0)
-    {
-        return false;
-    }
-    std::string_view buf_view(buf, count);
-    size_t focus_out_seq_pos = buf_view.rfind("\x1b\x5bO");
-    if (focus_out_seq_pos == std::string_view::npos)
-    {
-        return true;
-    }
-    size_t focus_in_seq_pos = buf_view.rfind("\x1b\x5bI");
-    if (focus_in_seq_pos == std::string_view::npos)
-    {
-        return false;
-    }
-    return focus_out_seq_pos < focus_in_seq_pos;
+    // Enable focus reporting.
+    std::clog << "\x1b\x5b?1004h";
+    count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
+    // Disable focus reporting. If it is disabled immediately after
+    // enabling it instead of here, the terminal may never send any focus
+    // escape sequences. There is a small chance that more sequences get
+    // written to standard input before focus reporting gets disabled but after
+    // the previous sequences have been read. This rare failure is all right.
+    std::clog << "\x1b\x5b?1004l";
+}
+
+LOG_DEBUG(logger, "Read non-blocking standard input", { { "count", count } });
+if (count <= 0)
+{
+    return false;
+}
+std::string_view buf_view(buf, count);
+size_t focus_out_seq_pos = buf_view.rfind("\x1b\x5bO");
+if (focus_out_seq_pos == std::string_view::npos)
+{
+    return true;
+}
+size_t focus_in_seq_pos = buf_view.rfind("\x1b\x5bI");
+if (focus_in_seq_pos == std::string_view::npos)
+{
+    return false;
+}
+return focus_out_seq_pos < focus_in_seq_pos;
 }
 
 #endif
