@@ -33,42 +33,51 @@ bool terminal_has_focus(void)
 #include <termios.h>
 #include <unistd.h>
 
-#define BUFSIZE 255
-
 /**
  * Temporarily modify standard input to allow non-blocking reads.
  */
 class NonBlockingStandardInputGuard
 {
 private:
-    bool error_occurred;
+    bool m_error_occurred;
     termios prev_termios, curr_termios;
 
 public:
     NonBlockingStandardInputGuard(void);
+    bool error_occurred(void) const;
     ~NonBlockingStandardInputGuard();
 };
 
 /**
  * Enable non-canonical mode.
  */
-NonBlockingStandardInputGuard::NonBlockingStandardInputGuard(void) : error_occurred(false)
+NonBlockingStandardInputGuard::NonBlockingStandardInputGuard(void) : m_error_occurred(false)
 {
     if (tcgetattr(STDIN_FILENO, &this->prev_termios) == -1)
     {
-        this->error_occurred = true;
+        this->m_error_occurred = true;
         return;
     }
     this->curr_termios = this->prev_termios;
     this->curr_termios.c_lflag &= ~(ECHO | ICANON);
-    // Block until sufficiently many bytes are available from standard input.
-    this->curr_termios.c_cc[VMIN] = BUFSIZE;
-    // But not for too long.
+    // Read standard input with a timeout.
+    this->curr_termios.c_cc[VMIN] = 0;
     this->curr_termios.c_cc[VTIME] = 1;
     if (tcsetattr(STDIN_FILENO, TCSANOW, &this->curr_termios) == -1)
     {
-        this->error_occurred = true;
+        this->m_error_occurred = true;
     }
+}
+
+/**
+ * Check whether an error occurred while trying to get or set terminal
+ * attributes.
+ *
+ * @return Error indicator.
+ */
+bool NonBlockingStandardInputGuard::error_occurred(void) const
+{
+    return this->m_error_occurred;
 }
 
 /**
@@ -76,7 +85,7 @@ NonBlockingStandardInputGuard::NonBlockingStandardInputGuard(void) : error_occur
  */
 NonBlockingStandardInputGuard::~NonBlockingStandardInputGuard()
 {
-    if (!this->error_occurred)
+    if (!this->m_error_occurred)
     {
         tcsetattr(STDIN_FILENO, TCSANOW, &this->prev_termios);
     }
@@ -84,13 +93,24 @@ NonBlockingStandardInputGuard::~NonBlockingStandardInputGuard()
 
 bool terminal_has_focus(void)
 {
-    char buf[BUFSIZE];
+    char buf[1024];
     ssize_t count;
     {
-        NonBlockingStandardInputGuard _;
-        // Enable and immediately disable focus reporting.
-        std::clog << "\x1b\x5b?1004h\x1b\x5b?1004l";
+        NonBlockingStandardInputGuard guard;
+        if (guard.error_occurred())
+        {
+            return false;
+        }
+        // Enable focus reporting.
+        std::clog << "\x1b\x5b?1004h";
         count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
+        // Disable focus reporting. If it is disabled immediately after
+        // enabling it instead of here, the terminal may never send any focus
+        // escape sequences. There is a small chance that the sequences get
+        // written to standard input before focus reporting gets disabled but
+        // after the previous sequences have been read. It should cause no
+        // damage, so I'll allow it.
+        std::clog << "\x1b\x5b?1004l";
     }
     LOG_DEBUG(logger, "Read non-blocking standard input", { { "count", count } });
     if (count <= 0)
