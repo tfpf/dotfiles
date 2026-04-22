@@ -96,6 +96,20 @@ bool terminal_has_focus(void)
     char buf[1024];
     ssize_t count;
     {
+        // Consume standard input so that anything entered previously does not
+        // get read instead of the focus escape sequence.
+        while (true)
+        {
+            count = read(STDIN_FILENO, buf, sizeof buf / sizeof *buf);
+            if (count < 0)
+            {
+                return false;
+            }
+            if (count == 0)
+            {
+                break;
+            }
+        }
         NonBlockingStandardInputGuard guard;
         if (guard.error_occurred())
         {
