@@ -60,7 +60,7 @@ NonBlockingStandardInputGuard::NonBlockingStandardInputGuard(void) : m_error_occ
     }
     this->curr_termios = this->prev_termios;
     this->curr_termios.c_lflag &= ~(ECHO | ICANON);
-    // Read standard input with a timeout.
+    // Set a timeout on standard input reads.
     this->curr_termios.c_cc[VMIN] = 0;
     this->curr_termios.c_cc[VTIME] = 1;
     if (tcsetattr(STDIN_FILENO, TCSANOW, &this->curr_termios) == -1)
