@@ -41,9 +41,9 @@ rectangles (or other substitute characters), you may want to install a patched f
 |`%`                              |Default prompt symbol                                   |
 |`▶%`                             |Prompt symbol in subshell                               |
 
-If the terminal is not the active window when a long command terminates, a desktop notification will also be sent; this
-is done using OSC 777 on macOS and Windows, and libnotify on Linux. (Needless to say, on Linux, X11 is assumed, since
-there is no server to query the active window on Wayland.)
+When a long command terminates, the GUI focus state of the terminal is queried using CSI 1004 on Linux and macOS or the
+Windows API on Windows. If the terminal does not have GUI focus, a desktop notification is sent using libnotify on
+Linux or OSC 777 on macOS and Windows.
 
 To actually get the custom prompt in Bash or Zsh, compile the code to obtain `custom-bash-prompt` and
 `custom-zsh-prompt` (or download them from the [latest release](https://github.com/tfpf/dotfiles/releases/latest)),
