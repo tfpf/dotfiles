@@ -132,7 +132,7 @@ command grep -Fiq microsoft /proc/version && . $HOME/.bash_aliases_wsl.bash
 _before_command()
 {
     [ -n "${__begin_ts+.}" ] && return
-    __begin_ts=$(custom-bash-prompt)
+    __begin_ts=$EPOCHREALTIME
 }
 
 # Post-command for command timing. It will be called just before the prompt is
@@ -142,7 +142,7 @@ _after_command()
     local exit_code=$?
     [ -z "${__begin_ts+.}" ] && return
     local last_command=$(history 1)
-    PS1=$(custom-bash-prompt "$last_command" $exit_code $__begin_ts $COLUMNS "$PWD" $SHLVL)
+    PS1=$(custom-bash-prompt "$last_command" $exit_code $__begin_ts $EPOCHREALTIME $COLUMNS "$PWD" $SHLVL)
     unset __begin_ts
 }
 

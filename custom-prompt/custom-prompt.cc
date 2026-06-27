@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <csignal>
 #include <cstddef>
@@ -109,7 +110,7 @@ private:
     unsigned milliseconds;
 
 public:
-    Interval(long long unsigned);
+    Interval(double);
     void print_short(std::ostream&) const;
     void print_long(std::ostream&) const;
 };
@@ -117,14 +118,15 @@ public:
 /**
  * Initialise from the given amount of time.
  *
- * @param delay Time measured in nanoseconds.
+ * @param delay Time measured in seconds.
  */
-Interval::Interval(long long unsigned delay)
+Interval::Interval(double delay)
 {
-    this->milliseconds = (delay /= 1000000ULL) % 1000;
-    this->seconds = (delay /= 1000) % 60;
-    this->minutes = (delay /= 60) % 60;
-    this->hours = delay / 60;
+    long long unsigned remaining = delay * 1000;
+    this->milliseconds = remaining % 1000;
+    this->seconds = (remaining /= 1000) % 60;
+    this->minutes = (remaining /= 60) % 60;
+    this->hours = remaining / 60;
     LOG_DEBUG(
         logger, "Calculated delay",
         {
@@ -518,18 +520,6 @@ std::string GitRepository::get_information(void)
 }
 
 /**
- * Get the current timestamp.
- *
- * @return Time in nanoseconds since a fixed but unspecified reference point.
- */
-long long unsigned get_timestamp(void)
-{
-    std::chrono::time_point now = std::chrono::system_clock::now();
-    long long unsigned ts = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
-    return ts;
-}
-
-/**
  * Show a completed command using a desktop notification.
  *
  * @param last_command Most-recently run command.
@@ -631,18 +621,18 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  *
  * @param last_command Most-recently run command.
  * @param exit_code Code with which the command exited.
- * @param delay Running time of the command in nanoseconds.
+ * @param delay Running time of the command in seconds.
  * @param columns Width of the terminal window.
  */
 void report_command_status(
-    std::string_view& last_command, int exit_code, long long unsigned delay, std::size_t columns
+    std::string_view& last_command, int exit_code, double delay, std::size_t columns
 )
 {
     LOG_DEBUG(
         logger, "Obtained last command details",
-        { { "command", last_command }, { "exit_code", exit_code }, { "nanoseconds", delay } }
+        { { "command", last_command }, { "exit_code", exit_code }, { "seconds", delay } }
     );
-    if (delay <= 5000000000ULL)
+    if (delay <= 5)
     {
 #ifdef NDEBUG
         return;
@@ -658,7 +648,7 @@ void report_command_status(
 
     Interval interval(delay);
     write_report(last_command, exit_code, interval, columns);
-    if (delay <= 10000000000ULL)
+    if (delay <= 10)
     {
         return;
     }
@@ -753,13 +743,6 @@ void set_terminal_title_display_primary_prompt(
  */
 int main_internal(int const argc, char const* argv[])
 {
-    long long unsigned ts = get_timestamp();
-    if (argc <= 1)
-    {
-        std::cout << ts << '\n';
-        return EXIT_SUCCESS;
-    }
-
     // Start another thread to obtain information about the current Git
     // repository.
     std::promise<std::string> git_repository_information_promise;
@@ -777,7 +760,12 @@ int main_internal(int const argc, char const* argv[])
 
     std::string_view last_command(argv[1]);
     int exit_code = std::stoi(argv[2]);
-    long long unsigned delay = ts - std::stoull(argv[3]);
+    double begin_ts, end_ts;
+    std::string_view begin_ts_view(argv[3]);
+    std::from_chars(begin_ts_view.data(), begin_ts_view.data() + begin_ts_view.size(), begin_ts);
+    std::string_view end_ts_view(argv[4]);
+    std::from_chars(end_ts_view.data(), end_ts_view.data() + end_ts_view.size(), end_ts);
+    double delay = end_ts - begin_ts;
     std::size_t columns = std::stoull(argv[4]);
     report_command_status(last_command, exit_code, delay, columns);
 

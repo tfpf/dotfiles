@@ -6,14 +6,14 @@ _after_command()
     local exit_code=$?
     [ -z "${__begin_ts+.}" ] && return
     local last_command=$(history -n -1 2>/dev/null)
-    PS1=$(custom-zsh-prompt "$last_command" $exit_code $__begin_ts $COLUMNS $PWD $SHLVL)
+    PS1=$(custom-zsh-prompt "$last_command" $exit_code $__begin_ts $EPOCHREALTIME $COLUMNS $PWD $SHLVL)
     unset __begin_ts
 }
 
 _before_command()
 {
     [ -n "${__begin_ts+.}" ] && return
-    __begin_ts=$(custom-zsh-prompt)
+    __begin_ts=$EPOCHREALTIME
 }
 
 cfs()
@@ -188,6 +188,11 @@ unset CONFIG_SITE
 unset GDK_SCALE
 unset GIT_ASKPASS
 unset SSH_ASKPASS
+
+###############################################################################
+# Modules.
+###############################################################################
+zmodload zsh/datetime
 
 ###############################################################################
 # Built-in functions.
