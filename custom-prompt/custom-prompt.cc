@@ -764,11 +764,11 @@ int main_internal(int const argc, char const* argv[])
     std::string_view end_ts_view(argv[4]);
     std::from_chars(end_ts_view.data(), end_ts_view.data() + end_ts_view.size(), end_ts);
     double delay = end_ts - begin_ts;
-    std::size_t columns = std::stoull(argv[4]);
+    std::size_t columns = std::stoull(argv[5]);
     report_command_status(last_command, exit_code, delay, columns);
 
-    std::string_view pwd(argv[5]);
-    int shlvl = std::stoi(argv[6]);
+    std::string_view pwd(argv[6]);
+    int shlvl = std::stoi(argv[7]);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
