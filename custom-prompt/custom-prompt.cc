@@ -796,7 +796,7 @@ int main(int const argc, char const* argv[])
     // null-terminated.
     if (argc == 2)
     {
-        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "79", "/", "1", nullptr };
+        char const* argv[] = { "custom-prompt", "[] last_command", "0", "0", "3661.001", "79", "/", "1", nullptr };
         int constexpr argc = sizeof argv / sizeof *argv - 1;
         return main_internal(argc, argv);
     }
