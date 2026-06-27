@@ -23,7 +23,7 @@ public:
 };
 
 using JSONKey = JSONString;
-using JSONValue = std::variant<int, long, long long, long long unsigned, long unsigned, unsigned, JSONString>;
+using JSONValue = std::variant<double, int, long, long long, long long unsigned, long unsigned, unsigned, JSONString>;
 
 class JSONLogger
 {
