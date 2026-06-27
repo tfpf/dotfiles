@@ -624,9 +624,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
  * @param delay Running time of the command in seconds.
  * @param columns Width of the terminal window.
  */
-void report_command_status(
-    std::string_view& last_command, int exit_code, double delay, std::size_t columns
-)
+void report_command_status(std::string_view& last_command, int exit_code, double delay, std::size_t columns)
 {
     LOG_DEBUG(
         logger, "Obtained last command details",
