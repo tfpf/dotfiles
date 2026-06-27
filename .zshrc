@@ -12,8 +12,7 @@ _after_command()
 
 _before_command()
 {
-    [ -n "${__begin_ts+.}" ] && return
-    __begin_ts=$EPOCHREALTIME
+    [ -z "${__begin_ts+.}" ] && __begin_ts=$EPOCHREALTIME
 }
 
 cfs()

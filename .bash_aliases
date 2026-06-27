@@ -131,8 +131,7 @@ command grep -Fiq microsoft /proc/version && . $HOME/.bash_aliases_wsl.bash
 # executed.
 _before_command()
 {
-    [ -n "${__begin_ts+.}" ] && return
-    __begin_ts=$EPOCHREALTIME
+    [ -z "${__begin_ts+.}" ] && __begin_ts=$EPOCHREALTIME
 }
 
 # Post-command for command timing. It will be called just before the prompt is
