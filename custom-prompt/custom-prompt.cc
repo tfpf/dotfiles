@@ -99,16 +99,14 @@ namespace C
 static JSONLogger logger;
 
 /**
- * Fast parser which converts (the prefix of) a string to an integer. (With
- * some compilers, this may work for floating-point numbers as well, but this
- * is not guaranteed.)
+ * Try to convert a string to an integer.
  *
  * @param view String to parse.
  * @param otherwise Fallback integer to return if parsing fails.
  *
- * @return The resultant integer if parsing succeeds, else the fallback.
+ * @return The parsed integer or the fallback.
  */
-template <typename T> T parse_string_to_integer(std::string_view view, T otherwise)
+template <typename T> T try_parse_number(std::string_view view, T otherwise)
 {
     T result = otherwise;
     std::from_chars(view.data(), view.data() + view.size(), result);
@@ -774,15 +772,17 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    int exit_code = parse_string_to_integer(argv[2], 1);
+    int exit_code = try_parse_number(argv[2], 1);
+    // Support for parsing floating-point numbers is not consistent across
+    // standard library implementations, so use a different function.
     double begin_ts = std::strtod(argv[3], nullptr);
     double end_ts = std::strtod(argv[4], nullptr);
     double delay = end_ts - begin_ts;
-    std::size_t columns = parse_string_to_integer(argv[5], 79);
+    std::size_t columns = try_parse_number(argv[5], 79);
     report_command_status(last_command, exit_code, delay, columns);
 
     std::string_view pwd(argv[6]);
-    int shlvl = parse_string_to_integer(argv[7], 1);
+    int shlvl = try_parse_number(argv[7], 1);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
