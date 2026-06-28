@@ -1,5 +1,5 @@
 CPPFLAGS = $(shell pkg-config --cflags libgit2)
-CXXFLAGS = -fstrict-aliasing -std=c++17 -Wall -Wextra -Wno-unused-parameter
+CXXFLAGS = -fstrict-aliasing -std=c++20 -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lstdc++ $(shell pkg-config --libs libgit2)
 
 MainSource = custom-prompt.cc
