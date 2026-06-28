@@ -96,6 +96,13 @@ namespace C
 
 // clang-format on
 
+#define FROM_CHARS(type, name, value, source)                                                                         \
+    type name = value;                                                                                                \
+    {                                                                                                                 \
+        std::string_view name_view(source);                                                                           \
+        std::from_chars(name_view.data(), name_view.data() + name_view.size(), name);                                 \
+    }
+
 static JSONLogger logger;
 
 /**
@@ -757,18 +764,15 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    int exit_code = std::stoi(argv[2]);
-    double begin_ts, end_ts;
-    std::string_view begin_ts_view(argv[3]);
-    std::from_chars(begin_ts_view.data(), begin_ts_view.data() + begin_ts_view.size(), begin_ts);
-    std::string_view end_ts_view(argv[4]);
-    std::from_chars(end_ts_view.data(), end_ts_view.data() + end_ts_view.size(), end_ts);
+    FROM_CHARS(int, exit_code, 1, argv[2]);
+    double begin_ts = std::strtod(argv[3], nullptr);
+    double end_ts = std::strtod(argv[4], nullptr);
     double delay = end_ts - begin_ts;
-    std::size_t columns = std::stoull(argv[5]);
+    FROM_CHARS(std::size_T, columns, 79, argv[5]);
     report_command_status(last_command, exit_code, delay, columns);
 
     std::string_view pwd(argv[6]);
-    int shlvl = std::stoi(argv[7]);
+    FROM_CHARS(int, shlvl, 1, argv[7]);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
