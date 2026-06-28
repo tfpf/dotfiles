@@ -106,7 +106,7 @@ static JSONLogger logger;
  *
  * @return Value obtained after parsing.
  */
-template <typename T> T from_chars(std::string_view view, T otherwise)
+template <typename T> T parse_string_to_integer(std::string_view view, T otherwise)
 {
     T result = otherwise;
     std::from_chars(view.data(), view.data() + view.size(), result);
@@ -772,15 +772,15 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    int exit_code = from_chars(argv[2], 1);
+    int exit_code = parse_string_to_integer(argv[2], 1);
     double begin_ts = std::strtod(argv[3], nullptr);
     double end_ts = std::strtod(argv[4], nullptr);
     double delay = end_ts - begin_ts;
-    std::size_t columns = from_chars(argv[5], 79);
+    std::size_t columns = parse_string_to_integer(argv[5], 79);
     report_command_status(last_command, exit_code, delay, columns);
 
     std::string_view pwd(argv[6]);
-    int shlvl = from_chars(argv[7], 1);
+    int shlvl = parse_string_to_integer(argv[7], 1);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
