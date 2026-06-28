@@ -99,12 +99,12 @@ namespace C
 static JSONLogger logger;
 
 /**
- * Fast parser which converts a string to a value of the desired type.
+ * Fast parser which converts a string to an integer.
  *
  * @param view String to parse.
- * @param otherwise Value to return if parsing fails.
+ * @param otherwise Fallback integer to return if parsing fails.
  *
- * @return Value obtained after parsing.
+ * @return The resultant integer if parsing succeeds, else the fallback.
  */
 template <typename T> T parse_string_to_integer(std::string_view view, T otherwise)
 {
