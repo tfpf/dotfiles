@@ -99,7 +99,9 @@ namespace C
 static JSONLogger logger;
 
 /**
- * Fast parser which converts a string to an integer.
+ * Fast parser which converts (the prefix of) a string to an integer. (With
+ * some compilers, this may work for floating-point numbers as well, but this
+ * is not guaranteed.)
  *
  * @param view String to parse.
  * @param otherwise Fallback integer to return if parsing fails.
