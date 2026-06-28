@@ -99,6 +99,21 @@ namespace C
 static JSONLogger logger;
 
 /**
+ * Try to convert a string to an integer.
+ *
+ * @param view String to parse.
+ * @param otherwise Fallback integer to return if parsing fails.
+ *
+ * @return The parsed integer or the fallback.
+ */
+template <typename T> T try_parse_number(std::string_view view, T otherwise)
+{
+    T result = otherwise;
+    std::from_chars(view.data(), view.data() + view.size(), result);
+    return result;
+}
+
+/**
  * Represent an amount of time.
  */
 class Interval
@@ -757,18 +772,17 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    int exit_code = std::stoi(argv[2]);
-    double begin_ts, end_ts;
-    std::string_view begin_ts_view(argv[3]);
-    std::from_chars(begin_ts_view.data(), begin_ts_view.data() + begin_ts_view.size(), begin_ts);
-    std::string_view end_ts_view(argv[4]);
-    std::from_chars(end_ts_view.data(), end_ts_view.data() + end_ts_view.size(), end_ts);
+    int exit_code = try_parse_number(argv[2], 1);
+    // Support for parsing floating-point numbers is not consistent across
+    // standard library implementations, so use a different function.
+    double begin_ts = std::strtod(argv[3], nullptr);
+    double end_ts = std::strtod(argv[4], nullptr);
     double delay = end_ts - begin_ts;
-    std::size_t columns = std::stoull(argv[5]);
+    std::size_t columns = try_parse_number(argv[5], 79);
     report_command_status(last_command, exit_code, delay, columns);
 
     std::string_view pwd(argv[6]);
-    int shlvl = std::stoi(argv[7]);
+    int shlvl = try_parse_number(argv[7], 1);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
