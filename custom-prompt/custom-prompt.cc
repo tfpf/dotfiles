@@ -96,14 +96,22 @@ namespace C
 
 // clang-format on
 
-#define FROM_CHARS(type, name, value, source)                                                                         \
-    type name = value;                                                                                                \
-    {                                                                                                                 \
-        std::string_view name_view(source);                                                                           \
-        std::from_chars(name_view.data(), name_view.data() + name_view.size(), name);                                 \
-    }
-
 static JSONLogger logger;
+
+/**
+ * Fast parser which converts a string to a value of the desired type.
+ *
+ * @param view String to parse.
+ * @param otherwise Value to return if parsing fails.
+ *
+ * @return Value obtained after parsing.
+ */
+template<typename T>
+T from_chars(std::string_view view, T otherwise){
+    T result = otherwise;
+    std::from_chars(view.data(), view.data() + view.size(), result);
+    return result;
+}
 
 /**
  * Represent an amount of time.
@@ -764,15 +772,15 @@ int main_internal(int const argc, char const* argv[])
         .detach();
 
     std::string_view last_command(argv[1]);
-    FROM_CHARS(int, exit_code, 1, argv[2]);
+    int exit_code = from_chars(argv[2], 1);
     double begin_ts = std::strtod(argv[3], nullptr);
     double end_ts = std::strtod(argv[4], nullptr);
     double delay = end_ts - begin_ts;
-    FROM_CHARS(std::size_t, columns, 79, argv[5]);
+    std::size_t columns = from_chars(argv[5], 79);
     report_command_status(last_command, exit_code, delay, columns);
 
     std::string_view pwd(argv[6]);
-    FROM_CHARS(int, shlvl, 1, argv[7]);
+    int shlvl = from_chars(argv[7], 1);
     std::string_view venv_view;
     char const* venv;
     if ((venv = getenv("VIRTUAL_ENV_PROMPT")) != nullptr)
