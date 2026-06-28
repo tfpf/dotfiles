@@ -768,7 +768,7 @@ int main_internal(int const argc, char const* argv[])
     double begin_ts = std::strtod(argv[3], nullptr);
     double end_ts = std::strtod(argv[4], nullptr);
     double delay = end_ts - begin_ts;
-    FROM_CHARS(std::size_T, columns, 79, argv[5]);
+    FROM_CHARS(std::size_t, columns, 79, argv[5]);
     report_command_status(last_command, exit_code, delay, columns);
 
     std::string_view pwd(argv[6]);
