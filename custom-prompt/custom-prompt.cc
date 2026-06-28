@@ -106,8 +106,8 @@ static JSONLogger logger;
  *
  * @return Value obtained after parsing.
  */
-template<typename T>
-T from_chars(std::string_view view, T otherwise){
+template <typename T> T from_chars(std::string_view view, T otherwise)
+{
     T result = otherwise;
     std::from_chars(view.data(), view.data() + view.size(), result);
     return result;
