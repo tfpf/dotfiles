@@ -38,6 +38,7 @@
     "telemetry.telemetryLevel": "off",
     "terminal.integrated.cursorStyle": "line",
     "terminal.integrated.fontSize": 16,
+    "terminal.integrated.initialHint": false,
     "vim.highlightedyank.color": "#27B4A63D",
     "vim.highlightedyank.duration": 300,
     "vim.highlightedyank.enable": true,
