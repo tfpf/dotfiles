@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
 import difflib
 import functools
 import itertools
+import json
 import os
 import sys
 import tempfile
@@ -67,15 +69,25 @@ rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect
 
 
 def read_lines(self: Path) -> Iterable[str]:
-    with open(self, encoding="utf-8") as self_reader:
-        yield from self_reader
+    self_text = self.read_text(encoding="utf-8")
+    if self.suffix.casefold() == ".ipynb":
+        with contextlib.suppress(json.JSONDecodeError, KeyError):
+            self_contents = json.loads(self_text)
+            return itertools.chain.from_iterable(cell["source"] for cell in self_contents["cells"])
+    return self_text.splitlines(keepends=True)
 
 
 def read_words(self: Path) -> Iterable[str] | None:
     try:
-        return self.read_text(encoding="utf-8").split()
+        self_text = self.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return None
+    if self.suffix.casefold() == ".ipynb":
+        with contextlib.suppress(json.JSONDecodeError, KeyError):
+            self_contents = json.loads(self_text)
+            self_lines = itertools.chain.from_iterable(cell["source"] for cell in self_contents["cells"])
+            return itertools.chain.from_iterable(line.split() for line in self_lines)
+    return self_text.split()
 
 
 Path.relative_to = functools.cache(Path.relative_to)
