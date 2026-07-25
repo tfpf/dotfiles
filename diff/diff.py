@@ -68,16 +68,7 @@ deleted_header = '<span style="color:red;">−−−−−</span>'  # noqa: RUF0
 rename_detect_real_quick_threshold, rename_detect_quick_threshold, rename_detect_threshold = 0.5, 0.5, 0.5
 
 
-def read_lines(self: Path) -> Iterable[str]:
-    self_text = self.read_text(encoding="utf-8")
-    if self.suffix.casefold() == ".ipynb":
-        with contextlib.suppress(json.JSONDecodeError, KeyError):
-            self_contents = json.loads(self_text)
-            return itertools.chain.from_iterable(cell["source"] for cell in self_contents["cells"])
-    return self_text.splitlines(keepends=True)
-
-
-def read_words(self: Path) -> Iterable[str] | None:
+def read_lines(self: Path) -> list[str] | None:
     try:
         self_text = self.read_text(encoding="utf-8")
     except UnicodeDecodeError:
@@ -85,9 +76,14 @@ def read_words(self: Path) -> Iterable[str] | None:
     if self.suffix.casefold() == ".ipynb":
         with contextlib.suppress(json.JSONDecodeError, KeyError):
             self_contents = json.loads(self_text)
-            self_lines = itertools.chain.from_iterable(cell["source"] for cell in self_contents["cells"])
-            return itertools.chain.from_iterable(line.split() for line in self_lines)
-    return self_text.split()
+            return [*itertools.chain.from_iterable(cell["source"] for cell in self_contents["cells"])]
+    return self_text.splitlines(keepends=True)
+
+
+def read_words(self: Path) -> list[str] | None:
+    if (self_lines := read_lines(self)) is None:
+        return None
+    return [*itertools.chain.from_iterable(line.split() for line in self_lines)]
 
 
 Path.relative_to = functools.cache(Path.relative_to)
@@ -273,21 +269,21 @@ class Diff:
             ):
                 writer.write(" ■ empty</summary>\n  </details></div>\n".encode())
                 continue
+            if (from_lines := read_lines(left_file) if left_file else []) is None or (
+                to_lines := read_lines(right_file) if right_file else []
+            ) is None:
+                writer.write(" ■ binary</summary>\n  </details></div>\n".encode())
+                continue
 
-            from_lines = read_lines(left_file) if left_file else []
-            to_lines = read_lines(right_file) if right_file else []
-            try:
-                html_table = self._html_diff.make_table(
-                    from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
-                )
-                # They might be identical if only the mode was changed.
-                if "No Differences Found" in html_table:
-                    writer.write(" ■ identical</summary>\n".encode())
-                else:
-                    writer.write(b"</summary>\n")
-                    writer.write(html_table.encode())
-            except UnicodeDecodeError:
-                writer.write(" ■ binary</summary>\n".encode())
+            html_table = self._html_diff.make_table(
+                from_lines, to_lines, from_desc.center(64, "\u00a0"), to_desc.center(64, "\u00a0"), context=True
+            )
+            # They might be identical if only the mode was changed.
+            if "No Differences Found" in html_table:
+                writer.write(" ■ identical</summary>\n".encode())
+            else:
+                writer.write(b"</summary>\n")
+                writer.write(html_table.encode())
             writer.write(b"\n  </details></div>\n")
 
 
