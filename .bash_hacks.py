@@ -190,15 +190,18 @@ create any Tkinter widgets, this should work well.
 :param args: Ignored.
     """
 
-    def __init__(self, fname, *args):
+    def __init__(self, fname=None, *args):
         super().__init__()
-        with open(fname) as fhandle:
-            content = fhandle.read()
+        if fname is not None:
+            with open(fname) as fhandle:
+                content = fhandle.read()
 
-        # Make it possible to find Python files in the working directory.
-        # (Ordinarily, the interpreter can't do so because the working
-        # directory is probably not the directory this file is in.)
-        sys.path.append(str(pathlib.Path(fname).resolve().parent))
+            # Make it possible to find Python files in the working directory.
+            # (Ordinarily, the interpreter can't do so because the working
+            # directory is probably not the directory this file is in.)
+            sys.path.append(str(pathlib.Path(fname).resolve().parent))
+        else:
+            content = ""
 
         self.iconphoto(True, tk.PhotoImage(data=data))
         self.title('Python Executor')
@@ -261,7 +264,6 @@ transformation.
     def __init__(self, fname, *args):
         (r, g, b, lower, upper) = map(float, args)
         src = np.asarray(Image.open(fname).convert('RGBA')) / 255
-        np.abs(src[:, :, 0] - r)
         diff = (np.abs(src[:, :, 0] - r) + np.abs(src[:, :, 1] - g) + np.abs(src[:, :, 2] - b)) / 3
         np.clip((diff - lower) / (upper - lower), 0, 1, out=diff)
         dst = src.copy()
