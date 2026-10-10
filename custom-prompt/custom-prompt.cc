@@ -207,7 +207,9 @@ private:
 
 public:
     GitRepository(void);
-    std::string get_information(void);
+    std::string get_description_tag_information(void);
+    std::string get_ahead_behind_information(void);
+    std::string get_dirty_staged_untracked_information(void);
 
 private:
     void establish_description(void);
@@ -226,7 +228,7 @@ private:
  * Read the current Git repository.
  */
 GitRepository::GitRepository(void) :
-    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0),
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(UINT_MAX), staged(UINT_MAX), untracked(UINT_MAX),
     ahead(SIZE_MAX), behind(SIZE_MAX)
 {
     if (C::git_libgit2_init() <= 0)
@@ -243,7 +245,6 @@ GitRepository::GitRepository(void) :
     this->establish_description();
     this->establish_tag();
     this->establish_state();
-    this->establish_dirty_staged_untracked();
     this->establish_ahead_behind();
 }
 
@@ -481,14 +482,7 @@ void GitRepository::establish_ahead_behind(void)
     C::git_graph_ahead_behind(&this->ahead, &this->behind, this->repo, this->oid, upstream_oid);
 }
 
-/**
- * Provide information about the current Git repository in a manner suitable to
- * display in the shell prompt.
- *
- * @return Git information.
- */
-std::string GitRepository::get_information(void)
-{
+std::string GitRepository::get_description_tag_information(void){
     if (this->repo == nullptr)
     {
         return "";
@@ -510,6 +504,27 @@ std::string GitRepository::get_information(void)
     {
         information_stream << " 󰓼 " << this->tag;
     }
+    return information_stream.str();
+}
+
+std::string GitRepository::get_ahead_behind_information(void){
+    std::ostringstream information_stream;
+    if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
+    {
+        information_stream << " " ESCAPE_CODE_GIT_AHEAD_BEHIND " +" << this->ahead << ",−" << this->behind
+                           << ESCAPE_CODE_COOKED_RESET;
+    }
+    return information_stream.str();
+}
+
+std::string GitRepository::get_dirty_staged_untracked_information(void){
+    // Executed lazily instead of in the constructor because it may take a long
+    // time.
+    if(this->dirty == UINT_MAX || this->staged == UINT_MAX || this->untracked == UINT_MAX){
+        this->dirty = this->staged = this->untracked = 0;
+        this->establish_dirty_staged_untracked();
+    }
+    std::ostringstream information_stream;
     if (this->dirty > 0)
     {
         information_stream << " " ESCAPE_CODE_GIT_DIRTY " " << this->dirty << ESCAPE_CODE_COOKED_RESET;
@@ -522,16 +537,11 @@ std::string GitRepository::get_information(void)
     {
         information_stream << " " ESCAPE_CODE_GIT_UNTRACKED " " << this->untracked << ESCAPE_CODE_COOKED_RESET;
     }
-    if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
-    {
-        information_stream << " " ESCAPE_CODE_GIT_AHEAD_BEHIND " +" << this->ahead << ",−" << this->behind
-                           << ESCAPE_CODE_COOKED_RESET;
-    }
-    if (!this->state.empty())
-    {
-        information_stream << " | " << this->state;
-    }
     return information_stream.str();
+}
+
+std::string GitRepository::get_state_information(void){
+    return this->state;
 }
 
 /**
@@ -758,18 +768,21 @@ int main_internal(int const argc, char const* argv[])
 {
     // Start another thread to obtain information about the current Git
     // repository.
-    std::promise<std::string> git_repository_information_promise;
-    std::future<std::string> git_repository_information_future = git_repository_information_promise.get_future();
+    int constexpr git_repository_information_pieces = 3;
+    std::promise<std::string> git_repository_information_promises[git_repository_information_pieces];
+    std::future<std::string> git_repository_information_futures[git_repository_information_pieces];
+    for(int i = 0; i < git_repository_information_pieces; ++i){
+        git_repository_information_futures[i] = git_repository_information_promise[i].get_future();
+    }
     std::thread(
-        [](std::promise<std::string> git_repository_information_promise)
-        {
-            git_repository_information_promise.set_value(GitRepository().get_information());
+        [](std::promise<std::string> git_repository_description_tag_promise, std::promise<std::string> git_repository_ahead_behind_promise, std::promise<std::string> git_repository_dirty_staged_untracked_promise){
+            GitRepository repository;
+        git_repository_description_tag_promise.set_value(repository.get_description_tag_information());
+        git_repository_ahead_behind_promise.set_value(repository.get_ahead_behind_information());
+        git_repository_dirty_staged_untracked_promise.set_value(repository.get_dirty_staged_untracked_information());
         },
-        // I prefer to transfer ownership of the promise to the thread, because
-        // it may continue running after the main thread terminates.
-        std::move(git_repository_information_promise)
-    )
-        .detach();
+        std::move(git_repository_information_promises[0]),std::move(git_repository_information_promises[1]),std::move(git_repository_information_promises[2])
+    ).detach();
 
     std::string_view last_command(argv[1]);
     int exit_code = try_parse_number(argv[2], 1);
@@ -794,7 +807,7 @@ int main_internal(int const argc, char const* argv[])
         venv_view = venv;
         venv_view.remove_prefix(venv_view.rfind('/') + 1);
     }
-    set_terminal_title_display_primary_prompt(columns, pwd, shlvl, git_repository_information_future, venv_view);
+    set_terminal_title_display_primary_prompt(columns, pwd, shlvl, git_repository_information_futures, venv_view);
 
     return EXIT_SUCCESS;
 }
