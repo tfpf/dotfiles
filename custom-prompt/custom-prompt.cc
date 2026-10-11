@@ -483,7 +483,7 @@ void GitRepository::establish_ahead_behind(void)
 
 /**
  * Provide information about the checkout type, branch or commit ID and tag,
- * deviation from the remote repository and the current operation of the
+ * deviation from the remote repository and the in-progress operation of the
  * current Git repository in a manner suitable to display in the shell prompt.
  *
  * @return Git information.
