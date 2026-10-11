@@ -83,16 +83,16 @@ namespace C
 #define ESCAPE_CODE_COOKED_RESET ESCAPE_CODE_COOKED("")
 
 // clang-format off
-#define ESCAPE_CODE_HOST                   ESCAPE_CODE_COOKED("1;3;93")
-#define ESCAPE_CODE_DIRECTORY              ESCAPE_CODE_COOKED("1;96")
-#define ESCAPE_CODE_VIRTUAL_ENVIRONMENT    ESCAPE_CODE_COOKED("94")
-#define ESCAPE_CODE_GIT_STAGED             ESCAPE_CODE_COOKED("92")
-#define ESCAPE_CODE_GIT_STATUS_UNAVAILABLE ESCAPE_CODE_COOKED("90")
-#define ESCAPE_CODE_GIT_UNTRACKED          ESCAPE_CODE_COOKED("91")
-#define ESCAPE_CODE_GIT_DIRTY              ESCAPE_CODE_COOKED("93")
-#define ESCAPE_CODE_GIT_AHEAD_BEHIND       ESCAPE_CODE_COOKED("2;37")
-#define ESCAPE_CODE_GIT_DESCRIPTION        ESCAPE_CODE_COOKED("32")
-#define ESCAPE_CODE_GIT_DETACHED           ESCAPE_CODE_COOKED("31")
+#define ESCAPE_CODE_HOST                ESCAPE_CODE_COOKED("1;3;93")
+#define ESCAPE_CODE_DIRECTORY           ESCAPE_CODE_COOKED("1;96")
+#define ESCAPE_CODE_VIRTUAL_ENVIRONMENT ESCAPE_CODE_COOKED("94")
+#define ESCAPE_CODE_GIT_STAGED          ESCAPE_CODE_COOKED("92")
+#define ESCAPE_CODE_GIT_UNAVAILABLE     ESCAPE_CODE_COOKED("90")
+#define ESCAPE_CODE_GIT_UNTRACKED       ESCAPE_CODE_COOKED("91")
+#define ESCAPE_CODE_GIT_DIRTY           ESCAPE_CODE_COOKED("93")
+#define ESCAPE_CODE_GIT_AHEAD_BEHIND    ESCAPE_CODE_COOKED("2;37")
+#define ESCAPE_CODE_GIT_DESCRIPTION     ESCAPE_CODE_COOKED("32")
+#define ESCAPE_CODE_GIT_DETACHED        ESCAPE_CODE_COOKED("31")
 
 // clang-format on
 
@@ -207,7 +207,8 @@ private:
 
 public:
     GitRepository(void);
-    std::string get_information(void);
+    std::string get_head_information(void);
+    std::string get_dirty_staged_untracked_information(void);
 
 private:
     void establish_description(void);
@@ -226,8 +227,8 @@ private:
  * Read the current Git repository.
  */
 GitRepository::GitRepository(void) :
-    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(0), staged(0), untracked(0),
-    ahead(SIZE_MAX), behind(SIZE_MAX)
+    repo(nullptr), bare(false), detached(false), ref(nullptr), oid(nullptr), dirty(UINT_MAX), staged(UINT_MAX),
+    untracked(UINT_MAX), ahead(SIZE_MAX), behind(SIZE_MAX)
 {
     if (C::git_libgit2_init() <= 0)
     {
@@ -243,7 +244,6 @@ GitRepository::GitRepository(void) :
     this->establish_description();
     this->establish_tag();
     this->establish_state();
-    this->establish_dirty_staged_untracked();
     this->establish_ahead_behind();
 }
 
@@ -482,12 +482,13 @@ void GitRepository::establish_ahead_behind(void)
 }
 
 /**
- * Provide information about the current Git repository in a manner suitable to
- * display in the shell prompt.
+ * Provide information about the checkout type, branch or commit ID and tag,
+ * deviation from the remote repository and the in-progress operation of the
+ * current Git repository in a manner suitable to display in the shell prompt.
  *
  * @return Git information.
  */
-std::string GitRepository::get_information(void)
+std::string GitRepository::get_head_information(void)
 {
     if (this->repo == nullptr)
     {
@@ -510,6 +511,38 @@ std::string GitRepository::get_information(void)
     {
         information_stream << " 󰓼 " << this->tag;
     }
+    if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
+    {
+        information_stream << " " ESCAPE_CODE_GIT_AHEAD_BEHIND " +" << this->ahead << ",−" << this->behind
+                           << ESCAPE_CODE_COOKED_RESET;
+    }
+    if (!this->state.empty())
+    {
+        information_stream << " | " << this->state;
+    }
+    return information_stream.str();
+}
+
+/**
+ * Provide information about the changes in the current Git repository in a
+ * manner suitable to display in the shell prompt.
+ *
+ * @return Git information.
+ */
+std::string GitRepository::get_dirty_staged_untracked_information(void)
+{
+    if (this->repo == nullptr)
+    {
+        return "";
+    }
+    // Executed lazily instead of in the constructor because it may take a long
+    // time.
+    if (this->dirty == UINT_MAX || this->staged == UINT_MAX || this->untracked == UINT_MAX)
+    {
+        this->dirty = this->staged = this->untracked = 0;
+        this->establish_dirty_staged_untracked();
+    }
+    std::ostringstream information_stream;
     if (this->dirty > 0)
     {
         information_stream << " " ESCAPE_CODE_GIT_DIRTY " " << this->dirty << ESCAPE_CODE_COOKED_RESET;
@@ -521,15 +554,6 @@ std::string GitRepository::get_information(void)
     if (this->untracked > 0)
     {
         information_stream << " " ESCAPE_CODE_GIT_UNTRACKED " " << this->untracked << ESCAPE_CODE_COOKED_RESET;
-    }
-    if (this->ahead != SIZE_MAX && this->behind != SIZE_MAX)
-    {
-        information_stream << " " ESCAPE_CODE_GIT_AHEAD_BEHIND " +" << this->ahead << ",−" << this->behind
-                           << ESCAPE_CODE_COOKED_RESET;
-    }
-    if (!this->state.empty())
-    {
-        information_stream << " | " << this->state;
     }
     return information_stream.str();
 }
@@ -688,12 +712,12 @@ void report_command_status(std::string_view& last_command, int exit_code, double
  * @param pwd Current directory.
  * @param columns Width of the terminal window.
  * @param shlvl Current shell level.
- * @param git_repository_information_future Git information provider.
+ * @param git_repository_information_futures Git information providers.
  * @param venv_view Python virtual environment.
  */
 void set_terminal_title_display_primary_prompt(
-    std::size_t columns, std::string_view& pwd, int shlvl, std::future<std::string>& git_repository_information_future,
-    std::string_view& venv_view
+    std::size_t columns, std::string_view& pwd, int shlvl,
+    std::future<std::string> git_repository_information_futures[], std::string_view& venv_view
 )
 {
     LOG_DEBUG(logger, "Obtained present working directory", { { "pwd", pwd } });
@@ -721,18 +745,29 @@ void set_terminal_title_display_primary_prompt(
         std::cout << "\n" HOST_ICON " " ESCAPE_CODE_HOST HOST ESCAPE_CODE_COOKED_RESET
                      "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
-    if (git_repository_information_future.wait_for(std::chrono::milliseconds(150)) != std::future_status::ready)
+
+    if (git_repository_information_futures[0].wait_for(std::chrono::milliseconds(10)) != std::future_status::ready)
     {
-        std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
+        std::cout << "  " << ESCAPE_CODE_GIT_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
-        std::string git_repository_information = git_repository_information_future.get();
-        if (!git_repository_information.empty())
+        std::string git_repository_head_information = git_repository_information_futures[0].get();
+        if (!git_repository_head_information.empty())
         {
-            std::cout << "  " << git_repository_information;
+            std::cout << "  " << git_repository_head_information;
+            if (git_repository_information_futures[1].wait_for(std::chrono::milliseconds(150))
+                != std::future_status::ready)
+            {
+                std::cout << "  " ESCAPE_CODE_GIT_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
+            }
+            else
+            {
+                std::cout << git_repository_information_futures[1].get();
+            }
         }
     }
+
     if (!venv_view.empty())
     {
         std::cout << "  " ESCAPE_CODE_VIRTUAL_ENVIRONMENT << venv_view << ESCAPE_CODE_COOKED_RESET;
@@ -758,16 +793,24 @@ int main_internal(int const argc, char const* argv[])
 {
     // Start another thread to obtain information about the current Git
     // repository.
-    std::promise<std::string> git_repository_information_promise;
-    std::future<std::string> git_repository_information_future = git_repository_information_promise.get_future();
+    int constexpr git_repository_information_pieces = 2;
+    std::promise<std::string> git_repository_information_promises[git_repository_information_pieces];
+    std::future<std::string> git_repository_information_futures[git_repository_information_pieces];
+    for (int i = 0; i < git_repository_information_pieces; ++i)
+    {
+        git_repository_information_futures[i] = git_repository_information_promises[i].get_future();
+    }
     std::thread(
-        [](std::promise<std::string> git_repository_information_promise)
+        [](std::promise<std::string> git_repository_head_information_promise,
+           std::promise<std::string> git_repository_dirty_staged_untracked_information_promise)
         {
-            git_repository_information_promise.set_value(GitRepository().get_information());
+            GitRepository repository;
+            git_repository_head_information_promise.set_value(repository.get_head_information());
+            git_repository_dirty_staged_untracked_information_promise.set_value(
+                repository.get_dirty_staged_untracked_information()
+            );
         },
-        // I prefer to transfer ownership of the promise to the thread, because
-        // it may continue running after the main thread terminates.
-        std::move(git_repository_information_promise)
+        std::move(git_repository_information_promises[0]), std::move(git_repository_information_promises[1])
     )
         .detach();
 
@@ -794,7 +837,7 @@ int main_internal(int const argc, char const* argv[])
         venv_view = venv;
         venv_view.remove_prefix(venv_view.rfind('/') + 1);
     }
-    set_terminal_title_display_primary_prompt(columns, pwd, shlvl, git_repository_information_future, venv_view);
+    set_terminal_title_display_primary_prompt(columns, pwd, shlvl, git_repository_information_futures, venv_view);
 
     return EXIT_SUCCESS;
 }
