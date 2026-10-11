@@ -9,8 +9,8 @@ on:
 
 jobs:
   build_windows:
-    name: build on windows-2022
-    runs-on: windows-2022
+    name: build on windows-2025
+    runs-on: windows-2025
     defaults:
       run:
         shell: msys2 {0}
