@@ -806,7 +806,6 @@ int main_internal(int const argc, char const* argv[])
         {
             GitRepository repository;
             git_repository_head_information.set_value(repository.get_head_information());
-            std::this_thread::sleep_for(std::chrono::milliseconds(150));
             git_repository_dirty_staged_untracked_promise.set_value(repository.get_dirty_staged_untracked_information()
             );
         },
