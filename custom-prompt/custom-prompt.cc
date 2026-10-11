@@ -83,16 +83,16 @@ namespace C
 #define ESCAPE_CODE_COOKED_RESET ESCAPE_CODE_COOKED("")
 
 // clang-format off
-#define ESCAPE_CODE_HOST                   ESCAPE_CODE_COOKED("1;3;93")
-#define ESCAPE_CODE_DIRECTORY              ESCAPE_CODE_COOKED("1;96")
-#define ESCAPE_CODE_VIRTUAL_ENVIRONMENT    ESCAPE_CODE_COOKED("94")
-#define ESCAPE_CODE_GIT_STAGED             ESCAPE_CODE_COOKED("92")
-#define ESCAPE_CODE_GIT_STATUS_UNAVAILABLE ESCAPE_CODE_COOKED("90")
-#define ESCAPE_CODE_GIT_UNTRACKED          ESCAPE_CODE_COOKED("91")
-#define ESCAPE_CODE_GIT_DIRTY              ESCAPE_CODE_COOKED("93")
-#define ESCAPE_CODE_GIT_AHEAD_BEHIND       ESCAPE_CODE_COOKED("2;37")
-#define ESCAPE_CODE_GIT_DESCRIPTION        ESCAPE_CODE_COOKED("32")
-#define ESCAPE_CODE_GIT_DETACHED           ESCAPE_CODE_COOKED("31")
+#define ESCAPE_CODE_HOST                ESCAPE_CODE_COOKED("1;3;93")
+#define ESCAPE_CODE_DIRECTORY           ESCAPE_CODE_COOKED("1;96")
+#define ESCAPE_CODE_VIRTUAL_ENVIRONMENT ESCAPE_CODE_COOKED("94")
+#define ESCAPE_CODE_GIT_STAGED          ESCAPE_CODE_COOKED("92")
+#define ESCAPE_CODE_GIT_UNAVAILABLE     ESCAPE_CODE_COOKED("90")
+#define ESCAPE_CODE_GIT_UNTRACKED       ESCAPE_CODE_COOKED("91")
+#define ESCAPE_CODE_GIT_DIRTY           ESCAPE_CODE_COOKED("93")
+#define ESCAPE_CODE_GIT_AHEAD_BEHIND    ESCAPE_CODE_COOKED("2;37")
+#define ESCAPE_CODE_GIT_DESCRIPTION     ESCAPE_CODE_COOKED("32")
+#define ESCAPE_CODE_GIT_DETACHED        ESCAPE_CODE_COOKED("31")
 
 // clang-format on
 
@@ -744,14 +744,14 @@ void set_terminal_title_display_primary_prompt(
     }
 
     if(git_repository_information_futures[0].wait_for(std::chrono::milliseconds(10)) != std::future_status::ready){
-        std::cout << "  " << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "head unavailable" ESCAPE_CODE_COOKED_RESET;
+        std::cout << "  " << ESCAPE_CODE_GIT_UNAVAILABLE "head unavailable" ESCAPE_CODE_COOKED_RESET;
     } else{
         std::string git_repository_head_information = git_repository_information_futures[0].get();
         if (!git_repository_head_information.empty())
         {
             std::cout << "  " << git_repository_head_information;
             if(git_repository_information_futures[1].wait_for(std::chrono::milliseconds(150)) != std::future_status::ready){
-                std::cout << ESCAPE_CODE_GIT_STATUS_UNAVAILABLE "status unavailable" ESCAPE_CODE_COOKED_RESET;
+                std::cout << " " ESCAPE_CODE_GIT_UNAVAILABLE "status unavailable" ESCAPE_CODE_COOKED_RESET;
             } else{
                 std::cout << git_repository_information_futures[1].get();
             }
@@ -793,6 +793,7 @@ int main_internal(int const argc, char const* argv[])
         [](std::promise<std::string> git_repository_head_information, std::promise<std::string> git_repository_dirty_staged_untracked_promise){
             GitRepository repository;
         git_repository_head_information.set_value(repository.get_head_information());
+            std::this_thread::sleep_for(std::chrono::milliseconds(150));
         git_repository_dirty_staged_untracked_promise.set_value(repository.get_dirty_staged_untracked_information());
         },
         std::move(git_repository_information_promises[0]),std::move(git_repository_information_promises[1])
