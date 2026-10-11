@@ -748,7 +748,7 @@ void set_terminal_title_display_primary_prompt(
 
     if (git_repository_information_futures[0].wait_for(std::chrono::milliseconds(10)) != std::future_status::ready)
     {
-        std::cout << "  " << ESCAPE_CODE_GIT_UNAVAILABLE "head unavailable" ESCAPE_CODE_COOKED_RESET;
+        std::cout << "  " << ESCAPE_CODE_GIT_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
     }
     else
     {
@@ -759,7 +759,7 @@ void set_terminal_title_display_primary_prompt(
             if (git_repository_information_futures[1].wait_for(std::chrono::milliseconds(150))
                 != std::future_status::ready)
             {
-                std::cout << " " ESCAPE_CODE_GIT_UNAVAILABLE "status unavailable" ESCAPE_CODE_COOKED_RESET;
+                std::cout << "  " ESCAPE_CODE_GIT_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
             }
             else
             {
