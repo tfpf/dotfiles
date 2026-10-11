@@ -801,11 +801,11 @@ int main_internal(int const argc, char const* argv[])
         git_repository_information_futures[i] = git_repository_information_promises[i].get_future();
     }
     std::thread(
-        [](std::promise<std::string> git_repository_head_information_promise,
+        [](std::promise<std::string> git_repository_head_promise,
            std::promise<std::string> git_repository_dirty_staged_untracked_promise)
         {
             GitRepository repository;
-            git_repository_head_information_promise.set_value(repository.get_head_information());
+            git_repository_head_promise.set_value(repository.get_head_information());
             git_repository_dirty_staged_untracked_promise.set_value(repository.get_dirty_staged_untracked_information()
             );
         },
