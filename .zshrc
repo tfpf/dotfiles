@@ -52,6 +52,14 @@ import()
     printf "This is Zsh. Did you mean to type this in Python?\n" >&2 && return 1
 }
 
+nvm()
+{
+    unset -f nvm
+    . "$NVM_DIR/nvm.sh"
+    command -v _nvm &>/dev/null || . "$NVM_DIR/bash_completion"
+    nvm "$@"
+}
+
 o()
 {
     [ ! -f "$1" ] && printf "Usage:\n  ${FUNCNAME[0]} <file>\n" >&2 && return 1
@@ -84,6 +92,14 @@ rr()
         tr -cd $pattern </dev/urandom | head -c $length
         printf "\n"
     done
+}
+
+sdk()
+{
+    unset -f sdk
+    . "$SDKMAN_DIR/bin/sdkman-init.sh"
+    . "$SDKMAN_DIR/contrib/completion/bash/sdk"
+    sdk "$@"
 }
 
 ###############################################################################
@@ -141,6 +157,7 @@ GIT_PS1_SHOWCOLORHINTS=1
 GIT_PS1_SHOWDIRTYSTATE=1
 GIT_PS1_SHOWUNTRACKEDFILES=1
 export NO_AT_BRIDGE=1
+export NVM_DIR="$HOME/.nvm"
 export PAGER='less -i'
 PS1='[%n@%m %~]%# '
 PS2='──▶ '
@@ -149,6 +166,7 @@ PS4='▶ '
 export PYTHONSTARTUP=$HOME/.pythonstartup.py
 export PYTHON_BASIC_REPL=1
 SAVEHIST=1000
+export SDKMAN_DIR="$HOME/.sdkman"
 export TIME_STYLE=long-iso
 VIRTUAL_ENV_DISABLE_PROMPT=1
 ZLE_REMOVE_SUFFIX_CHARS=

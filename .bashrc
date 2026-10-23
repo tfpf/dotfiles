@@ -59,9 +59,11 @@ export MANPAGER='less -i'
 export MAN_POSIXLY_CORRECT=1
 # Disable accessibility bus error messages when using some GTK programs.
 export NO_AT_BRIDGE=1
+export NVM_DIR=$HOME/.nvm
 export PAGER='less -i'
 export PYTHONSTARTUP=$HOME/.pythonstartup.py
 export PYTHON_BASIC_REPL=1
+export SDKMAN_DIR=$HOME/.sdkman
 # Time format in directory listing.
 export TIME_STYLE=long-iso
 # Do not change the terminal prompt when in a Python virtual environment.

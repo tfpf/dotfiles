@@ -195,3 +195,19 @@ import()
 {
     printf "This is Bash. Did you mean to type this in Python?\n" >&2 && return 1
 }
+
+nvm()
+{
+    unset -f nvm
+    . "$NVM_DIR/nvm.sh"
+    command -v _nvm &>/dev/null || . "$NVM_DIR/bash_completion"
+    nvm "$@"
+}
+
+sdk()
+{
+    unset -f sdk
+    . "$SDKMAN_DIR/bin/sdkman-init.sh"
+    . "$SDKMAN_DIR/contrib/completion/bash/sdk"
+    sdk "$@"
+}
