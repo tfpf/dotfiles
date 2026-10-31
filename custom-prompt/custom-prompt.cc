@@ -746,7 +746,7 @@ void set_terminal_title_display_primary_prompt(
                      "  " ESCAPE_CODE_DIRECTORY DIRECTORY ESCAPE_CODE_COOKED_RESET;
     }
 
-    if (git_repository_information_futures[0].wait_for(std::chrono::milliseconds(10)) != std::future_status::ready)
+    if (git_repository_information_futures[0].wait_for(std::chrono::milliseconds(30)) != std::future_status::ready)
     {
         std::cout << "  " << ESCAPE_CODE_GIT_UNAVAILABLE "unavailable" ESCAPE_CODE_COOKED_RESET;
     }
