@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <charconv>
 #include <chrono>
+#include <climits>
 #include <csignal>
 #include <cstddef>
 #include <cstdint>
@@ -12,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <utility>
 
