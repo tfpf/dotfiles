@@ -60,13 +60,15 @@ namespace C
 
 #ifdef __MINGW32__
 // Multi-byte characters are not rendered correctly. Use substitutes.
-#define HISTORY_ICON "$"
+#define COMMAND_ICON ">"
 #define SUCCESS_ICON "#"
 #define FAILURE_ICON "#"
+#define WAITING_ICON "?"
 #else
-#define HISTORY_ICON ""
+#define COMMAND_ICON ""
 #define SUCCESS_ICON ""
 #define FAILURE_ICON ""
+#define WAITING_ICON "󰞌"
 #endif
 
 #define ESCAPE "\x1B"
@@ -77,7 +79,6 @@ namespace C
 #define ESCAPE_CODE_RAW(id) ESCAPE LEFT_SQUARE_BRACKET id "m"
 #define ESCAPE_CODE_RAW_RESET ESCAPE_CODE_RAW("")
 
-#define ESCAPE_CODE_COMMAND_HISTORY ESCAPE_CODE_RAW("36")
 #define ESCAPE_CODE_COMMAND_SUCCESS ESCAPE_CODE_RAW("32")
 #define ESCAPE_CODE_COMMAND_FAILURE ESCAPE_CODE_RAW("31")
 
@@ -605,7 +606,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     std::ostringstream report_stream;
     if (last_command.size() <= left_piece_len + right_piece_len + 5)
     {
-        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " " << last_command;
+        report_stream << COMMAND_ICON " " << last_command;
     }
     else
     {
@@ -613,8 +614,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
             logger, "Breaking command into pieces",
             { { "left_piece_len", left_piece_len }, { "right_piece_len", right_piece_len } }
         );
-        report_stream << ESCAPE_CODE_COMMAND_HISTORY HISTORY_ICON ESCAPE_CODE_RAW_RESET " "
-                      << last_command.substr(0, left_piece_len);
+        report_stream << COMMAND_ICON " " << last_command.substr(0, left_piece_len);
         report_stream << " ... " << last_command.substr(last_command.size() - right_piece_len);
     }
     if (exit_code == 0)
@@ -625,6 +625,8 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     {
         report_stream << " " ESCAPE_CODE_COMMAND_FAILURE FAILURE_ICON ESCAPE_CODE_RAW_RESET " ";
     }
+    std::time_t ts = std::time(nullptr);
+    report_stream << std::put_time(std::localtime(&ts), "%T " WAITING_ICON " ");
     interval.print_short(report_stream);
 
     // Determine the number of UTF-8 code points in the report. The C++
@@ -649,9 +651,7 @@ void write_report(std::string_view const& last_command, int exit_code, Interval 
     // characters and non-printing sequences.
     std::size_t multi_byte_correction = report.size() - report_size;
     std::size_t constexpr non_printing_correction
-        = (sizeof ESCAPE_CODE_COMMAND_HISTORY + sizeof ESCAPE_CODE_COMMAND_SUCCESS + 2 * sizeof ESCAPE_CODE_RAW_RESET
-           - 4)
-        / sizeof(char);
+        = (sizeof ESCAPE_CODE_COMMAND_SUCCESS + sizeof ESCAPE_CODE_RAW_RESET - 2) / sizeof(char);
     std::size_t width = columns + multi_byte_correction + non_printing_correction;
     LOG_DEBUG(logger, "Padding report", { { "width", width } });
     std::clog << '\r' << std::setw(width) << report << '\n';
