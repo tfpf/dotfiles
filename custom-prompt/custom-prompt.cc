@@ -45,7 +45,6 @@ namespace C
 #define HOST "\\h"
 #define DIRECTORY "\\w"
 #define SHORT_DIRECTORY "\\W"
-#define PROMPT_SYMBOL "\\$"
 #elif defined ZSH
 #define BEGIN_INVISIBLE "%\x7B"
 #define END_INVISIBLE "%\x7D"
@@ -53,7 +52,6 @@ namespace C
 #define HOST "%m"
 #define DIRECTORY "%~"
 #define SHORT_DIRECTORY "%1~"
-#define PROMPT_SYMBOL "%#"
 #else
 #error "unknown shell"
 #endif
@@ -71,6 +69,7 @@ namespace C
 #define WAITING_ICON "󰞌"
 #endif
 
+#define PROMPT_SYMBOL COMMAND_ICON
 #define ESCAPE "\x1B"
 #define LEFT_SQUARE_BRACKET "\x5B"
 #define BACKSLASH "\x5C"
